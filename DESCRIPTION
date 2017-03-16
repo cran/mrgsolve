@@ -1,6 +1,6 @@
 Package: mrgsolve
 Type: Package
-Version: 0.8.2
+Version: 0.8.6
 Title: Simulate from ODE-Based Population PK/PD and Systems
         Pharmacology Models
 Authors@R: c(
@@ -45,7 +45,7 @@ Collate: 'RcppExports.R' 'utils.R' 'package.R' 'generics.R'
         'mrgsolve.R' 'nmxml.R' 'param.R' 'print.R' 'qsim.R' 'render.R'
         'simtime.R' 'update.R'
 RoxygenNote: 6.0.1
-Packaged: 2017-03-11 02:22:23 UTC; kyleb
+Packaged: 2017-03-16 02:31:04 UTC; kyleb
 Author: Kyle T Baron [aut, cre],
   Alan C Hindmarsh [ctb],
   Linda R Petzold [ctb],
@@ -54,4 +54,4 @@ Author: Kyle T Baron [aut, cre],
   Devin Pastoor [ctb],
   Metrum Research Group LLC [cph]
 Repository: CRAN
-Date/Publication: 2017-03-11 09:18:40
+Date/Publication: 2017-03-16 13:24:25
