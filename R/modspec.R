@@ -19,7 +19,7 @@
 # @include complog.R nmxml.R annot.R
 
 globalre2 <- "^\\s*(predpk|double|bool|int)\\s+\\w+"
-block_re <-  "^\\s*\\$[A-Z]\\w*|\\[\\s*[A-Z]\\w*\\s*]"
+block_re <-  "^\\s*\\$[A-Z]\\w*|\\s*\\[\\s*[A-Z]\\w*\\s*]"
 
 ## Generate an advan/trans directive
 advtr <- function(advan,trans) {
@@ -932,8 +932,11 @@ capture_param <- function(annot,.capture) {
   
   # captured parameters
   what <- dplyr::filter(annot, name %in% .capture & block=="PARAM")
-  .capture <- intersect(.capture,what[,"name"])
-  what <- dplyr::mutate(what, block="CAPTURE")
+  if(nrow(what) > 0) {
+    .capture <- intersect(.capture,what[,"name"])
+    what[["block"]] <- "CAPTURE"
+  }
+
   annot <- dplyr::filter(annot, !(block=="CAPTURE" & name %in% .capture))
   bind_rows(annot,what)
 }

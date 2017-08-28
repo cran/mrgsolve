@@ -42,7 +42,7 @@ struct databox {
   unsigned int newind; ///< new individual flag
   double time; ///< current simulation time
   int evid;  ///< event ID flag
-  bool SYSTEMOFF; ///< flag to stop advancing system for current ID
+  unsigned short int SYSTEMOFF; ///< flag to stop advancing system for current ID
   dvec mtime; ///< model time values
   double id;  ///< current ID
   double amt; ///< current dosing amount value
@@ -53,6 +53,9 @@ struct databox {
   int rown; ///< current output row number
   bool CFONSTOP; ///< carry forward on stop indicator
   void* envir; ///< model environment
+  void stop() {SYSTEMOFF=9;}
+  void stop_id() {SYSTEMOFF=1;}
+  void stop_id_cf(){SYSTEMOFF=2;}
 };
 
 //! vector of <code>datarecord</code> objects for one <code>ID</code>
@@ -86,12 +89,6 @@ typedef void main_deriv_func(int* neq, double* t,
 #define MRGSOLVE_GET_PRED_K10 (pred[0]/pred[1]) ///< rate constants for <code>$PKMODEL</code>
 #define MRGSOLVE_GET_PRED_K12 (pred[3]/pred[1]) ///< rate constants for <code>$PKMODEL</code>
 #define MRGSOLVE_GET_PRED_K21 (pred[3]/pred[4]) ///< rate constants for <code>$PKMODEL</code>
-
-
-// deriv_func*  as_deriv_func( SEXP derivs);
-// init_func*   as_init_func(  SEXP inits);
-// table_func*  as_table_func( SEXP table);
-// config_func* as_config_func(SEXP config);
 
 extern "C"{DL_FUNC tofunptr(SEXP a);}
 
@@ -155,6 +152,7 @@ public:
   void rate_add(unsigned int pos, const double& value);
   void rate_rm(unsigned int pos,  const double& value);
   void rate_bump(const unsigned int pos, const double& value);
+  void rate_main(rec_ptr rec);
   void rate_reset();
   
   void dur(unsigned int pos, double value) {D[pos] = value;}
@@ -163,13 +161,13 @@ public:
   void fbio(unsigned int pos, double value) {F.at(pos) = value;}
   double fbio(unsigned int pos) {return F.at(pos);}
   
-  double alag(int cmt){return Alag.at(abs(cmt)-1);}
+  double alag(int cmt){return Alag.at(cmt);}
   
   void reset_newid(const double id_);
   
   void eta(int pos, double value) {d.ETA[pos] =value;}
   void eps(int pos, double value) {d.EPS[pos] = value;}
-  bool systemoff(){return d.SYSTEMOFF;}
+  unsigned short int systemoff(){return d.SYSTEMOFF;}
   
   void on(unsigned short int cmt);
   void off(unsigned short int cmt);

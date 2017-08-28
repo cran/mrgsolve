@@ -90,8 +90,10 @@ funset <- function(x) {
   }) 
   
   ans <- 
-    dplyr::bind_rows(unname(ans)) %>% mutate(func = names(funs(x)))  %>%
-    dplyr::select(func,name,loaded) %>% as.data.frame
+    dplyr::bind_rows(unname(ans)) %>% 
+    dplyr::mutate(func = names(funs(x)))  
+
+  ans <- as.data.frame(ans[,c("name", "loaded"),drop=FALSE])
   
   shlib <- dplyr::data_frame(package=pkg,
                              version=as.character(build_version(x)),

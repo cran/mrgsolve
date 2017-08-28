@@ -15,10 +15,28 @@
 # You should have received a copy of the GNU General Public License
 # along with mrgsolve.  If not, see <http://www.gnu.org/licenses/>.
 
-Sys.setenv("R_TESTS" = "")
 library(testthat)
-library(magrittr)
 library(mrgsolve)
+library(dplyr)
+Sys.setenv(R_TESTS="")
+options("mrgsolve_mread_quiet"=TRUE)
 
-test_check("mrgsolve", reporter="summary")
 
+context("test-inventory")
+
+test_that("inventory conditions", {
+    
+  mod <- mrgsolve:::house()
+  
+  data <- expand.ev(amt=100,CL=1, SEX=0)
+  idata <- data.frame(ID=1, CL=1, SEX=0)
+  
+  expect_error(inventory(mod,data,everything()))
+  expect_warning(inventory(mod,data))
+  expect_error(inventory(mod,data,c("CL", "VC")))
+  expect_message(inventory(mod,data,c("CL", "SEX")))
+  expect_message(inventory(mod,data,CL,SEX))
+  expect_error(mod %>% data_set(data,need=c("CL", "VC")))
+  expect_error(mod %>% idata_set(data,need=c("CL", "WTCL")))
+  expect_is(mod %>% data_set(data,need="CL") %>% mrgsim(end=1),"mrgsims")
+})

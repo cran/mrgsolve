@@ -43,7 +43,7 @@
 #include "RcppInclude.h"
 
 
-#define CRUMP(a) Rcpp::stop(a)
+#define CRUMP(a) throw Rcpp::exception(a,false)
 #define REP(a)   Rcpp::Rcout << #a << std::endl;
 #define nREP(a)  Rcpp::Rcout << a << std::endl;
 #define say(a)   Rcpp::Rcout << a << std::endl;
@@ -168,12 +168,8 @@ Rcpp::List DEVTRAN(const Rcpp::List parin,
   prob->pass_envir(&envir);
   const unsigned int neq = prob->neq();
   
-  // Allocate the record list:
   recstack a(NID);
   
-  // dataobject.cpp
-  // Extract data records from the data set
-  // Track the number of observations and events
   unsigned int obscount = 0;
   unsigned int evcount = 0;
   dat.get_records(a, NID, neq, obscount, evcount, obsonly, debug);
@@ -194,42 +190,30 @@ Rcpp::List DEVTRAN(const Rcpp::List parin,
       tofd.resize(a.size(),0.0); 
     }
     if(tofd.size() != a.size()) {
-       Rcpp::stop("There was a problem finding time of first dose.");
+      CRUMP("There was a problem finding time of first dose.");
     }
   }
   
-  // Observations from stime will always come after events;
-  // unsigned int nextpos = 0; warnings
-  // Vector of simulation times
-  // only active if no evid=0 records in data (cleared out in that case).
   dvec mtimes = Rcpp::as<dvec>(parin["mtime"]);
   
   // Need this for later
   int nextpos = put_ev_first ?  (data.nrow() + 10) : -100;
   
-  // ******* START TGRID SECTION *******
-  // Take apart tgrid matrix and create observation event objects
-  // with generic ID
-  // Only  do this if we need to insert observations into the stack
   if((obscount == 0) || (obsaug)) {
     
-    // Padded times
     dvec ptimes = Rcpp::as<dvec>(parin["ptimes"]);
     
-    // Matrix of designs
     Rcpp::NumericMatrix tgrid = Rcpp::as<Rcpp::NumericMatrix>(parin["tgridmatrix"]);
     
-    
-    // Vector of length idata.nrow() that maps each ID to a design
     // Already has C indexing
     Rcpp::IntegerVector tgridi = Rcpp::as<Rcpp::IntegerVector>(parin["whichtg"]);
-
+    
     if(tgridi.size() == 0) tgridi = Rcpp::rep(0,NID);
     
     if(tgridi.size() < NID) CRUMP("Length of design indicator less than NID.");
     
     if(max(tgridi) >= tgrid.ncol()) {
-      Rcpp::stop("Insufficient number of designs specified for this problem.");
+      CRUMP("Insufficient number of designs specified for this problem.");
     }
     
     // Number of non-na times in each design
@@ -257,9 +241,7 @@ Rcpp::List DEVTRAN(const Rcpp::List parin,
       z.reserve(tgridn[i]);
       
       for(int j = 0; j < tgridn[i]; ++j) { 
-        rec_ptr obs = boost::make_shared<datarecord>(
-          tgrid(j,i),nextpos,true
-        );
+        rec_ptr obs = NEWREC(tgrid(j,i),nextpos,true);
         z.push_back(obs); 
       }
       designs.push_back(z);
@@ -280,20 +262,19 @@ Rcpp::List DEVTRAN(const Rcpp::List parin,
       it->reserve((it->size() + n + m + 10));
       
       for(h=0; h < n; h++) {
-        it->push_back(designs.at(tgridi[j]).at(h));
+        //it->push_back(designs.at(tgridi[j]).at(h));
+        it->push_back(designs[tgridi[j]][h]);
         ++obscount;
-      } // done adding stimes;
+      } 
       
       for(h=0; h < m; h++) {
-        rec_ptr obs = boost::make_shared<datarecord>(ptimes[h],nextpos,false);
+        rec_ptr obs = NEWREC(ptimes[h],nextpos,false);
         it->push_back(obs);
       }
-      // sort the records by time and original position 
+      
       std::sort(it->begin(), it->end(), CompRec());
     }
   }
-  // ******* END TGRID SECTION ******* 
-  
   
   
   // Create results matrix:
@@ -309,8 +290,6 @@ Rcpp::List DEVTRAN(const Rcpp::List parin,
   const unsigned int req_start = idata_carry_start+n_idata_carry;
   const unsigned int capture_start = req_start+nreq;
   
-  // SIMULATE ETA AND EPS
-  //   - Need NN for this
   const unsigned int neta = OMEGA.nrow();
   arma::mat eta;
   if(neta > 0) {
@@ -325,14 +304,12 @@ Rcpp::List DEVTRAN(const Rcpp::List parin,
     prob->neps(neps);
   }
   
-  // Carry along TRAN data items (evid, amt, ii, ss, rate)
   Rcpp::CharacterVector tran_names;
   if(n_tran_carry > 0) {
     
     Rcpp::CharacterVector::iterator tcbeg  = tran_carry.begin();
     Rcpp::CharacterVector::iterator tcend  = tran_carry.end();
     
-    // items in tran_carry are always lc
     const bool carry_evid = std::find(tcbeg,tcend, "evid")  != tcend;
     const bool carry_cmt =  std::find(tcbeg,tcend, "cmt")   != tcend;
     const bool carry_amt =  std::find(tcbeg,tcend, "amt")   != tcend;
@@ -352,7 +329,7 @@ Rcpp::List DEVTRAN(const Rcpp::List parin,
     if(carry_aug)  tran_names.push_back("a.u.g");
     
     
-    crow = 0; // current output row
+    crow = 0;
     int n = 0;
     for(recstack::const_iterator it = a.begin(); it !=a.end(); ++it) {
       for(reclist::const_iterator itt = it->begin(); itt != it->end(); ++itt) {
@@ -371,8 +348,6 @@ Rcpp::List DEVTRAN(const Rcpp::List parin,
     }
   }
   
-  
-  // Carry items from data or idata
   if(((n_idata_carry > 0) || (n_data_carry > 0)) ) {
     dat.carry_out(a,ans,idat,data_carry,data_carry_start,
                   idata_carry,idata_carry_start);
@@ -382,13 +357,11 @@ Rcpp::List DEVTRAN(const Rcpp::List parin,
   
   double tto, tfrom;
   crow = 0;
-  int this_cmt = 0;
-  
-  // The current difference between tto and tfrom
+  int this_cmtn = 0;
   double dt = 0;
   double id = 0;
   double maxtime = 0;
-  double biofrac = 1.0;
+  double Fn = 1.0;
   int this_idata_row = 0;
   double told = -1;
   
@@ -424,18 +397,12 @@ Rcpp::List DEVTRAN(const Rcpp::List parin,
       prob->newind(0);
     }
     
-    // Copy eta/eps values for this ID
     for(k=0; k < neta; ++k) prob->eta(k,eta(i,k));
     for(k=0; k < neps; ++k) prob->eps(k,eps(crow,k));
-    
-    // Refresh parameters in data:
-    dat.reload_parameters(inpar,prob);
-    
-    //Copy parameters from idata
+
     idat.copy_parameters(this_idata_row,prob);
     
     if(a[i][0]->from_data()) {
-      // If this record is from the data set, copy parameters from data
       dat.copy_parameters(a[i][0]->pos(), prob);
     } else {
       if(filbak) {
@@ -443,21 +410,16 @@ Rcpp::List DEVTRAN(const Rcpp::List parin,
       }
     }
     
-    // Calculate initial conditions:
     prob->y_init(init);
     
-    // Copy initials from idata
     idat.copy_inits(this_idata_row,prob);
     
-    // Call $MAIN
     prob->init_call(tfrom);
     
-    // mtime
     if(mtimes.size() > 0) {
       add_mtime(a[i], mtimes, prob->mtime(),(debug||verbose));
     }
     
-    // LOOP ACROSS EACH RECORD for THIS ID:
     for(size_t j=0; j < a[i].size(); ++j) {
       
       if(crow == NN) continue;
@@ -468,28 +430,29 @@ Rcpp::List DEVTRAN(const Rcpp::List parin,
       
       this_rec->id(id);
       
-      // Fill in the remaining records once system is turned off
       if(prob->systemoff()) {
+        unsigned short int status = prob->systemoff();
+        if(status==9) CRUMP("The problem was stopped at user request.");
         if(this_rec->output()) {
-          if(prob->CFONSTOP()) {
+          if(status==1) {
             ans(crow,0) = this_rec->id();
             ans(crow,1) = this_rec->time();
-            for(k=0; k < n_capture; ++k) {
+            for(unsigned int k=0; k < n_capture; ++k) {
               ans(crow,(k+capture_start)) = prob->capture(capture[k+1]);
             }
-            for(k=0; k < nreq; ++k) {
+            for(unsigned int k=0; k < nreq; ++k) {
               ans(crow,(k+req_start)) = prob->y(request[k]);
             }
           } else {
-            ans(crow,0) = NA_REAL;
+            for(int k=0; k < ans.ncol(); ++k) {
+              ans(crow,k) = NA_REAL;
+            }
           }
           ++crow;
         }
         continue;
-      } // End if(systemoff)
+      } 
       
-      // For this ID, we already have parameters from the first row; only update when
-      // we come across a record from the data set
       if(this_rec->from_data()) {
         dat.copy_parameters(this_rec->pos(), prob);
       }
@@ -497,8 +460,6 @@ Rcpp::List DEVTRAN(const Rcpp::List parin,
       tto = this_rec->time();
       dt  = (tto-tfrom)/(tfrom == 0.0 ? 1.0 : tfrom);
       
-      // If tto is too close to tfrom, set tto to tfrom
-      // dt is never negative; dt will never be < mindt when mindt==0
       if((dt > 0.0) && (dt < mindt)) { 
         tto = tfrom;
       }
@@ -509,7 +470,6 @@ Rcpp::List DEVTRAN(const Rcpp::List parin,
         }
       }
       
-      // Only copy in a new eps value if we are actually advancing in time:
       if(tto > tfrom) {
         for(k = 0; k < neps; ++k) {
           prob->eps(k,eps(crow,k));
@@ -523,61 +483,60 @@ Rcpp::List DEVTRAN(const Rcpp::List parin,
         prob->init_call_record(tto);
       }  
       
-      // Schedule ADDL and infusion end times
-      if((this_rec->is_event()) && (this_rec->from_data())) {
+      // Some non-observation event happening
+      if(this_rec->is_dose()) {
         
-        // Grab Bioavailability
-        biofrac = prob->fbio(abs(this_rec->cmt())-1);
+        this_cmtn = this_rec->cmtn();
         
-        if(biofrac < 0) {
-          CRUMP("mrgsolve: Bioavailability fraction is less than zero.");
+        Fn = prob->fbio(this_cmtn);
+        if(Fn < 0) {
+          CRUMP("mrgsolve: bioavailability fraction is less than zero.");
         }
         
-        this_rec->fn(biofrac);
-        
-        // We already found an negative rate or duration in the data set.
-        if(this_rec->rate() < 0) {
-          if(this_rec->rate() == -1) {
-            this_cmt = this_rec->cmt()-1;
-            if(prob->rate(this_cmt) <= 0) {
-              Rcpp::stop("Invalid infusion setting: rate (R_CMT).");
+        bool sort_recs = false;
+        unsigned int sort_offset = 0;
+      
+        if(this_rec->from_data()) {
+          if(this_rec->rate() < 0) {
+            prob->rate_main(this_rec);
+          }
+          if(prob->alag(this_cmtn) > mindt) {
+            if(this_rec->ss() > 0) {
+              CRUMP("ss dosing records with lag time are not currently supported");
             }
-            this_rec->rate(prob->rate(this_cmt));
+            rec_ptr newev = NEWREC(*this_rec);
+            newev->pos(__ALAG_POS);
+            newev->phantom_rec();
+            newev->time(this_rec->time() + prob->alag(this_cmtn));
+            this_rec->unarm();
+            reclist::iterator it = a[i].begin()+j;
+            advance(it,1);
+            a[i].insert(it,newev);
+            newev->schedule(a[i], maxtime, addl_ev_first, Fn);
+            sort_recs = true;
+            sort_offset = 0;
+          } else {
+            this_rec->schedule(a[i], maxtime, addl_ev_first, Fn); 
+            sort_recs = this_rec->needs_sorting();
+            sort_offset = 1;
           }
-          
-          if(this_rec->rate() == -2) {
-            this_cmt = this_rec->cmt()-1;
-            if(prob->dur(this_cmt) <= 0) {
-              Rcpp::stop("Invalid infusion setting: duration (D_CMT).");
-            }
-            this_rec->rate(this_rec->amt() * biofrac / prob->dur(this_cmt));
-          }
-        } // End ev->rate() < 0
+        }
         
-        // If alag set for this compartment
-        // spawn a new event with no output and time modified by alag
-        // disarm this event
-        if((prob->alag(this_rec->cmt()) > mindt)) {
-          
-          rec_ptr newev = boost::make_shared<datarecord>(*this_rec);
-          newev->pos(__ALAG_POS);
-          newev->phantom_rec();
-          newev->time(this_rec->time() + prob->alag(this_rec->cmt()));
-          newev->fn(biofrac);
-          
-          this_rec->unarm();
-          
-          reclist::iterator it = a[i].begin()+j;
-          advance(it,1);
-          a[i].insert(it,newev);
-          newev->schedule(a[i], maxtime, addl_ev_first);
-          std::sort(a[i].begin()+j,a[i].end(),CompRec());
-          
-        } else {
-          this_rec->schedule(a[i], maxtime, addl_ev_first); 
-          if(this_rec->needs_sorting()) {
-            std::sort(a[i].begin()+j+1,a[i].end(),CompRec());
-          }
+        if(this_rec->int_infusion()) {
+          rec_ptr evoff = NEWREC(this_rec->cmt(), 
+                                 9, 
+                                 this_rec->amt(), 
+                                 this_rec->time() + this_rec->dur(Fn),
+                                 this_rec->rate(), 
+                                 -300, 
+                                 this_rec->id());
+          a[i].push_back(evoff);
+          sort_recs = true;
+        }
+        
+        // SORT
+        if(sort_recs) {
+          std::sort(a[i].begin()+sort_offset,a[i].end(),CompRec()); 
         }
       }
       
@@ -587,57 +546,39 @@ Rcpp::List DEVTRAN(const Rcpp::List parin,
         this_rec->implement(prob);
       }
       
-      // Write save values to output matrix:
       prob->table_call();
       
       if(this_rec->output()) {
-        
-        // Write out ID and time
         ans(crow,0) = this_rec->id();
         ans(crow,1) = this_rec->time();
         if(tad) {
           ans(crow,2) = (told > -1) ? (tto - told) : tto - tofd.at(i);
         }
-        // Write out captured items
         k = 0;
         for(unsigned int i=0; i < n_capture; ++i) {
           ans(crow,k+capture_start) = prob->capture(capture[i+1]);
           ++k;
         }
-        
-        // Write out requested compartments
         for(k=0; k < nreq; ++k) {
           ans(crow,(k+req_start)) = prob->y(request[k]);
         }
-        
-        ++crow; // this must inside check to output
-      } // end if ouput()
-      
-      
-      // Reset or other events:
+        ++crow; 
+      } 
       if(this_rec->evid()==2) {
         this_rec->implement(prob);
       }
-      
-      // Move tto to tfrom
       tfrom = tto;
     }
   }
-  
-  // Significant digits in simulated variables and outputs too
   if(digits > 0) {
     for(int i=req_start; i < ans.ncol(); ++i) {
       ans(Rcpp::_, i) = signif(ans(Rcpp::_,i), digits);
     }
   }
-  
   if((tscale != 1) && (tscale >= 0)) {
     ans(Rcpp::_,1) = ans(Rcpp::_,1) * tscale;
   }
-
-  // Clean up
   delete prob;
-  
   return Rcpp::List::create(Rcpp::Named("data") = ans,
                             Rcpp::Named("trannames") = tran_names);
 }

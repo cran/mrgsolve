@@ -80,17 +80,17 @@ odeproblem::odeproblem(Rcpp::NumericVector param,
   d.CFONSTOP = false;
   d.cmt = 0;
   d.amt = 0;
-
+  
   pred.assign(5,0.0);
   
   for(int i=0; i < npar_; ++i) Param[i] =       double(param[i]);
   for(int i=0; i < neq_;  ++i) Init_value[i] =  double(init[i]);
-
+  
   *reinterpret_cast<void**>(&Inits)  = R_ExternalPtrAddr(funs["main"]);
   *reinterpret_cast<void**>(&Table)  = R_ExternalPtrAddr(funs["table"]);
   *reinterpret_cast<void**>(&Derivs) = R_ExternalPtrAddr(funs["ode"]);
   *reinterpret_cast<void**>(&Config) = R_ExternalPtrAddr(funs["config"]);
-
+  
   Capture.assign(n_capture_,0.0);
   
   simeta = resim(&dosimeta,reinterpret_cast<void*>(this));
@@ -221,6 +221,21 @@ void odeproblem::rate_reset() {
   }
 }
 
+void odeproblem::rate_main(rec_ptr rec) {
+  if(rec->rate() == -1) {
+    if(this->rate(rec->cmtn()) <= 0) {
+      throw Rcpp::exception("invalid infusion setting: rate (R_CMT).", false);
+    }
+    rec->rate(this->rate(rec->cmtn()));
+  }
+  if(rec->rate() == -2) {
+    if(this->dur(rec->cmtn()) <= 0) {
+      throw Rcpp::exception("invalid infusion setting: duration (D_CMT).",false);
+    }
+    rec->rate(rec->amt() * this->fbio(rec->cmtn()) / this->dur(rec->cmtn()));
+  }
+}
+
 //! Reset <code>odeproblem</code> object for new individual.
 void odeproblem::reset_newid(const double id_) {
   
@@ -238,7 +253,7 @@ void odeproblem::reset_newid(const double id_) {
   d.newind = 1;
   d.time = 0.0;
   
-  d.SYSTEMOFF=false;
+  d.SYSTEMOFF=0;
   this->lsoda_init();
   d.id = id_;
 }
@@ -605,7 +620,7 @@ double PolyExp(const double& x,
       if (dx <= xinf) {
         for(i=0;i<n;++i) {
           result += a[i] * (1 - exp(-alpha[i]*xinf))*exp(-alpha[i]*(dx-xinf+tau)) /
-          (1-exp(-alpha[i]*tau)) / alpha[i] + a[i] * (1 - exp(-alpha[i]*dx)) / alpha[i];
+            (1-exp(-alpha[i]*tau)) / alpha[i] + a[i] * (1 - exp(-alpha[i]*dx)) / alpha[i];
         }
       }
       else {

@@ -20,10 +20,12 @@
 ##' @param evid event ID
 ##' @param ID subject ID
 ##' @param time event time
-##' @param replicate logical; if \code{TRUE}, events will be replicated for each individual in \code{ID}
+##' @param replicate logical; if \code{TRUE}, events will be replicated for 
+##' each individual in \code{ID}
 ##' @param cmt compartment
 ##' @param until the expected maximum \bold{observation} time for this regimen
-##' @param realize_addl if \code{FALSE} (default), no change to \code{addl} doses.  If \code{TRUE}, 
+##' @param realize_addl if \code{FALSE} (default), no change to \code{addl} doses. 
+##'  If \code{TRUE}, 
 ##' \code{addl} doses are made explicit with \code{\link{realize_addl}}.
 ##' @export
 setMethod("ev", "missing", function(time=0, evid=1, ID=numeric(0), 
@@ -44,12 +46,16 @@ setMethod("ev", "missing", function(time=0, evid=1, ID=numeric(0),
   if(!has_name("amt",data)) stop("amt is required input.", call.=FALSE)
   
   if(!missing(until)) {
-    if(!has_name("ii", data)) stop("ii is required when until is specified", call.=FALSE)
+    if(!has_name("ii", data)) {
+      stop("ii is required when until is specified", call.=FALSE)
+    }
     data["addl"] <- ceiling((data["time"] + until)/data["ii"])-1
   }
   
   if(length(ID) > 0) {
-    ID <- seq_along(unique(ID))
+    
+    ID <- unique(ID)
+    
     if(!is.numeric(ID)) stop("ID must be numeric")
     
     if(replicate) {
@@ -58,10 +64,11 @@ setMethod("ev", "missing", function(time=0, evid=1, ID=numeric(0),
         data <- lapply(data, unique)
         data <- do.call("expand.grid", 
                         c(list(ID=ID,stringsAsFactors=FALSE),data))
-        data <- data %>% dplyr::arrange(ID,time)
+        #data <- data %>% dplyr::arrange(ID,time)
+        data <- dplyr::arrange_(data,.dots=c("ID", "time"))
         rownames(data) <- NULL
       } else {
-        data <- data.frame(.Call(mrgsolve_EXPAND_EVENTS, 
+        data <- data.frame(.Call(`_mrgsolve_EXPAND_EVENTS`, 
                                  PACKAGE="mrgsolve", 
                                  match("ID", colnames(data),0), 
                                  data.matrix(data), 
@@ -70,7 +77,8 @@ setMethod("ev", "missing", function(time=0, evid=1, ID=numeric(0),
       
     } else {
       if(length(ID)!=nrow(data)) { 
-        stop("Length of ID does not match number of events while replicate = FALSE", call.=FALSE)
+        stop("Length of ID does not match number of events while replicate = FALSE", 
+             call.=FALSE)
       }
       data["ID"] <- ID
     }
@@ -94,21 +102,41 @@ setMethod("ev", "ev", function(x, realize_addl=FALSE,...) {
 
 ##' @param nid if greater than 1, will expand to the appropriate 
 ##' number of individuals
+##' @param keep_id if \code{TRUE}, \code{ID} column is retained if it exists
 ##' @rdname events
 ##' @export
-setMethod("as.ev", "data.frame", function(x,nid=1,...) {
+setMethod("as.ev", "data.frame", function(x,nid=1,keep_id=TRUE,...) {
+  
   if(nrow(x)==0) return(new("ev",data=data.frame()))
-  if(!all(c("cmt", "time") %in% names(x))) stop("cmt, time are required data items for events.")
-  if(nid > 1) x <- data.frame(.Call(mrgsolve_EXPAND_EVENTS, 
-                                    match("ID", colnames(x),0), 
-                                    data.matrix(x),
-                                    c(1:nid)))
+  
+  if(!all(c("cmt", "time") %in% names(x))) {
+    stop("cmt, time are required data items for events.",call.=FALSE)
+  }
+  if(nid > 1) {
+    if(!exists("ID",x)) stop("please add ID column to data frame",call.=FALSE)
+    x <- data.frame(.Call(`_mrgsolve_EXPAND_EVENTS`, 
+                          match("ID", colnames(x),0), 
+                          data.matrix(x),
+                          c(1:nid)))
+  } else {
+    if(exists("ID",x) & !keep_id) x[,"ID"] <- NULL
+  }
+  
   new("ev",data=x)
+  
 })
 
 ##' @rdname events
 ##' @export
-setMethod("as.matrix", "ev", function(x,...) as.matrix(as.data.frame(x,stringsAsFactors=FALSE),...))
+setMethod("as.ev", "ev", function(x,...) {
+  do.call("c", c(list(x),list(...)))
+})
+
+##' @rdname events
+##' @export
+setMethod("as.matrix", "ev", function(x,...) {
+  as.matrix(as.data.frame(x,stringsAsFactors=FALSE),...)
+})
 
 ##' @param row.names passed to \code{\link{as.data.frame}}
 ##' @param optional passed to \code{\link{as.data.frame}}
@@ -158,6 +186,11 @@ setMethod("as_data_set","ev", function(x,...) {
   do.call(collect_ev,c(list(x),list(...)))
 })
 
+##' @rdname as_data_set
+setMethod("as_data_set","data.frame", function(x,...) {
+  as_data_set(as.ev(x),...)
+})
+
 ##' @param object passed to show
 ##' @rdname events
 ##' @export
@@ -172,10 +205,6 @@ check_ev <- function(x) {
   if(!has_name("ID", x)) x[["ID"]] <- 1
   return(x)
 }
-na2zero <- function(x) {
-  x[is.na(x)] <- 0
-  x
-}
 
 collect_ev <- function(...) {
   tran <- c("ID","time", "cmt", "evid",  "amt", "ii", "addl", "rate", "ss")
@@ -183,18 +212,25 @@ collect_ev <- function(...) {
   y <- lapply(x, "[[","ID")
   mx <- sapply(y,function(xx) length(unique(xx)))
   mx <- cumsum(c(0,mx[-length(mx)]))
-  y <- mapply(y,mx, FUN=function(yi,mx) return(yi+mx), SIMPLIFY=FALSE)
-  x <- dplyr::bind_rows(x) %>% dplyr::mutate(ID = unlist(y,use.names=FALSE))
+  y <- mapply(y,mx, FUN=function(yi,mxi) return(yi+mxi), SIMPLIFY=FALSE)
+  x <- dplyr::bind_rows(x)
+  x <- dplyr::mutate(x,ID = unlist(y,use.names=FALSE))
   tran <- intersect(tran,names(x))
   what <- names(x) %in% tran
-  x <- dplyr::mutate_each(x,dplyr::funs(na2zero),which(what))
+  
+  if (utils::packageVersion("dplyr") > "0.5.0") {
+    x <- dplyr::mutate_at(x,which(what),dplyr::funs(na2zero))
+  } else {
+    x <- dplyr::mutate_each(x,dplyr::funs(na2zero),which(what))
+  }
+  
   na.check <- which(!what)
   if(length(na.check) > 0) {
     if(any(is.na(unlist(x[,na.check])))) {
       warning("Missing values in some columns.",call.=FALSE)
     }
   }
-  x <- x %>% dplyr::select(c(match(tran,names(x)),seq_along(names(x))))
+  x <- dplyr::select(x,c(match(tran,names(x)),seq_along(names(x))))
   return(x)
 }
 
@@ -333,8 +369,10 @@ add.ev <- function(e1,e2) {
 ##' 
 ##' @param l list of event objects
 ##' @param idata an idata set (one ID per row)
-##' @param evgroup the character name of the column in \code{idata} that specifies event object to implement
-##' @param join if \code{TRUE}, join \code{idata} to the data set before returning.
+##' @param evgroup the character name of the column in \code{idata} 
+##' that specifies event object to implement
+##' @param join if \code{TRUE}, join \code{idata} to the data set 
+##' before returning.
 ##' 
 ##' 
 ##' @examples
@@ -344,10 +382,10 @@ add.ev <- function(e1,e2) {
 ##' idata <- data.frame(ID=1:10) 
 ##' idata$arm <- 1+(idata$ID %%2)
 ##' 
-##' assign_ev(list(ev1,ev2),idata,"arm",join=TRUE)
+##' ev_assign(list(ev1,ev2),idata,"arm",join=TRUE)
 ##' 
 ##' @export
-assign_ev <- function(l,idata,evgroup,join=FALSE) {
+ev_assign <- function(l,idata,evgroup,join=FALSE) {
   
   idata <- as.data.frame(idata)
   
@@ -407,6 +445,12 @@ assign_ev <- function(l,idata,evgroup,join=FALSE) {
   return(x)
   
 }
+
+##' @param ... used to pass arguments from \code{assign_ev}
+##' to \code{ev_assign}
+##' @rdname ev_assign
+##' @export
+assign_ev <- function(...) ev_assign(...)
 
 ##' Schedule dosing events on days of the week.
 ##' 
@@ -488,7 +532,8 @@ ev_days <- function(ev=NULL,days="",addl=0,ii=168,unit=c("hours", "days"),...) {
   evs <- lapply(evs,as.data.frame)
   for(d in days) {
     if(any(evs[[d]]$time > max.time)) {
-      warning("not expecting time values greater than 24 hours or 1 day.",call.=FALSE)  
+      warning("not expecting time values greater than 24 hours or 1 day.",
+              call.=FALSE)  
     }
     evs[[d]]$time <- evs[[d]]$time + start[d] 
   }
@@ -496,9 +541,9 @@ ev_days <- function(ev=NULL,days="",addl=0,ii=168,unit=c("hours", "days"),...) {
   evs$ii <- ii
   if(addl > 0) evs$addl <- addl
   if("ID" %in% names(evs)) {
-    return(as.data.frame(dplyr::arrange(evs,ID,time)))
+    return(as.data.frame(dplyr::arrange_(evs,.dots=c("ID","time"))))
   } else {
-    return(as.data.frame(dplyr::arrange(evs,time)))
+    return(as.data.frame(dplyr::arrange_(evs,.dots=c("time"))))
   }
 }
 
@@ -532,9 +577,9 @@ realize_addl.data.frame <- function(x,...) {
   df[[addlcol]] <- 0
   df[[iicol]] <- 0
   if("ID" %in% names(df)) {
-    df <- dplyr::arrange(df,ID,time)
+    df <- dplyr::arrange_(df,.dots=c("ID","time"))
   } else {
-    df <- dplyr::arrange(df,time)
+    df <- dplyr::arrange_(df,.dots=c("time"))
   }
   df
 }
@@ -545,7 +590,164 @@ realize_addl.ev <- function(x,...) {
   return(x)
 }
 
+##' Replicate an event object
+##' 
+##' An event sequence can be replicated a certain number of
+##' times in a certain number of IDs.
+##' 
+##' @param x event object
+##' @param id numeric vector if IDs
+##' @param n passed to \code{\link{ev_repeat}}
+##' @param wait passed to \code{\link{ev_repeat}}
+##' @param as.ev if \code{TRUE} an event object is returned
+##' 
+##' @seealso \code{\link{ev_repeat}}
+##' 
+##' @examples
+##' 
+##' e1 <- c(ev(amt=100), ev(amt=200, ii=24, addl=2, time=72))
+##' 
+##' ev_rep(e1, 1:5)
+##' 
+##' @return
+##' A single event object or event object as 
+##' determined by the value of \code{as.ev}.
+##' 
+##' @export
+ev_rep <- function(x, id = 1, n = NULL, wait = 0, as.ev = FALSE) {
+  x <- as.data.frame(x) 
+  x <- EXPAND_EVENTS(0,numeric_data_matrix(x),id)
+  x <- as.data.frame(x)
+  if(!is.null(n)) {
+    if(n  > 1) {
+      x <- ev_repeat(x,n,wait)
+    }
+  }
+  if(as.ev) return(as.ev(x))
+  return(x)
+}
+
+##' Repeat a block of dosing events
+##' 
+##' @param x event object or dosing data frame
+##' @param n number of times to repeat
+##' @param wait time to wait between repeats
+##' 
+##' @return 
+##' A dosing data.frame.
+##' 
+##' @export
+ev_repeat <- function(x,n,wait=0) {
+  x <- as.data.frame(x)
+  if(!exists("ii", x)) x["ii"] <- 0
+  if(!exists("addl", x)) x["addl"] <- 0
+  start <- x[1,"time"]
+  end <- x$time + x$ii*x$addl + x$ii
+  end <- max(end) + wait
+  out <- vector("list", n)
+  for(i in seq_len(n)) {
+    nxt <- x
+    nxt$time <- start + nxt$time + end*(i-1)
+    out[[i]] <- nxt
+  }
+  out <- dplyr::bind_rows(out)
+  if(exists("ID", out)) {
+    out <- dplyr::arrange_(out,"ID", "time") 
+  }
+  out
+}
 
 
 
+##' Schedule a series of event objects
+##' 
+##' @param ... event objects or numeric arguments named \code{wait}
+##' @param id numeric vector of subject ids
+##' @param .dots a list of event objects that replaces \code{...}
+##' 
+##' @details
+##' The doses for the next event line start after 
+##' all of the doses from the previous event line plus 
+##' one dosing interval from the previous event line (see
+##' examples).  
+##' 
+##' When numerics named \code{wait} are mixed in with the 
+##' event objects, a period with no dosing activity is 
+##' incorporated into the sequence, between the adjacent 
+##' dosing event objects.  Values for \code{wait} can
+##' be negative.
+##' 
+##' Values for \code{time} in any event object act like
+##' a prefix time spacer wherever that event 
+##' occurs in the event sequence (see examples).
+##' 
+##' @examples
+##' 
+##' e1 <- ev(amt=100, ii=12, addl=1)
+##' 
+##' e2 <- ev(amt=200)
+##' 
+##' seq(e1, e2)
+##' 
+##' seq(e1, wait = 8, e2)
+##' 
+##' seq(e1, wait = 8, e2, id = 1:10)
+##' 
+##' ev_seq(wait = 12, e1, wait = 120, e2, wait = 120, e1)
+##' 
+##' seq(ev(amt=100, ii=12), ev(time=8, amt=200))
+##' 
+##' @details
+##' Use the generic \code{\link{seq}} when the first argument 
+##' is an event object.  If a waiting period is the 
+##' first event, you will need to use \code{ev_seq}.
+##' 
+##' @return
+##' A single event object.
+##' 
+##' @export
+ev_seq <- function(..., id = NULL, .dots = NULL) {
+  
+  evs <- list(...)
+  if(is.list(.dots)) {
+    evs <- .dots 
+  }
+  out <- vector("list", length(evs))
+  start <- 0
+  if(is.null(names(evs))) {
+    names(evs) <- rep(".", length(evs))
+  }
+  for(i in seq_along(out)) {
+    if(names(evs)[i]=="wait") {
+      start <- start + evs[[i]]
+      evs[[i]] <- list()
+      next
+    }
+    e <- as.data.frame(evs[[i]])
+    if(nrow(e) !=1) stop("events can only have one row", call.=FALSE)
+    if(is.null(e$ii)) e$ii <- 0
+    if(is.null(e$addl)) e$addl <- 0
+    after <-  dplyr::if_else(is.null(e$.after), 0, e$.after)
+    e$time <- e$time + start
+    start <- start + after + e$ii*e$addl + e$ii
+    out[[i]] <- e
+  }
+  out <- dplyr::bind_rows(out) 
+  out <- dplyr::mutate(out, .after = NULL)
+  if(exists("rate", out)) {
+    out["rate"] <- na2zero(out["rate"])
+  }
+  if(exists("ss",out)) {
+    out["ss"] <- na2zero(out["ss"]) 
+  }
+  if(is.numeric(id)) {
+    out <- ev_rep(out,id)
+  }
+  as.ev(as.data.frame(out))
+}
 
+##' @export
+##' @rdname ev_seq
+seq.ev <- function(...) {
+  ev_seq(...) 
+}

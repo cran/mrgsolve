@@ -11,6 +11,7 @@
 \alias{ev,missing-method}
 \alias{ev,ev-method}
 \alias{as.ev,data.frame-method}
+\alias{as.ev,ev-method}
 \alias{as.matrix,ev-method}
 \alias{as.data.frame,ev-method}
 \alias{show,ev-method}
@@ -32,7 +33,9 @@ as.ev(x, ...)
 
 \S4method{ev}{ev}(x, realize_addl = FALSE, ...)
 
-\S4method{as.ev}{data.frame}(x, nid = 1, ...)
+\S4method{as.ev}{data.frame}(x, nid = 1, keep_id = TRUE, ...)
+
+\S4method{as.ev}{ev}(x, ...)
 
 \S4method{as.matrix}{ev}(x, ...)
 
@@ -57,15 +60,19 @@ as.ev(x, ...)
 
 \item{cmt}{compartment}
 
-\item{replicate}{logical; if \code{TRUE}, events will be replicated for each individual in \code{ID}}
+\item{replicate}{logical; if \code{TRUE}, events will be replicated for 
+each individual in \code{ID}}
 
 \item{until}{the expected maximum \bold{observation} time for this regimen}
 
-\item{realize_addl}{if \code{FALSE} (default), no change to \code{addl} doses.  If \code{TRUE}, 
+\item{realize_addl}{if \code{FALSE} (default), no change to \code{addl} doses. 
+ If \code{TRUE}, 
 \code{addl} doses are made explicit with \code{\link{realize_addl}}.}
 
 \item{nid}{if greater than 1, will expand to the appropriate 
 number of individuals}
+
+\item{keep_id}{if \code{TRUE}, \code{ID} column is retained if it exists}
 
 \item{row.names}{passed to \code{\link{as.data.frame}}}
 

@@ -24,6 +24,7 @@
 ##' @param object character name of an object existing in \code{$ENV} to use for the data set
 ##' @param subset passed to \code{dplyr::filter_}
 ##' @param select passed to \code{dplyr::select_}
+##' @param need passed to \code{\link{inventory}}
 ##' @param ... passed along
 ##' 
 ##' @details
@@ -73,13 +74,13 @@ setGeneric("idata_set", function(x,data,...) standardGeneric("idata_set"))
 
 ##' @rdname idata_set
 ##' @export
-setMethod("idata_set", c("mrgmod", "data.frame"), 
-          function(x,data,subset=TRUE,select=TRUE,object=NULL,...) {
+setMethod("idata_set", c("mrgmod", "data.frame"), function(x,data,subset=TRUE,select=TRUE,object=NULL,need=NULL,...) {
             
+  if(is.character(need)) suppressMessages(inventory(x,data,need))
   if(exists("idata", x@args)) stop("idata has already been set.")
   if(!missing(subset)) data <- filter_(data,.dots=lazy(subset))
   if(!missing(select)) data <- select_(data,.dots=lazy(select))
-  if(nrow(data) ==0) {
+  if(nrow(data)==0) {
     stop("Zero rows in idata after filtering.", call.=FALSE)
   }
   if(is.character(object)) {
