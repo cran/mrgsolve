@@ -18,20 +18,27 @@
 library(testthat)
 library(mrgsolve)
 library(dplyr)
+
 Sys.setenv(R_TESTS="")
 options("mrgsolve_mread_quiet"=TRUE)
 
-context("test-matrix")
+context("test-ev_assign")
 
-test_that("Testing modMATRIX", {
-    expect_equal(dim(modMATRIX("  0 0 0   0")), c(4,4))
-    expect_equal(dim(modMATRIX("  0\n 0\n 0   0")), c(4,4))
-    expect_equal(dim(modMATRIX("  0 0 0   ", block=TRUE)), c(2,2))
-    expect_error(modMATRIX("  0 0 0  0 ", block=TRUE))
-    expect_equal(modMATRIX("0 0 0", use=FALSE), matrix(0,nrow=3,ncol=3))
+e <- ev(amt=100)
+b <- ev(amt=200)
+
+data0 <- data_frame(ID = c(1,2,3), COV = c(1,2,3))
+
+data <- data_frame(ID = c(1,2,3,4), COV = c(2,1,1,2))
+
+
+test_that("Input error", {
+  expect_error(ev_assign(list(e,b), data0, "COV"))
+  expect_is(ev_assign(list(e,b), data, "COV"), "data.frame")
 })
 
-
-
-
+test_that("Assignment on sorted values", {
+  df <- ev_assign(list(b,e), data, "COV")
+  expect_equal(df$amt, c(100, 200, 200, 100))
+})
 

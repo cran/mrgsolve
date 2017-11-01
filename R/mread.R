@@ -45,8 +45,8 @@ NULL
 ##' mod <- mcode("example",code)
 ##' }
 ##' @export
-mcode <- function(model,code, project=tempdir(),...) {
-  mread(model=model,project=project,code=code,...)
+mcode <- function(model, code, project=tempdir(), ...) {
+  mread(model=model, project=project, code=code,...)
 }
 
 ##' Read a model specification file.
@@ -57,6 +57,7 @@ mcode <- function(model,code, project=tempdir(),...) {
 ##'
 ##' @param model model name
 ##' @param project location of the model specification file an any headers to be included
+##' @param file the full file name (with extension, but without path) where the model is specified
 ##' @param soloc directory where model shared object is stored
 ##' @param code a character string with model specification code to be used instead of a model file
 ##' @param ignore.stdout passed to system call for compiling model
@@ -69,7 +70,15 @@ mcode <- function(model,code, project=tempdir(),...) {
 ##' @param quiet don't print messages when compiling
 ##' @param preclean logical; if \code{TRUE}, compilation artifacts are cleaned up first
 ##' @param ... passed along
-##' @export
+##' 
+##' @details
+##' When the \code{model} argument is used, 
+##' \code{mrgsolve} assumes the model is written in the 
+##' file with \code{model} as the stem and \code{.cpp} as the 
+##' extension.  Use the \code{file} argument to \code{mread} or use 
+##' \code{mread_file} to read a model from a file without
+##' the \code{.cpp} extension. 
+##' 
 ##' 
 ##' @section Model Library:
 ##' 
@@ -102,7 +111,7 @@ mcode <- function(model,code, project=tempdir(),...) {
 ##' $ODE dxdt_CENT = -(CL/VC)*CENT;
 ##' '
 ##'
-##' mod <- mcode("ex_mread",code)
+##' mod <- mcode("ex_mread", code)
 ##'
 ##' mod
 ##'
@@ -112,13 +121,28 @@ mcode <- function(model,code, project=tempdir(),...) {
 ##' mod <- mread("irm3", modlib())
 ##' 
 ##' mod
+##' 
+##' # if the model is in the file mymodel.cpp
+##' mod <- mread("mymodel")
+##' 
+##' # if the model is in the file mymodel.txt
+##' mod <- mread(file = "mymodel.txt")
+##' 
+##' or
+##' 
+##' mod <- mread_file("mymodel.txt")
+##' 
+##' 
 ##' }
-mread <- function(model=character(0),project=getwd(),code=NULL,udll=TRUE,
-                  ignore.stdout=TRUE,
-                  raw=FALSE,compile=TRUE,audit=TRUE,
-                  quiet=getOption("mrgsolve_mread_quiet",FALSE),
-                  check.bounds=FALSE,warn=TRUE,soloc=tempdir(),
-                  preclean=FALSE,...) {
+##' 
+##' @export
+mread <- function(model = NULL, project = getwd(), code = NULL, 
+                  file = paste0(model, ".cpp"), 
+                  udll = TRUE, ignore.stdout=TRUE,
+                  raw = FALSE, compile = TRUE, audit = TRUE,
+                  quiet = getOption("mrgsolve_mread_quiet",FALSE),
+                  check.bounds = FALSE, warn = TRUE, soloc = tempdir(),
+                  preclean = FALSE, ...) {
   
   quiet <- as.logical(quiet)
   
@@ -126,7 +150,9 @@ mread <- function(model=character(0),project=getwd(),code=NULL,udll=TRUE,
   
   if(!missing(code) & missing(model)) model <- "_mrgsolve_temp"
   
-  build <- new_build(model,project,soloc,code,preclean,udll)
+  build <- new_build(file, model, project, soloc, code, preclean, udll)
+  
+  model <- build$model
   
   if(!file_exists(build$modfile)) {
     if(build$project==modlib()) {
@@ -246,7 +272,8 @@ mread <- function(model=character(0),project=getwd(),code=NULL,udll=TRUE,
            funs = funs_create(model),
            capture = capture,
            envir = ENV, 
-           plugin = names(plugin)
+           plugin = names(plugin),
+           modfile = basename(build$modfile)
   )
   
   x <- store_annot(x,annot)
@@ -429,4 +456,13 @@ mread <- function(model=character(0),project=getwd(),code=NULL,udll=TRUE,
   
   return(x)
 }
+
+##' @export
+##' @rdname mread
+mread_file <- function(file, ...) {
+  model <- tools::file_path_sans_ext(file)
+  mread(model = model, file = file, ...)
+}
+
+
 

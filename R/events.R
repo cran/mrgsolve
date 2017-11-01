@@ -218,11 +218,7 @@ collect_ev <- function(...) {
   tran <- intersect(tran,names(x))
   what <- names(x) %in% tran
   
-  if (utils::packageVersion("dplyr") > "0.5.0") {
-    x <- dplyr::mutate_at(x,which(what),dplyr::funs(na2zero))
-  } else {
-    x <- dplyr::mutate_each(x,dplyr::funs(na2zero),which(what))
-  }
+  x <- dplyr::mutate_at(x,which(what),dplyr::funs(na2zero))
   
   na.check <- which(!what)
   if(length(na.check) > 0) {
@@ -382,7 +378,22 @@ add.ev <- function(e1,e2) {
 ##' idata <- data.frame(ID=1:10) 
 ##' idata$arm <- 1+(idata$ID %%2)
 ##' 
-##' ev_assign(list(ev1,ev2),idata,"arm",join=TRUE)
+##' ev_assign(list(ev1,ev2), idata, "arm", join=TRUE)
+##' 
+##' 
+##' 
+##' @details
+##' \code{ev_assign} connects events in a list passed in as the
+##' \code{l} argument to values in the data set identified in the 
+##' \code{evgroup} argument.  For making assignments, the unique 
+##' values in the \code{evgroup} column are first sorted so that 
+##' the first sorted unique value in \code{evgroup} is assigned 
+##' to the first event in \code{l}, the second sorted value in 
+##' \code{evgroup} column is assigned to the second event in 
+##' \code{l}, and so on.  This is a change from previous behavior, 
+##' which did not sort the unique values in \code{evgroup} prior to 
+##' making the assignments. 
+##' 
 ##' 
 ##' @export
 ev_assign <- function(l,idata,evgroup,join=FALSE) {
@@ -420,7 +431,7 @@ ev_assign <- function(l,idata,evgroup,join=FALSE) {
   })
   
   evgroup <- idata[,evgroup]
-  uevgroup <- unique(evgroup)
+  uevgroup <- sort(unique(evgroup))
   evgroup <- match(evgroup,uevgroup)
   
   if(length(l) != length(uevgroup)) {
