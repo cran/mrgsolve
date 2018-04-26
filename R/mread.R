@@ -1,4 +1,4 @@
-# Copyright (C) 2013 - 2017  Metrum Research Group, LLC
+# Copyright (C) 2013 - 2018  Metrum Research Group, LLC
 #
 # This file is part of mrgsolve.
 #
@@ -19,47 +19,22 @@
 NULL
 
 
-##' Write, compile, and load model code.
-##'
-##' This is a convenience function that ultimately calls \code{\link{mread}}.
-##'
-##' @param model model name
-##' @param project project name
-##' @param code character string specifying a \code{mrgsolve} model
-##' @param ... passed to \code{\link{mread}}
-##' @details
-##' Note that the arguments are in slightly different order than \code{\link{mread}}.  The default \code{project} is \code{tempdir()}.
-##'
-##' @examples
-##'
-##' \dontrun{ 
-##' code <- '
-##' $CMT DEPOT CENT
-##' $PKMODEL ncmt=1, depot=TRUE
-##' $MAIN
-##' double CL = 1;
-##' double V = 20;
-##' double KA = 1;
-##' '
-##'
-##' mod <- mcode("example",code)
-##' }
-##' @export
-mcode <- function(model, code, project=tempdir(), ...) {
-  mread(model=model, project=project, code=code,...)
-}
 
-##' Read a model specification file.
+##' Read a model specification file
 ##' 
-##' \code{mread} reads and parses a \code{mrgsolve} model specification file, builds the model, and returns 
+##' \code{mread} reads and parses a \code{mrgsolve} model 
+##' specification file, builds the model, and returns 
 ##' a model object for simulation.
 ##' 
 ##'
 ##' @param model model name
-##' @param project location of the model specification file an any headers to be included
-##' @param file the full file name (with extension, but without path) where the model is specified
+##' @param project location of the model specification file an any 
+##' headers to be included
+##' @param file the full file name (with extension, but without path)
+##' where the model is specified
 ##' @param soloc directory where model shared object is stored
-##' @param code a character string with model specification code to be used instead of a model file
+##' @param code a character string with model specification code to be 
+##' used instead of a model file
 ##' @param ignore.stdout passed to system call for compiling model
 ##' @param raw if TRUE, return a list of raw output
 ##' @param compile logical; if \code{TRUE}, the model will be built
@@ -68,28 +43,39 @@ mcode <- function(model, code, project=tempdir(), ...) {
 ##' @param warn logical; if \code{TRUE}, print warning messages that may arise
 ##' @param udll use unique name for shared object
 ##' @param quiet don't print messages when compiling
-##' @param preclean logical; if \code{TRUE}, compilation artifacts are cleaned up first
+##' @param preclean logical; if \code{TRUE}, compilation artifacts are 
+##' cleaned up first
 ##' @param ... passed along
 ##' 
 ##' @details
-##' When the \code{model} argument is used, 
-##' \code{mrgsolve} assumes the model is written in the 
-##' file with \code{model} as the stem and \code{.cpp} as the 
-##' extension.  Use the \code{file} argument to \code{mread} or use 
-##' \code{mread_file} to read a model from a file without
-##' the \code{.cpp} extension. 
+##' The \code{model} argument is required.  For typical use, 
+##' the \code{file} argument is omitted and the value 
+##' for \code{file} is generated from the value for \code{model}.
+##' To determine the source file name, \code{mrgsolve} will look for 
+##' a file extension in the value of \code{model}.  A file extension is 
+##' assumed when it find sa period followed by one to three alpha-numeric 
+##' characters at the end of the string (e.g. \code{mymodel.txt} but not 
+##' \code{my.model}).  If no file extension is found, the extension \code{.cpp} 
+##' is assumed (e.g. \code{file} is \code{<model-name>.cpp}).  If a file 
+##' extension is found, \code{file} is \code{<model-name>}.    
+##' 
+##' Best practice is to avoid using \code{.} in \code{model} unless
+##' you are using \code{model} to point to the model specification 
+##' file name. Otherwise, use \code{\link{mread_file}}. 
 ##' 
 ##' 
 ##' @section Model Library:
 ##' 
-##' \code{mrgsolve} comes bundled with several precoded PK, PK/PD, and other systems models
-##' that are accessible via the \code{mread} interface.  
+##' \code{mrgsolve} comes bundled with several precoded PK, PK/PD, and 
+##' other systems models that are accessible via the \code{mread} interface.  
 ##' 
 ##' Models available in the library include:
 ##' 
 ##' \itemize{
-##'   \item PK models: \code{pk1cmt}, \code{pk2cmt}, \code{pk3cmt}, \code{tmdd}
-##'   \item PKPD models: \code{irm1}, \code{irm2}, \code{irm3}, \code{irm4}, \code{emax}, \code{effect}
+##'   \item PK models: \code{pk1cmt}, \code{pk2cmt}, \code{pk3cmt},
+##'                    \code{pk1}, \code{pk2}, \code{popex}, \code{tmdd}
+##'   \item PKPD models: \code{irm1}, \code{irm2}, \code{irm3}, \code{irm4},
+##'                       \code{emax}, \code{effect}
 ##'   \item Other models: \code{viral1}, \code{viral2}
 ##' }
 ##' 
@@ -99,8 +85,9 @@ mcode <- function(model, code, project=tempdir(), ...) {
 ##' to the \code{mrgsolve} model library location via \code{\link{modlib}}.
 ##' 
 ##' For more details, see \code{\link{modlib_pk}}, \code{\link{modlib_pkpd}}, 
-##' \code{\link{modlib_tmdd}}, \code{\link{modlib_viral}}, and \code{\link{modlib_details}}
-##' for more information about the state variables and parameters in each model.
+##' \code{\link{modlib_tmdd}}, \code{\link{modlib_viral}}, and 
+##' \code{\link{modlib_details}} for more information about the state 
+##' variables and parameters in each model.
 ##' 
 ##' @examples
 ##'
@@ -135,32 +122,35 @@ mcode <- function(model, code, project=tempdir(), ...) {
 ##' 
 ##' }
 ##' 
+##' @seealso \code{\link{mcode}}, \code{\link{mcode_cache}}
+##' 
 ##' @export
-mread <- function(model = NULL, project = getwd(), code = NULL, 
-                  file = paste0(model, ".cpp"), 
+mread <- function(model, project = getwd(), code = NULL, 
+                  file = NULL, 
                   udll = TRUE, ignore.stdout=TRUE,
                   raw = FALSE, compile = TRUE, audit = TRUE,
                   quiet = getOption("mrgsolve_mread_quiet",FALSE),
                   check.bounds = FALSE, warn = TRUE, soloc = tempdir(),
                   preclean = FALSE, ...) {
   
+  if(charthere(model, "/")) {
+    project <- dirname(model)
+    model <- basename(model)
+  }
+  
   quiet <- as.logical(quiet)
   
   warn <- warn & (!quiet)
   
-  if(!missing(code) & missing(model)) model <- "_mrgsolve_temp"
+  if(missing(model) & !missing(file)) {
+    model <- file  
+  }
   
-  build <- new_build(file, model, project, soloc, code, preclean, udll)
+  build <- new_build(file = file, model = model, project = project, 
+                     soloc = soloc, code = code, preclean = preclean, 
+                     udll = udll)
   
   model <- build$model
-  
-  if(!file_exists(build$modfile)) {
-    if(build$project==modlib()) {
-      return(mintern(model)) 
-    } else {
-      stop(paste0("Could not find model file ", build$modfile), call.=FALSE)
-    }
-  }
   
   ## Read the model spec and parse:
   spec  <- modelparse(readLines(build$modfile,warn=FALSE))
@@ -225,8 +215,13 @@ mread <- function(model = NULL, project = getwd(), code = NULL,
   omega <- omat(do.call("c", nonull.list(mread.env$omega)))
   sigma <- smat(do.call("c", nonull.list(mread.env$sigma)))
   namespace <- do.call("c", mread.env$namespace)
-  capture <- unique(as.character(unlist(do.call("c", nonull.list(mread.env$capture)))))
-  annot <- capture_param(annot,capture)
+  
+  # capture is a vector that may be name or to_name = from_name
+  # capture will be to_names and it's names are from names 
+  capture <- unlist(do.call("c", nonull.list(mread.env$capture)))
+  capture <- .ren.create(as.character(capture))
+  
+  annot <- capture_param(annot,.ren.new(capture))
   
   check_globals_err <- check_globals(mread.env$move_global,names(init))
   if(length(check_globals_err) > 0) {
@@ -235,27 +230,36 @@ mread <- function(model = NULL, project = getwd(), code = NULL,
   
   ## Collect potential multiples
   subr  <- collect_subr(spec)
-  table <- unlist(spec[names(spec)=="TABLE"],use.names=FALSE)
+  table <- unlist(spec[names(spec)=="TABLE"], use.names=FALSE)
   plugin <- get_plugins(spec[["PLUGIN"]])
   
   ## Look for compartments we're dosing into: F/ALAG/D/R
   ## and add them to CMTN
   dosing <- dosing_cmts(spec[["MAIN"]], names(init))
-  SET[["CMTN"]] <- c(spec[["CMTN"]],dosing)
+  SET[["CMTN"]] <- c(spec[["CMTN"]], dosing)
   
-  ## This section checks the contents of the spec and makes some special interventions
-  ##   Virtual compartments
+  # This section checks the contents of the spec and makes some special 
+  # interventions
+  # Virtual compartments
   if(any(is.element("VCMT", names(spec)))) {
     what <- which(names(spec)=="VCMT")
     vcmt <- unique(names(unlist(mread.env$init[what])))
     spec[["ODE"]] <- c(spec[["ODE"]], paste0("dxdt_",vcmt,"=0;"))
   }
-  ##  COVSET blocks
-  if(any(is.element("COVSET",names(spec)))) {
-    handle_cov(spec,ENV) 
+  
+  if(is.element("Rcpp", names(plugin))) {
+    spec <- global_rcpp(spec)
   }
   
+  if(is.element("mrgx", names(plugin))) {
+    toglob <- wrap_namespace("Rcpp::Environment _env;", NULL)
+    topream <- "_env = mrgx::get_envir(self);"
+    spec[["PREAMBLE"]] <- c(topream, spec[["PREAMBLE"]])
+    spec[["GLOBAL"]] <-  c(toglob, spec[["GLOBAL"]])
+  }
   
+
+
   ## Constructor for model object:
   x <- new("mrgmod",
            model = model,
@@ -270,7 +274,7 @@ mread <- function(model = NULL, project = getwd(), code = NULL,
            param = as.param(param),
            init = as.init(init),
            funs = funs_create(model),
-           capture = capture,
+           capture = .ren.chr(capture),
            envir = ENV, 
            plugin = names(plugin),
            modfile = basename(build$modfile)
@@ -283,7 +287,8 @@ mread <- function(model = NULL, project = getwd(), code = NULL,
   ## Check $MAIN for the proper symbols
   if(x@advan != 13) {
     if(subr[["n"]] != neq(x)) {
-      stop("$PKMODEL requires  ", subr[["n"]] , " compartments in $CMT or $INIT.",call.=FALSE)
+      stop("$PKMODEL requires  ", subr[["n"]] , 
+           " compartments in $CMT or $INIT.",call.=FALSE)
     }
     check_pred_symbols(x,spec[["MAIN"]])
   }
@@ -300,7 +305,9 @@ mread <- function(model = NULL, project = getwd(), code = NULL,
   
   ## Arguments in $SET that will be passed to mrgsim
   simargs <- SET[is.element(names(SET),set_args)]
-  if(length(simargs) > 0) x@args <- merge(x@args,simargs, open=TRUE)
+  if(length(simargs) > 0) {
+    x@args <- combine_list(x@args,simargs)
+  }
   
   ## Next, update with what the user passed in as arguments
   args <- list(...)
@@ -309,7 +316,7 @@ mread <- function(model = NULL, project = getwd(), code = NULL,
   
   ## These are the various #define statements
   ## that go at the top of the .cpp.cpp file
-  rd <-generate_rdefs(pars = names(param),
+  rd <- generate_rdefs(pars = names(param),
                       cmt = names(init),
                       ode_func(x),
                       main_func(x),
@@ -359,7 +366,7 @@ mread <- function(model = NULL, project = getwd(), code = NULL,
     "\n// TABLE CODE BLOCK:",
     "__BEGIN_table__",
     table,
-    write_capture(x@capture),
+    write_capture(.ren.old(capture)),
     "__END_table__",
     sep="\n", file=def.con)
   close(def.con)
@@ -371,6 +378,7 @@ mread <- function(model = NULL, project = getwd(), code = NULL,
   x@shlib$version <- GLOBALS[["version"]]
   x@shlib$source <- file.path(build$soloc,build$compfile)
   x@shlib$md5 <- build$md5
+  x@shlib$covariates <- mread.env$covariates
   
   ## IN soloc directory
   cwd <- getwd()
@@ -455,6 +463,45 @@ mread <- function(model = NULL, project = getwd(), code = NULL,
   x <- compiled(x,TRUE)
   
   return(x)
+}
+
+##' @rdname mread 
+##' @export
+mread_cache <- function(model = NULL, project = getwd(), 
+                        file = paste0(model, ".cpp"),
+                        code = NULL, soloc = tempdir(), 
+                        quiet = FALSE, 
+                        preclean = FALSE, ...) {
+  
+  build <- new_build(file, model, project, soloc, code, preclean) 
+  
+  cache_file <- file.path(build$soloc, "mrgmod_cache.RDS")
+  
+  ## If the cache file doesn't exist, build and return
+  te <- file.exists(cache_file) & !preclean
+  t0 <- t1 <- t2 <- t3 <- FALSE
+  
+  if(te) {
+    x <- readRDS(cache_file)
+    t0 <- is.mrgmod(x)
+    if(t1 <- is.character(x@shlib$md5)) {
+      t2 <- x@shlib$md5 == build$md5
+    }
+    t3 <- file.exists(sodll(x))
+  }
+  
+  if(all(t0,t1,t2,t3,te)) {
+    if(!quiet) message("Loading model from cache.")
+    loadso(x)
+    return(update(x,...))
+  }
+  
+  x <- mread(build$model, project, soloc=soloc, quiet=quiet, 
+             file = basename(build$modfile), ...)
+  
+  saveRDS(x,file=cache_file)
+  
+  return(x) 
 }
 
 ##' @export

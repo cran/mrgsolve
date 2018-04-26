@@ -3,37 +3,46 @@
 \name{mrgsims_dplyr}
 \alias{mrgsims_dplyr}
 \alias{as.tbl.mrgsims}
+\alias{pull.mrgsims}
 \alias{filter_.mrgsims}
-\alias{group_by_.mrgsims}
-\alias{distinct_.mrgsims}
-\alias{mutate_.mrgsims}
+\alias{filter_sims}
+\alias{group_by.mrgsims}
+\alias{distinct.mrgsims}
+\alias{mutate.mrgsims}
+\alias{mutate_sims}
 \alias{summarise.each}
-\alias{summarise_.mrgsims}
-\alias{do_.mrgsims}
-\alias{select_.mrgsims}
-\alias{slice_.mrgsims}
+\alias{summarise.mrgsims}
+\alias{do.mrgsims}
+\alias{select.mrgsims}
+\alias{slice.mrgsims}
 \alias{as_data_frame.mrgsims}
-\title{Methods for handling output with dplyr verbs.}
+\title{Methods for handling output with dplyr verbs}
 \usage{
 \method{as.tbl}{mrgsims}(x, ...)
 
-\method{filter_}{mrgsims}(.data, ..., .dots)
+\method{pull}{mrgsims}(.data, ...)
 
-\method{group_by_}{mrgsims}(.data, ..., .dots, add = FALSE)
+filter_.mrgsims(.data, ...)
 
-\method{distinct_}{mrgsims}(.data, ..., .dots, .keep_all = FALSE)
+filter_sims(.data, ...)
 
-\method{mutate_}{mrgsims}(.data, ..., .dots)
+\method{group_by}{mrgsims}(.data, ..., add = FALSE)
 
-summarise.each(.data, funs, ...)
+\method{distinct}{mrgsims}(.data, ..., .keep_all = FALSE)
 
-\method{summarise_}{mrgsims}(.data, ..., .dots)
+\method{mutate}{mrgsims}(.data, ...)
 
-\method{do_}{mrgsims}(.data, ..., .dots)
+mutate_sims(.data, ...)
 
-\method{select_}{mrgsims}(.data, ..., .dots)
+\method{summarise}{each}(.data, funs, ...)
 
-\method{slice_}{mrgsims}(.data, ...)
+\method{summarise}{mrgsims}(.data, ...)
+
+\method{do}{mrgsims}(.data, ..., .dots)
+
+\method{select}{mrgsims}(.data, ...)
+
+\method{slice}{mrgsims}(.data, ...)
 
 \method{as_data_frame}{mrgsims}(.data_, ...)
 }
@@ -44,16 +53,16 @@ summarise.each(.data, funs, ...)
 
 \item{.data}{passed to various \code{dplyr} functions}
 
-\item{.dots}{passed to various \code{dplyr} functions}
+\item{add}{passed to \code{dplyr::group_by}}
 
-\item{add}{passed to \code{dplyr::group_by_}}
-
-\item{.keep_all}{passed to \code{dplyr::distinct_}}
+\item{.keep_all}{passed to \code{dplyr::distinct}}
 
 \item{funs}{passed to \code{dplyr::summarise_each}}
+
+\item{.dots}{passed to various \code{dplyr} functions}
 
 \item{.data_}{mrgsims object}
 }
 \description{
-Methods for handling output with dplyr verbs.
+Methods for handling output with dplyr verbs
 }

@@ -1,4 +1,4 @@
-# Copyright (C) 2013 - 2017  Metrum Research Group, LLC
+# Copyright (C) 2013 - 2018  Metrum Research Group, LLC
 #
 # This file is part of mrgsolve.
 #
@@ -75,7 +75,7 @@ create_matlist <- function(x=list(),class,labels=list(),signature=NULL,...) {
 }
 
 
-##' S4 class matlist.
+##' S4 class matlist
 ##'
 ##' @rdname matlist-class
 setClass("matlist", 
@@ -89,3 +89,5 @@ setClass("matlist",
 )
 
 is.matlist <- function(x) inherits(x,"matlist")
+
+

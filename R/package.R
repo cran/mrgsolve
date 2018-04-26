@@ -1,4 +1,4 @@
-# Copyright (C) 2013 - 2017  Metrum Research Group, LLC
+# Copyright (C) 2013 - 2018  Metrum Research Group, LLC
 #
 # This file is part of mrgsolve.
 #
@@ -19,15 +19,15 @@
 ##' @title mrgsolve
 ##' @name mrgsolve
 ##' 
-##' @section Example models:
-##' See \code{\link{mrgsolve_example}} to export example models into your own, writeable project directory.
 ##'
 ##' @section Input data sets:
-##' See \code{\link{data_set}} for help creating input data sets.  See \code{\link{exdatasets}} for example input data sets.
+##' See \code{\link{data_set}} for help creating input data sets.  
+##' See \code{\link{exdatasets}} for example input data sets.
 ##'
 ##' @section Package help:
 ##' \itemize{
-##'  \item  Package \href{00Index.html}{index}, including a listing of all functions
+##'  \item  Package \href{00Index.html}{index}, including a listing 
+##'  of all functions
 ##'  \item Reserved words in \code{mrgsolve}: \code{\link[mrgsolve]{reserved}}
 ##' }
 ##'
@@ -37,16 +37,18 @@
 ##'
 ##' @name mrgsolve
 ##' @description
-##' mrgsolve is an R package maintained under the auspices of Metrum Research Group, LLC, that facilitates
-##' simulation from models based on systems of ordinary differential equations (ODE) that are typically employed
-##' for understanding pharmacokinetics, pharmacodynamics, and systems biology and pharmacology.
-##' mrgsovle consists of computer code written in the R and C++ languages, providing an interface to
-##' the DLSODA differential equation solver (written in FORTRAN) provided through ODEPACK -
+##' mrgsolve is an R package maintained under the auspices of 
+##' Metrum Research Group, LLC, that facilitates simulation from 
+##' models based on systems of ordinary differential equations (ODE) 
+##' that are typically employed for understanding pharmacokinetics, 
+##' pharmacodynamics, and systems biology and pharmacology. mrgsovle 
+##' consists of computer code written in the R and C++ languages, 
+##' providing an interface to the DLSODA differential equation solver 
+##' (written in FORTRAN) provided through ODEPACK -
 ##' A Systematized Collection of ODE Solvers.
 ##'
 ##' @section Handling simulated output:
 ##' See \code{\link{mrgsims}} for methods to use with simulated output.
-##'
 ##'
 ##' @section About the solver used by \code{mrgsolve}:
 ##' See: \code{\link{aboutsolver}}
@@ -144,11 +146,12 @@
 ##' mod
 ##' 
 ##' mod %>% ev(amt=300, ii=12, addl=3) %>% mrgsim
+##' 
 ##' }
 ##'
 NULL
 
-##' About the ODEPACK differential equation solver used by mrgsolve.
+##' About the ODEPACK differential equation solver used by mrgsolve
 ##'
 ##' @name aboutsolver
 ##' @rdname aboutsolver
@@ -194,12 +197,102 @@ NULL
 ##' }
 NULL
 
+##' Optional inputs for DLSODA
+##' 
+##' These are settings for the differential equation 
+##' solver (\code{DLSODA}) that can be accessed via
+##' the R interface.  The code listing below is taken directly
+##' from the \code{DLSODA} source code.  
+##'
+##' @name solversettings
+##' @rdname solversettings
+##' @seealso \code{\link{aboutsolver}}, \code{\link{update}}
+##' 
+##' @details
+##' 
+##' The following items can be set
+##' 
+##' \itemize{
+##' \item \code{hmax} (\code{HMAX} below); decrease \code{hmax} when 
+##' you want to limit how big of a step the solver can take when 
+##' integrating from one time to the next time. However be aware
+##' that smaller \code{hmax} will result in longer run times.
+##' \item \code{hmin} (\code{HMIN} below); don't fiddle with this
+##' unless you know what you're doing.  
+##' \item \code{ixpr} (\code{IXPR} below)
+##' \item \code{maxsteps} (\code{MXSTEP} below); increase this 
+##' number when the solver has a long interval between 
+##' two integration times (e.g. when observation records are 
+##' far apart). 
+##' \item \code{mxhnil} (\code{MXHNIL below}); don't usually 
+##' modify this one
+##' \item \code{atol} - the absolute solver tolerance; decrease
+##' this number (e.g. to 1E-10 or 1E-20 or 1E-50) when the 
+##' value in a compartment can get extremely small; without this 
+##' extra (lower) tolerance, the value can get so low that the number
+##' can randomly become negative.  However be aware that more precision
+##' here will result in longer run times. 
+##' \item \code{rtol} - the reltive solver tolerances; decrease this 
+##' number when you want a more precise solution.  However be aware 
+##' that more precision here will result in longer run times.
+##' }
+##' 
+##' 
+##' 
+##'
+##' @section Solver Settings:
+##' \preformatted{
+##'C-----------------------------------------------------------------------
+##'C Optional Inputs.
+##'C
+##'C The following is a list of the optional inputs provided for in the
+##'C call sequence.  (See also Part 2.)  For each such input variable,
+##'C this table lists its name as used in this documentation, its
+##'C location in the call sequence, its meaning, and the default value.
+##'C The use of any of these inputs requires IOPT = 1, and in that
+##'C case all of these inputs are examined.  A value of zero for any
+##'C of these optional inputs will cause the default value to be used.
+##'C Thus to use a subset of the optional inputs, simply preload
+##'C locations 5 to 10 in RWORK and IWORK to 0.0 and 0 respectively, and
+##'C then set those of interest to nonzero values.
+##'C
+##'C Name    Location      Meaning and Default Value
+##'C
+##'C
+##'C HMAX    RWORK(6)  the maximum absolute step size allowed.
+##'C                   The default value is infinite.
+##'C
+##'C HMIN    RWORK(7)  the minimum absolute step size allowed.
+##'C                   The default value is 0.  (This lower bound is not
+##'C                   enforced on the final step before reaching TCRIT
+##'C                   when ITASK = 4 or 5.)
+##'C
+##'C IXPR    IWORK(5)  flag to generate extra printing at method switches.
+##'C                   IXPR = 0 means no extra printing (the default).
+##'C                   IXPR = 1 means print data on each switch.
+##'C                   T, H, and NST will be printed on the same logical
+##'C                   unit as used for error messages.
+##'C
+##'C MXSTEP  IWORK(6)  maximum number of (internally defined) steps
+##'C                   allowed during one call to the solver.
+##'C                   The default value is 500.
+##'C
+##'C MXHNIL  IWORK(7)  maximum number of messages printed (per problem)
+##'C                   warning that T + H = T on a step (H = step size).
+##'C                   This must be positive to result in a non-default
+##'C                   value.  The default value is 10.
+##'C
+##'C-----------------------------------------------------------------------
+##' }
+NULL
+
 
 ##' Reserved words.
 ##'
 ##' @name reserved
 ##' @details
-##' Note: this function is not exported; you must go into the \code{mrgsolve} namespace by using the \code{mrgsolve:::} prefix.
+##' Note: this function is not exported; you must go into the 
+##' \code{mrgsolve} namespace by using the \code{mrgsolve:::} prefix.
 ##' @examples
 ##' mrgsolve:::reserved()
 ##'

@@ -45,7 +45,9 @@ dataobject::dataobject(Rcpp::NumericMatrix _data,
   Data_names = Rcpp::as<Rcpp::CharacterVector>(dimnames[1]);
   
   Idcol = find_position("ID", Data_names);
-  if(Idcol < 0) throw Rcpp::exception("Could not find ID column in data set.",false);
+  if(Idcol < 0) {
+    throw Rcpp::exception("Could not find ID column in data set.",false);
+  }
   
   // Connect Names in the data set with positions in the parameter list
   from_to(Data_names,parnames, par_from, par_to);
@@ -66,7 +68,11 @@ dataobject::dataobject(Rcpp::NumericMatrix _data,
   
   Idcol = find_position("ID", Data_names);
   
-  if(Idcol < 0) throw Rcpp::exception("Could not find ID column in data set.",false);
+  if(Idcol < 0) {
+    throw Rcpp::exception(
+        "could not find ID column in data set.",false
+    );
+  }
   
   for(Rcpp::CharacterVector::iterator it = cmtnames.begin(); it != cmtnames.end(); ++it) {
     *it += "_0";
@@ -111,7 +117,6 @@ Rcpp::IntegerVector dataobject::get_col_n(const Rcpp::CharacterVector& what) {
 
 void dataobject::locate_tran() {
   
-  
   unsigned int zeros = Data.ncol()-1;
   
   if(zeros==0) {
@@ -135,7 +140,12 @@ void dataobject::locate_tran() {
   
   if(tcol > zeros) {
     tcol = std::find(bg,ed,"TIME") - bg;
-    if(tcol > zeros) throw Rcpp::exception("Could not find time or TIME column in the data set.",false);
+    if(tcol > zeros) {
+      throw Rcpp::exception(
+          "Could not find time or TIME column in the data set",
+          false)
+      ;
+    }
     lc = false;
   }
   
@@ -149,7 +159,6 @@ void dataobject::locate_tran() {
     col[_COL_rate_] = std::find(bg,ed,"rate") - bg;
     col[_COL_evid_] = std::find(bg,ed,"evid") - bg;
     col[_COL_cmt_]  = std::find(bg,ed,"cmt")  - bg;
-    
   } else {
     col[_COL_amt_]  = std::find(bg,ed,"AMT")  - bg;
     col[_COL_ii_]   = std::find(bg,ed,"II")   - bg;
@@ -168,7 +177,9 @@ void dataobject::locate_tran() {
   if(col[_COL_evid_] > zeros) col[_COL_evid_] = zeros;
   
   if(col[_COL_cmt_] > zeros  && zeros > 0) {
-    throw Rcpp::exception("Couldn't locate cmt or CMT in data set.",false);
+    throw Rcpp::exception(
+        "Could not locate cmt or CMT in data set",false
+    );
   }
 }
 
@@ -225,7 +236,10 @@ void dataobject::get_records(recstack& a, int NID, int neq,
     for(j = this->start(h); j <= this->end(h); ++j) {
       
       if(Data(j,col[_COL_time_]) < lastime) {
-        throw Rcpp::exception("data set is not sorted by time or time is negative.",false);
+        throw Rcpp::exception(
+            "data set is not sorted by time or time is negative.",
+            false
+        );
       }
       
       lastime = Data(j,col[_COL_time_]);
@@ -236,7 +250,10 @@ void dataobject::get_records(recstack& a, int NID, int neq,
       if(Data(j,col[_COL_evid_])==0) {
         
         if((this_cmt < 0) || (this_cmt > neq)) {
-          throw Rcpp::exception("cmt number in observation record out of range.",false);
+          throw Rcpp::exception(
+              "Compartment number in observation record out of range",
+              false
+          );
         }
         
         rec_ptr obs = boost::make_shared<datarecord>(
@@ -253,7 +270,10 @@ void dataobject::get_records(recstack& a, int NID, int neq,
       
       // Check that cmt is valid:
       if((this_cmt==0) || (abs(this_cmt) > neq)) {
-        throw Rcpp::exception("cmt number in dosing record out of range.",false);
+        throw Rcpp::exception(
+            "Compartment number in dosing record out of range",
+            false
+        );
       }
       
       ++evcount;
@@ -269,18 +289,21 @@ void dataobject::get_records(recstack& a, int NID, int neq,
       );
       
       if((ev->rate() < 0) && (ev->rate() != -2) && (ev->rate() != -1)) {
-        throw Rcpp::exception("Non-zero rate must be positive or equal to -1 or -2",
-                              false);
+        throw Rcpp::exception(
+            "non-zero rate must be positive or equal to -1 or -2",
+            false
+        );
       }
       
       if((ev->rate() != 0) && (ev->amt() <= 0) && (ev->evid()==1)) {
-        throw Rcpp::exception("Non-zero rate requires positive amt.",
-                              false);
+        throw Rcpp::exception(
+            "non-zero rate requires positive amt.",
+            false
+        );
       }
       
       ev->from_data(true);
       if(!obsonly) ev->output(true);
-      
       
       ev->ss(Data(j,col[_COL_ss_]));
       ev->addl(Data(j,col[_COL_addl_]));
@@ -288,12 +311,16 @@ void dataobject::get_records(recstack& a, int NID, int neq,
       
       if(ev->ii() <= 0) {
         if(ev->addl() > 0) {
-          throw Rcpp::exception("Found dosing record with addl > 0 and ii <= 0.",
-                                false);
+          throw Rcpp::exception(
+              "found dosing record with addl > 0 and ii <= 0.",
+              false
+          );
         }
         if(ev->ss()) {
-          throw Rcpp::exception("Found dosing record with ss==1 and ii <= 0.",
-                                false);
+          throw Rcpp::exception(
+              "found dosing record with ss==1 and ii <= 0.",
+              false
+          );
         }
       }
       a[h].push_back(ev);
@@ -307,6 +334,10 @@ void dataobject::get_ids(uidtype* ids) {
   }
 }
 
+unsigned int dataobject::get_idata_row(const double ID) {
+  return idmap[ID];
+}
+  
 void dataobject::check_idcol(dataobject& idat) {
   
   if(idat.ncol() == 0) {return;}
@@ -321,7 +352,9 @@ void dataobject::check_idcol(dataobject& idat) {
   sort_unique(uidata);
   
   if(!std::includes(uidata.begin(),uidata.end(),uthis.begin(),uthis.end())) {
-    throw Rcpp::exception("ID found in the data set, but not in idata.",false);
+    throw Rcpp::exception(
+        "ID found in the data set, but not in idata.",
+        false);
   }
 }
 

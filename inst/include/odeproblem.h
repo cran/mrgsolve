@@ -43,7 +43,6 @@ struct databox {
   double time; ///< current simulation time
   int evid;  ///< event ID flag
   unsigned short int SYSTEMOFF; ///< flag to stop advancing system for current ID
-  dvec mtime; ///< model time values
   double id;  ///< current ID
   double amt; ///< current dosing amount value
   short int cmt; ///< current compartment value
@@ -56,6 +55,8 @@ struct databox {
   void stop() {SYSTEMOFF=9;}
   void stop_id() {SYSTEMOFF=1;}
   void stop_id_cf(){SYSTEMOFF=2;}
+  std::vector<shuttle> recs;
+  
 };
 
 //! vector of <code>datarecord</code> objects for one <code>ID</code>
@@ -112,6 +113,7 @@ public:
   
   virtual ~odeproblem();
   
+  void do_init_calc(bool answer) {Do_Init_Calc = answer;}
   void advance(double tfrom, double tto);
   void call_derivs(int *neq, double *t, double *y, double *ydot);
   void init(int pos, double value){Init_value[pos] = value;}
@@ -165,7 +167,7 @@ public:
   
   void reset_newid(const double id_);
   
-  void eta(int pos, double value) {d.ETA[pos] =value;}
+  void eta(int pos, double value) {d.ETA[pos] = value;}
   void eps(int pos, double value) {d.EPS[pos] = value;}
   unsigned short int systemoff(){return d.SYSTEMOFF;}
   
@@ -191,15 +193,16 @@ public:
   void idn(int n) {d.idn = n;}
   void rown(int n) {d.rown=n;}
   
-  dvec& mtime(){return d.mtime;}
-  
   dvec& get_capture() {return Capture;}
   double capture(int i) {return Capture[i];}
   
   void copy_parin(const Rcpp::List& parin);
   void copy_funs(const Rcpp::List& funs);
-
-
+  
+  bool any_mtime() {return d.recs.size() > 0;}
+  std::vector<shuttle> mtimes(){return d.recs;}
+  void clear_mtime(){d.recs.clear();}
+  
 protected:
   
   double* Param; ///< model parameters
@@ -233,6 +236,7 @@ protected:
   table_func Table; ///< <code>$TABLE</code> function
   config_func Config; ///< <code>$PREAMBLE</code> function
   
+  bool Do_Init_Calc;
   
 };
 
@@ -257,11 +261,5 @@ Rcpp::List TOUCH_FUNS(const Rcpp::NumericVector& lparam,
                       const Rcpp::NumericVector& linit,
                       const Rcpp::CharacterVector& capture,
                       const Rcpp::List& funs);
-
-// SEXP ODEPTR(const Rcpp::NumericVector& lparam, 
-//                               const Rcpp::NumericVector& linit,
-//                               int Neta, int Neps,
-//                               const Rcpp::CharacterVector& capture,
-//                               const Rcpp::List& funs);
 
 #endif

@@ -131,22 +131,22 @@ double datarecord::dur(double b) {
   return(b*Amt/Rate);
 }
 
-
-
 void datarecord::implement(odeproblem* prob) {
   
-  if(Evid==0 || (!Armed)) return;
+  if(Evid==0 || (!Armed) || (prob->neq()==0)){
+    return;
+  }
   
   unsigned int evid = Evid;
   
   if(this->infusion()) evid = 5;
   
   int eq_n = this->cmtn();
-  
+
   double Fn = prob->fbio(eq_n);
   
   if(Ss > 0) this->steady(prob, Fn);
-  
+
   switch (evid) {
   case 1: // Dosing event record
     if(!prob->is_on(eq_n)) prob->on(eq_n);
@@ -204,7 +204,7 @@ void datarecord::implement(odeproblem* prob) {
 }
 
 /* 
- * Brings systme to steady state if appropriate.
+ * Brings system to steady state if appropriate.
  */
 void datarecord::steady(odeproblem* prob, double Fn) {
   if(Fn==0) throw Rcpp::exception("Cannot use ss flag when F(n) is zero.",false);
@@ -484,52 +484,4 @@ void datarecord::schedule(std::vector<rec_ptr>& thisi, double maxtime,
     }
   } // end addl
 }  
-
-void add_mtime(reclist& thisi, dvec& b, dvec& c, bool debug) {
-  
-  if((b.size()==0) & (c.size()==0)) return;
-  
-  double maxtime  = thisi.back()->time();
-  double mintime = thisi.at(0)->time();
-  std::sort(b.begin(), b.end());
-  std::sort(c.begin(), c.end());
-  
-  b.insert(b.end(), c.begin(), c.end() );
-  std::sort(b.begin(), b.end());
-  
-  b.erase(unique(b.begin(), b.end()), b.end());
-  
-  std::size_t i = 0;
-  
-  bool dropmin = true;
-  bool dropmax = true;
-  
-  // add mtimes from argument
-  for(i=0; i < b.size(); ++i) {
-    
-    if(b.at(i) <= mintime) {
-      if(debug && dropmin) {
-        Rcpp::Rcout << "dropping mtimes <=  min observation time" << std::endl;
-        dropmin = false;
-      }
-      continue;
-    }
-    
-    if(b.at(i) >= maxtime)  {
-      if(debug && dropmax) {
-        Rcpp::Rcout << "dropping mtimes >= to max observation time" << std::endl;
-        dropmax = false;
-      }
-      break;
-    }
-    
-    rec_ptr obs = NEWREC(100,b[i],0,-100,0);
-    obs->output(false);
-    obs->from_data(false);
-    thisi.push_back(obs);
-  }
-  
-  std::sort(thisi.begin(), thisi.end(), CompByTimePosRec);
-}
-
 

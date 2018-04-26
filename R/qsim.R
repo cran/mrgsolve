@@ -1,4 +1,4 @@
-# Copyright (C) 2013 - 2017  Metrum Research Group, LLC
+# Copyright (C) 2013 - 2018  Metrum Research Group, LLC
 #
 # This file is part of mrgsolve.
 #
@@ -15,14 +15,27 @@
 # You should have received a copy of the GNU General Public License
 # along with mrgsolve.  If not, see <http://www.gnu.org/licenses/>.
 
-##' A quick simulation function.
+##' A quick simulation function
 ##' 
 ##' @param x model object
 ##' @param e event object
 ##' @param idata individual data set
 ##' @param req compartments to request
 ##' @param tgrid \code{tgrid} object; used if \code{e} is an \code{ev} object
+##' @param skip_init_calc not used
+##' @param ... passed to \code{\link{qsim}}
 ##' 
+##' @details
+##' Use when simulating with no intervention or a simple intervention.
+##' The rule of thumb to keep in mind with this function is that 
+##' the timing of all events and observations is determined prior to 
+##' the model run.  This has particular consequences for infusion
+##' duration and lag times that might be set in \code{$MAIN}. 
+##' Specifically, bioavailability is implemented for bolus but not 
+##' infusion doses.  Infusion rates and durations are not modeled
+##' from \code{$MAIN}. Dose lag times are not modeled
+##' from \code{$MAIN}. If these features are needed or when in doubt, 
+##' use \code{\link{mrgsim}}.
 ##' 
 ##' @examples 
 ##' 
@@ -36,20 +49,22 @@
 ##' 
 ##' @export
 ##' 
-qsim <- function(x,e,idata,req=NULL,tgrid=NULL) {
+qsim <- function(x,e=NULL,idata=NULL,req=NULL,tgrid=NULL,
+                 skip_init_calc = FALSE) {
   
-  if(missing(idata)) {
+  if(is.null(idata)) {
     idata <- matrix(1,dimnames=list(NULL,"ID"))
   }
   
+  if(is.null(e)) e <- ev()
+  
   if(is.ev(e)) {
     if(!is.null(tgrid)) {
-      e <- recmatrix(e,tgrid) 
+      e <- data_qsim(e,tgrid) 
     } else {
-      e <- recmatrix(e,stime(x))
+      e <- data_qsim(e,stime(x))
     }
-  }
-  
+  } 
   
   cm <- reqn <-  cmt(x)
   if(is.null(req)) {
@@ -61,12 +76,16 @@ qsim <- function(x,e,idata,req=NULL,tgrid=NULL) {
   
   cap <- c(length(x@capture),seq_along(x@capture)-1)
   
+  parin <- parin(x)
+  
+  parin$do_init_calc <- !skip_init_calc
+  
   out <- .Call(`_mrgsolve_QUICKSIM`, 
                PACKAGE = 'mrgsolve',
-               parin(x),
+               parin,
                as.numeric(param(x)),
                as.numeric(init(x)),
-               pars(x),
+               Pars(x),
                e,attr(e,"n"),
                data.matrix(idata),
                as.integer(req-1),
@@ -82,42 +101,12 @@ qsim <- function(x,e,idata,req=NULL,tgrid=NULL) {
   
 }
 
+##' @rdname qsim
+##' @export
+qsim_df <- function(...) {
+  as_data_frame(qsim(...)) 
+}
 
-# qsim_data <- function(x,data,req=NULL,stime=NULL) {
-# 
-#   cm <- reqn <-  cmt(x)
-#   if(is.null(req)) {
-#     req <- seq_along(reqn)
-#   } else {
-#     req <- match(intersect(req,cm),cm)
-#     reqn <- cm[req]
-#   }
-# 
-#   cap <- c(length(x@capture),seq_along(x@capture)-1)
-# 
-#   NN <- sum(data[,3] %in% c(0,2))
-# 
-#   out <- .Call(`_mrgsolve_QUICKSIM_DATA`,
-#                PACKAGE = 'mrgsolve',
-#                parin(x),
-#                as.numeric(param(x)),
-#                as.numeric(init(x)),
-#                pars(x),
-#                NN,
-#                data.matrix(data),
-#                as.integer(req-1),
-#                cap,
-#                pointers(x),
-#                as.integer(c(sum(nrow(omat(x))),
-#                             sum(nrow(smat(x)))))
-#   )
-# 
-#   dimnames(out) <- list(NULL, c("ID","time", reqn,x@capture))
-# 
-#   out
-# 
-# }
-# 
 
 as_ev_matrix <- function(ev) {
   n <- ev$addl+1
@@ -142,12 +131,6 @@ as_ev_matrix <- function(ev) {
   m1
 }
 
-# get_rate_off <- function(x) {
-#   dur <- x$amt/x$rate
-#   y <- mutate(x,time=time+dur,rate=-1*rate)
-#   y
-# }
-
 obs_matrix <- function(x,n=1) {
   if(n > 1) x <- rep(x,times=n)
   matrix(nrow=length(x),ncol=5,
@@ -163,7 +146,7 @@ id_obs_matrix <- function(obs,ids) {
 }
 
 
-##' Create a matrix of events for simulation.
+##' Create a matrix of events for simulation
 ##' 
 ##' This function is for use with \code{\link{qsim}} only.
 ##'
@@ -172,16 +155,116 @@ id_obs_matrix <- function(obs,ids) {
 ##' @param c_indexing if \code{TRUE}, compartment numbers will be decremented by 1
 ##' @export
 ##' 
-recmatrix <- function(x,times,c_indexing=TRUE) {
+recmatrix <- function(x, times, c_indexing=TRUE) {
   x <- as.data.frame(x)
-  if(!has_name("rate", x)) x$rate <- 0
-  if(!has_name("addl", x)) x$addl <- 0
-  if(!has_name("ii", x)) x$ii <- 0
-  if(!has_name("start", x)) x$start <- 0
-  if(c_indexing) x[["cmt"]] <- x[["cmt"]]-1
-  
+  if(nrow(x) > 0) {
+    if(!has_name("rate", x)) x$rate <- 0
+    if(!has_name("addl", x)) x$addl <- 0
+    if(!has_name("ii", x)) x$ii <- 0
+    if(!has_name("start", x)) x$start <- 0
+    if(c_indexing) x[["cmt"]] <- x[["cmt"]]-1
+  }
   if(is.null(times)) stop("Please supply simulation times.")
-  x <- lapply(split(x,1:nrow(x)),as_ev_matrix)
+  x <- lapply(split(x,seq_len(nrow(x))),as_ev_matrix)
   x <- do.call(rbind,c(x,list(obs_matrix(stime(times)))))
   structure(x[order(x[,1],x[,4]),],n=sum(x[,"evid"]==0))
+}
+
+##' Create a matrix of events and observations for simulation
+##' 
+##' This function is to be used with \code{\link{qsim}} only.
+##' 
+##' @param e an event object
+##' @param times numeric vector of observation times or a 
+##' \code{tgrid} object
+##' 
+##' @return A numeric matrix with at minimum columns of 
+##' \code{time}, \code{cmt}, \code{evid}, \code{amt}, 
+##' \code{rate}.
+##' 
+##' @examples
+##' e <- ev(amt = 100, ii = 12, addl = 2, rate = 50)
+##' 
+##' times <- tgrid(end = 240, delta = 6)
+##' 
+##' data_qsim(e, times)
+##' 
+##' 
+##' @export
+data_qsim <- function(e, times) {
+  
+  times <- stime(times)
+  
+  d <- as.data.frame(e)
+  
+  if(!exists("rate",d)) {
+    d$rate <- 0  
+  }
+  if(!exists("addl", d)) {
+    d$addl <- 0  
+  }
+  if(!exists("ii", d)) {
+    d$ii <- 0  
+  }
+  
+  dmat <- data.matrix(d)
+  
+  cols <- unique(c("time", "cmt", "evid", "amt", "rate", colnames(dmat)))
+  
+  dmat[,"cmt"] <- dmat[,"cmt"] - 1
+  
+  dmat <- dmat[,cols,drop = FALSE]
+  
+  if(any(d$addl > 0)) {
+    
+    admat <- dmat[dmat[,"addl"] > 0,,drop = FALSE]
+    
+    reps <- unlist(
+      sapply(
+        admat[,"addl"],seq, simplify = FALSE, USE.NAMES = FALSE
+      ), 
+      use.names = FALSE
+    )
+    
+    admat <- admat[
+      rep(seq(nrow(admat)),times = admat[,"addl"]),,
+      drop = FALSE]
+    
+    admat[,"time"] <- 
+      admat[,"time"] +
+      admat[,"ii"]*reps
+    
+    dmat <- rbind(dmat,admat)
+  }
+  
+  nrate <- 0
+  if(any(d$rate > 0)) {
+    drate <- dmat[dmat[,"rate"] > 0,,drop = FALSE]
+    drate[,"evid"] <- 9
+    drate[,"time"] <- 
+      drate[,"time"] + 
+      drate[,"amt"]/drate[,"rate"]
+    dmat <- rbind(dmat,drate)
+    nrate <- nrow(drate)
+  }
+  
+  dmat[,"addl"] <- dmat[,"ii"] <- 0
+  
+  
+  
+  totrows <- length(times) + nrow(d) + sum(d$addl) + nrate
+  
+  mat <- matrix(0, nrow = totrows, ncol = ncol(d))
+  
+  dimnames(mat) <- list(NULL, colnames(dmat))
+  
+  mat[seq(nrow(dmat)),seq(ncol(dmat))] <- dmat
+  
+  tindex <- seq(nrow(dmat)+1, nrow(mat))
+  
+  mat[tindex,"time"] <- times
+  
+  mat <- mat[order(mat[,"time"],mat[,"evid"]),]
+  
+  structure(mat, n = sum(mat[,"evid"]==0))
 }

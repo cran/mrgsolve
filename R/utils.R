@@ -1,4 +1,4 @@
-# Copyright (C) 2013 - 2017  Metrum Research Group, LLC
+# Copyright (C) 2013 - 2018  Metrum Research Group, LLC
 #
 # This file is part of mrgsolve.
 #
@@ -25,18 +25,23 @@ bind_col <- function(x,y,z) {
 
 is.mt <- function(x) {return(is.null(x) | length(x)==0)}
 
-##' Merge two lists.
+##' Merge two lists
 ##'
 ##' @param x the original list
 ##' @param y the new list for merging
+##' @param open logical indicating whether or not new items should 
+##' be allowed in the list upon merging
 ##' @param wild wild-card name; see details
 ##' @param warn issue warning if nothing found to update
 ##' @param context description of usage context
 ##' @param ... not used
-##' @param open logical indicating whether or not new items should be allowed in the list upon merging.
+##' 
 ##' @rdname merge
+##' 
 ##' @details
-##' Wild-card names (\code{wild}) are always retained in \code{x} and are brought along from \code{y} only when \code{open}.
+##' Wild-card names (\code{wild}) are always retained in \code{x} and
+##' are brought along from \code{y} only when \code{open}.
+##' 
 ##' @export
 merge.list <- function(x,y,...,open=FALSE,
                        warn=TRUE,context="object",wild="...") {
@@ -58,23 +63,32 @@ merge.list <- function(x,y,...,open=FALSE,
     x <- c(x,y[nw])
   } else {
     if(length(common)==0 & warn) {
-      warning(paste0("Found nothing to update: ", context), call.=FALSE)
+      warning(paste0("found nothing to update: ", context), call.=FALSE)
     }
   }
   x
 }
 
-render_time <- function(x) {
-  add <- times <- numeric(0)
-  if(!is.mt(x@add)){add <- x@add}
-  if(x@end >=0){times <-seq(x@start,x@end,x@delta)}
-  times <- invisible(as.numeric(c(times,add)))
-  if(is.mt(times)) {return(0)}
-  sort(unique(times[times>=0]))
+combine_list <- function(left, right) {
+  if(!all(is.list(left),is.list(right))) {
+    stop("input are not lists")
+  }
+  left[names(right)] <-  right
+  left
+}
+
+update_list <- function(left, right) {
+  if(!all(is.list(left),is.list(right))) {
+    stop("input are not lists")
+  }
+  common <- intersect(names(left), names(right))
+  left[common] <-  right[common]
+  left
 }
 
 
-##' Simulate from a multivariate normal distribution with mean zero.
+
+##' Simulate from a multivariate normal distribution with mean zero
 ##'
 ##' @param mat a positive-definite matrix
 ##' @param n number of variates to simulate
@@ -165,7 +179,7 @@ as.cvec <- function(x) {
 }
 
 
-##' Create template data sets for simulation.
+##' Create template data sets for simulation
 ##'
 ##' @param ... passed to \code{\link{expand.grid}}
 ##' 
@@ -196,11 +210,7 @@ expand.ev <- function(...) {
   shuffle(ans,"ID")
 }
 
-
 is.numeric.data.frame <- function(x) sapply(x, is.numeric)
-
-
-
 
 tolist <- function(x,concat=TRUE,envir=list()) {
   if(is.null(x)) return(list())
@@ -226,7 +236,7 @@ tovec <- function(x,concat=TRUE) {
 }
 
 
-##' Create create character vectors.
+##' Create create character vectors
 ##'
 ##' @param x comma-separated quoted string (for \code{cvec})
 ##' @param ... unquoted strings (for \code{ch})
@@ -234,8 +244,7 @@ tovec <- function(x,concat=TRUE) {
 ##' @examples
 ##'
 ##' cvec("A,B,C")
-##' ch(A,B,C)
-##' s(A,B,C)
+##' s_(A,B,C)
 ##'
 setGeneric("cvec", function(x,...) standardGeneric("cvec"))
 
@@ -245,36 +254,35 @@ setMethod("cvec", "character", as.cvec)
 
 ##' @export
 ##' @rdname cvec
-ch <- function(...) as.character(match.call(expand.dots=TRUE))[-1]
+s_ <- function(...) as.character(match.call(expand.dots=TRUE))[-1]
 
-##' @export
-##' @rdname cvec
-s <- ch
-
-##' Access or clear arguments for calls to mrgsim.
+##' Access or clear arguments for calls to mrgsim
 ##'
 ##' @param x model object
-##' @param clear logical indicating whether or not clear args from the model object
+##' @param clear logical indicating whether or not clear args from 
+##' the model object
+##' @param which character with lenght 1 naming a single arg to get
 ##' @param ... passed along
 ##' 
-##' @return If \code{clear} is \code{TRUE}, the argument list is cleared and the model object is returned.  Otherwise, the argument list is returned.
+##' @return If \code{clear} is \code{TRUE}, the argument list is 
+##' cleared and the model object is returned.  Otherwise, the argument 
+##' list is returned.
 ##' 
 ##' @examples
 ##' mod <- mrgsolve:::house()
 ##' mod %>% Req(CP,RESP) %>% carry_out(evid,WT,FLAG) %>% simargs
 ##' 
 ##' @export
-simargs <- function(x,...) UseMethod("simargs")
-
-##' @rdname simargs
-##' @export
-simargs.mrgmod <- function(x,clear=FALSE,...) {
+simargs <- function(x, which = NULL, clear=FALSE,...) {
   
   if(clear) {
     x@args <- list()
     return(x)
   }
-  x@args
+  if(!is.character(which)) {
+    return(x@args) 
+  }
+  return(x@args[[which]])
 }
 
 
@@ -288,7 +296,7 @@ build_path <- function(x) {
 }
 
 
-##' Set RNG to use L'Ecuyer-CMRG.
+##' Set RNG to use L'Ecuyer-CMRG
 ##'
 ##' @export
 mcRNG <- function() base::RNGkind("L'Ecuyer-CMRG")
@@ -307,7 +315,8 @@ if.file.remove <- function(x) {
 rename_cols <- function(.df, new_names) {
   if (!all(new_names %in% names(.df))) {
     missing <- new_names[which(!new_names %in% names(.df))]
-    stop(paste("the following columns do not exist in the dataset: ", paste(missing, collapse = ", ")))
+    stop(paste("the following columns do not exist in the dataset: ", 
+               paste(missing, collapse = ", ")))
   }
   matches <- match(new_names, names(.df))
   names(.df)[matches] <- names(new_names)
@@ -329,7 +338,10 @@ get_tokens <- function(x,unlist=FALSE) {
 
 grepn <- function(x,pat,warn=FALSE) {
   if(is.null(names(x))) {
-    if(warn) warning("grepn: pattern was specified, but names are NULL.", call.=FALSE)
+    if(warn) {
+      warning("grepn: pattern was specified, but names are NULL.", 
+              call.=FALSE)
+    }
     return(x)
   }
   if(pat=="*") return(x)
@@ -434,13 +446,16 @@ get_option <- function(what,opt,default=FALSE) {
   }
 }
 
-has_name <- function(a,b) {
-  is.element(a,names(b))
+has_name <- function(name,object) {
+  is.element(name,names(object))
+}
+
+has_ID <- function(object) {
+  is.element("ID", names(object)) 
 }
 
 file_exists <- function(x) {
   file.exists(x)
-  #file.access(x)==0
 }
 
 file_writeable <- function(x) {
@@ -474,14 +489,6 @@ tparse <- function(x,...) parse(text=x,...)
 
 mt_fun <- function(){}
 
-is.covset <- function(x) {
-  class(x)[1] =="covset" 
-}
-
-require_covset <- function() {
-  stop("covset features are not available in this version of mrgsolve.") 
-}
-
 call_system <- function(args) {
   suppressWarnings(do.call(system,args))
 }
@@ -492,7 +499,7 @@ build_error <- function(args,compfile) {
     args$show.output.on.console <- FALSE 
     args$intern <- TRUE
     err <- call_system(args)
-
+    
     errors <- grepl(paste0("^",compfile),err)
     
     for(i in seq_along(errors)) {
@@ -512,6 +519,52 @@ na2zero <- function(x) {
   x
 }
 
-# covset <- function(...) {
-#   dmutate::covset(...)
-# }
+sanitize_capture <- function(x) {
+  for(i in seq_along(x)) {
+    x[i] <- gsub("\\[|\\(", "_", x[i])
+    x[i] <- gsub("\\]|\\)", "",  x[i])
+  }
+  x
+}
+
+# from metrumrg package
+locf <- function(x){
+  good <- !is.na(x)
+  positions <- seq(length(x))
+  good.positions <- good * positions
+  last.good.position <- cummax(good.positions)
+  last.good.position[last.good.position==0] <- NA
+  x[last.good.position]
+}
+forbak <- function(x)nocb(locf(x))
+bakfor <- function(x)locf(nocb(x))
+nocb <- function(x)rev(locf(rev(x)))
+
+locf_data_frame <- function(x) {
+  mutate_all(x, .funs = funs__("locf"))
+}
+
+locf_ev <- function(x) {
+  if(!is.ev(x)) {
+    stop("x is not an event object") 
+  }
+  x@data <- mutate_all(x@data, funs__("locf"))
+  x
+}
+
+
+arrange__ <- function(df, .dots) {
+  arrange(df, `!!!`(syms(.dots)))
+}
+select__ <- function(df, .dots) {
+  select(df, `!!!`(syms(.dots)))
+}
+group_by__ <- function(df,.dots, add = FALSE) {
+  group_by(df, `!!!`(syms(.dots)), add = add)
+}
+funs__ <- function(...) {
+  dplyr::funs(`!!!`(syms(...)))  
+}
+distinct__ <- function(df, .dots, .keep_all = FALSE) {
+  dplyr::distinct(df, `!!!`(syms(.dots)), .keep_all = .keep_all)  
+}

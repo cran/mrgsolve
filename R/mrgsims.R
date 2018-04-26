@@ -1,4 +1,4 @@
-# Copyright (C) 2013 - 2017  Metrum Research Group, LLC
+# Copyright (C) 2013 - 2018  Metrum Research Group, LLC
 #
 # This file is part of mrgsolve.
 #
@@ -18,23 +18,34 @@
 
 ##' Methods for working with \code{mrgsims} objects.
 ##'
-##' These methods help the user view simulation output and extract simulated data to work with further.  The methods listed here for the
-##' most part have generics defined by R or other R packages.  See the \code{seealso} section for other methods defined by \code{mrgsolve}
-##' that have their own documentation pages.
+##' These methods help the user view simulation output and extract 
+##' simulated data to work with further.  The methods listed here 
+##' for the most part have generics defined by R or other R packages.  
+##' See the \code{seealso} section for other methods defined 
+##' by \code{mrgsolve} that have their own documentation pages.
 ##'
 ##' @details
-##' Most methods should behave as expected according to other method commonly used in R (e.g. head, tail, as.data.frame, etc ...)
+##' Most methods should behave as expected according to other method 
+##' commonly used in R (e.g. head, tail, as.data.frame, etc ...)
 ##'
 ##' \itemize{
-##'   \item{\code{subset}} coreces simulated output to data.frame and passes to subset.data.frame
-##'   \item{\code{$}} selects a column in the simulated data and returns numeric
-##'   \item{\code{head}} see \code{\link{head.matrix}}; returns simulated data
-##'   \item{\code{tail}} see \code{\link{tail.matrix}}; returns simulated data
-##'   \item{\code{dim}, \code{nrow}, \code{ncol}} returns dimensions, number of rows, and number of columns in simulated data
-##'   \item{\code{as.data.frame}} coreces simulated data to data.frame and returns the data.frame
+##'   \item{\code{subset}} coreces simulated output to data.frame and 
+##'   passes to subset.data.frame
+##'   \item{\code{$}} selects a column in the simulated data and 
+##'   returns numeric
+##'   \item{\code{head}} see \code{\link{head.matrix}}; returns 
+##'   simulated data
+##'   \item{\code{tail}} see \code{\link{tail.matrix}}; returns 
+##'   simulated data
+##'   \item{\code{dim}, \code{nrow}, \code{ncol}} returns dimensions, 
+##'   number of rows, and number of columns in simulated data
+##'   \item{\code{as.data.frame}} coreces simulated data to data.frame 
+##'   and returns the data.frame
 ##'   \item{\code{as.matrix}} returns matrix of simulated data
-##'   \item{\code{as.tbl}} coreces simulated to \code{tbl_df}; requires \code{dplyr}
-##'   \item{\code{summary}} coreces simulated data to data.frame and passes to \code{\link{summary.data.frame}}
+##'   \item{\code{as.tbl}} coreces simulated to \code{tbl_df}; 
+##'   requires \code{dplyr}
+##'   \item{\code{summary}} coreces simulated data to data.frame 
+##'   and passes to \code{\link{summary.data.frame}}
 ##'   \item{\code{plot}} plots simulated data; see \code{\link{plot_mrgsims}}
 ##' }
 ##' @param x mrgsims object
@@ -88,21 +99,23 @@ variables <- function(x) {
 ##' @rdname mrgsims
 ##' @export
 setMethod("$", "mrgsims", function(x,name) {
-  if(!is.element(name, colnames(x@data))) stop("Couldn't find column ", name, " in simulated data")
+  if(!is.element(name, colnames(x@data))) {
+    stop("Couldn't find column ", name, " in simulated data")
+  }
   return(x@data[,name])
 })
 
 ##' @rdname mrgsims
 ##' @export
-setMethod("tail", "mrgsims",function(x,...) {
+setMethod("tail", "mrgsims", function(x,...) {
   cat("Model: ", model(mod(x)), "\n")
   return(tail(x@data,...))
 })
 
 ##' @rdname mrgsims
 ##' @export
-setMethod("head", "mrgsims",function(x,...) {
-  cat("Model: ", model(mod(x)), "\n")
+setMethod("head", "mrgsims", function(x,...) {
+  #cat("Model: ", model(mod(x)), "\n")
   return(head(x@data,...))
 })
 
@@ -118,7 +131,7 @@ setMethod("names", "mrgsims", function(x) {
   return(colnames(x@data))
 })
 
-##' Methods for handling output with dplyr verbs.
+##' Methods for handling output with dplyr verbs
 ##' 
 ##' @rdname mrgsims_dplyr
 ##' @name mrgsims_dplyr
@@ -128,70 +141,96 @@ NULL
 ##' @param x mrgsims object
 ##' @param .dots passed to various \code{dplyr} functions
 ##' @param .data passed to various \code{dplyr} functions
-##' @param add passed to \code{dplyr::group_by_}
-##' @param .keep_all passed to \code{dplyr::distinct_}
+##' @param add passed to \code{dplyr::group_by}
+##' @param .keep_all passed to \code{dplyr::distinct}
 ##' @param funs passed to \code{dplyr::summarise_each}
 ##' @param ... passed to other methods
 ##' @rdname mrgsims_dplyr
 ##' @export
 as.tbl.mrgsims <- function(x,...) {
-  dplyr::as.tbl(as.data.frame(x))
+  as.tbl(as.data.frame(x))
 }
 
 ##' @rdname mrgsims_dplyr
 ##' @export
-filter_.mrgsims <- function(.data,...,.dots) {
-    dplyr::filter_(as_data_frame.mrgsims(.data),...,.dots=.dots)
+pull.mrgsims <- function(.data, ...) {
+  dplyr::pull(as_data_frame.mrgsims(.data), ...)
 }
 
 ##' @rdname mrgsims_dplyr
 ##' @export
-group_by_.mrgsims <- function(.data,...,.dots,add=FALSE) {
-    dplyr::group_by_(as_data_frame.mrgsims(.data),...,.dots=.dots)
-}
-##' @rdname mrgsims_dplyr
-##' @export
-distinct_.mrgsims <- function(.data,...,.dots,.keep_all=FALSE) {
-    dplyr::distinct_(as_data_frame.mrgsims(.data),...,.dots=.dots,.keep_all=.keep_all)
+filter_.mrgsims <- function(.data,...) {
+  dplyr::filter_(as_data_frame.mrgsims(.data),...)
 }
 
 ##' @rdname mrgsims_dplyr
 ##' @export
-mutate_.mrgsims <- function(.data,...,.dots) {
-    dplyr::mutate_(as_data_frame.mrgsims(.data),...,.dots=.dots)
+filter_sims <- function(.data, ... ) {
+  .data@data <- dplyr::filter(.data@data, ...)
+  .data
 }
+
+##' @rdname mrgsims_dplyr
+##' @export
+group_by.mrgsims <- function(.data,...,add=FALSE) {
+  dplyr::group_by(as_data_frame.mrgsims(.data),...,add = add)
+}
+
+##' @rdname mrgsims_dplyr
+##' @export
+distinct.mrgsims <- function(.data,...,.keep_all=FALSE) {
+  dplyr::distinct(as_data_frame.mrgsims(.data),...,
+                  .keep_all=.keep_all)
+}
+
+##' @rdname mrgsims_dplyr
+##' @export
+mutate.mrgsims <- function(.data,...) {
+  dplyr::mutate(as_data_frame.mrgsims(.data),...)
+}
+
+##' @rdname mrgsims_dplyr
+##' @export
+mutate_sims <- function(.data, ...) {
+  .data@data <- dplyr::mutate(.data@data, ...)
+  .data
+}
+
 ##' @rdname mrgsims_dplyr
 ##' @export
 summarise.each <- function(.data,funs,...) {
-    dplyr::summarise_each(as_data_frame.mrgsims(.data),funs,...)
-}
-##' @rdname mrgsims_dplyr
-##' @export
-summarise_.mrgsims <- function(.data,...,.dots) {
-    dplyr::summarise_(as_data_frame.mrgsims(.data),...,.dots=.dots)
-}
-##' @rdname mrgsims_dplyr
-##' @export
-do_.mrgsims <- function(.data,...,.dots) {
-    dplyr::do_(as_data_frame.mrgsims(.data),...,.dots=.dots)
-}
-##' @rdname mrgsims_dplyr
-##' @export
-select_.mrgsims <- function(.data,...,.dots) {
-    dplyr::select_(as_data_frame.mrgsims(.data),...,.dots=.dots)
+  dplyr::summarise_each(as_data_frame.mrgsims(.data),funs,...)
 }
 
 ##' @rdname mrgsims_dplyr
 ##' @export
-slice_.mrgsims <- function(.data,...) {
-  dplyr::slice_(as_data_frame.mrgsims(.data),...)
+summarise.mrgsims <- function(.data,...) {
+  dplyr::summarise(as_data_frame.mrgsims(.data),...)
+}
+
+##' @rdname mrgsims_dplyr
+##' @export
+do.mrgsims <- function(.data,...,.dots) {
+  dplyr::do(as_data_frame.mrgsims(.data),...)
+}
+
+##' @rdname mrgsims_dplyr
+##' @export
+select.mrgsims <- function(.data,...) {
+  dplyr::select(as_data_frame.mrgsims(.data),...)
+}
+
+##' @rdname mrgsims_dplyr
+##' @export
+slice.mrgsims <- function(.data,...) {
+  dplyr::slice(as_data_frame.mrgsims(.data),...)
 }
 
 ##' @rdname mrgsims_dplyr
 ##' @param .data_ mrgsims object
 ##' @export
 as_data_frame.mrgsims <- function(.data_,...) {
-  tibble::as_data_frame(as.data.frame(.data_),...)
+  as_data_frame(as.data.frame(.data_),...)
 }
 
 ##' @rdname mrgsims
@@ -205,7 +244,9 @@ setMethod("as.data.frame", "mrgsims", function(x,row.names=NULL, optional=FALSE,
 ##' @export
 ##' @rdname mrgsims
 ##' @export
-setMethod("as.matrix", "mrgsims", function(x,...) return(as.matrix(x@data)))
+setMethod("as.matrix", "mrgsims", function(x,...) {
+  return(as.matrix(x@data))
+})
 
 ##' @rdname mrgsims
 ##' @export
@@ -227,7 +268,7 @@ setMethod("show", "mrgsims", function(object) {
   n <- min(8,nrow(object@data))
   top <- data.matrix(object@data[seq_len(n),,drop=FALSE],rownames.force=FALSE)
   tcol <- timename(object@data)
-  cat("Model: ", basename(cfile(mod(object))), "\n")
+  cat("Model: ", model(mod(object)), "\n")
   cat("Dim:   ", dim(object)[1], "x", dim(object)[2], "\n")
   cat("Time:  ", paste(range(object@data[,tcol]), collapse=" to "), "\n")
   cat("ID:    ", length(unique(object@data[,"ID"])), "\n")
@@ -235,8 +276,7 @@ setMethod("show", "mrgsims", function(object) {
 })
 
 
-
-##' Generate a quick plot of simulated data.
+##' Generate a quick plot of simulated data
 ##'
 ##' @name plot_mrgsims
 ##' 
@@ -255,8 +295,6 @@ setMethod("show", "mrgsims", function(object) {
 ##' @rdname plot_mrgsims
 ##' 
 ##' @aliases plot,mrgsims,missing-method
-##' 
-##' @details Values for \code{as} argument: ;  \code{raw}: raw simulated output;
 ##' 
 ##' @examples
 ##'
@@ -285,10 +323,12 @@ setMethod("plot", c("mrgsims","missing"), function(x,limit=16,...) {
   
   if(length(ynames)>limit) {
     ynames <- ynames[1:limit]
-    if(missing(limit)) warning(paste0("NOTE: show first ",
-                                      limit,
-                                      " variables.  Check limit argument."
-    ), call.=FALSE)
+    if(missing(limit)) {
+      warning(paste0("NOTE: show first ",
+                     limit,
+                     " variables.  Check limit argument."
+      ), call.=FALSE)
+    }
   }
   
   tname <- timename(x@data)
@@ -312,8 +352,12 @@ setMethod("plot", c("mrgsims","formula"), function(x,y,
   
   data <- as.data.frame(subset(x,...))
   
+  if(length(y)==2) y[[3]] <- as.symbol(".")
+  
   if(!has_name("time", data)) {
-    if(!has_name("TIME", data)) stop("Couldn't find time or TIME column.",call.=FALSE)
+    if(!has_name("TIME", data)) {
+      stop("Couldn't find time or TIME column.",call.=FALSE)
+    }
     # Must mutate here; not rename
     data <- dplyr::mutate(data,time=TIME)
   }
@@ -337,7 +381,43 @@ setMethod("plot", c("mrgsims","formula"), function(x,y,
   ans
 })
 
-##' @rdname events
-##' @export
-setMethod("events", "mrgsims", function(x,...) events(mod(x)))
 
+##' Plot data as an mrgsims object
+##' 
+##' @param .data a data frame
+##' @param ... unquoted column names to plot on y-axis
+##' @param .f a formula to plot
+##' @param .dots extra arguments passed to \code{lattice::xyplot}
+##' 
+##' @details 
+##' This function is only intended for use with data frames that 
+##' were created by modifying an \code{mrgsims} object.
+##' 
+##' @examples
+##'
+##' mod <- mrgsolve:::house() %>% ev(amt = 100)
+##' 
+##' out <- mrgsim(mod) 
+##' out_df <- dplyr::mutate(out, time <= 72)
+##' 
+##' plot(out)
+##' plot_sims(out, CP, RESP)
+##' 
+##' \dontrun{
+##' plot_sims(out, .f = ~ CP + RESP)
+##' plot_sims(out, .f = CP + RESP ~ time)
+##' }
+##' 
+##' @export
+plot_sims <- function(.data, ..., .f = NULL, .dots = list()) {
+  .data <- as.data.frame(.data)
+  vars <- quos(...)
+  vars <- select_vars(names(.data), `!!!`(vars))
+  .dots$x <- new("mrgsims", data = .data, outnames = vars)
+  if(rlang::is_formula(.f)) {
+    if(length(.f)==2) .f[[3]] <- as.symbol(".")
+    .dots$y <- .f
+    return(do.call(plot, .dots))
+  }
+  return(do.call(plot, .dots))
+}

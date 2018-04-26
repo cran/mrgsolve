@@ -1,4 +1,4 @@
-# Copyright (C) 2013 - 2017  Metrum Research Group, LLC
+# Copyright (C) 2013 - 2018  Metrum Research Group, LLC
 #
 # This file is part of mrgsolve.
 #
@@ -15,24 +15,21 @@
 # You should have received a copy of the GNU General Public License
 # along with mrgsolve.  If not, see <http://www.gnu.org/licenses/>.
 
-##' Select and modify a data set for simulation.
+##' Select and modify a data set for simulation
 ##'
 ##'
-##' @export
 ##' @param x model object
 ##' @param data data set
-##' @param subset passed to \code{dplyr::filter_}; retain only certain 
-##' rows in the data set
-##' @param select passed to \code{dplyr::select_}; retain only certain 
-##' columns in the data set
+##' @param .subset an unquoted expression passed to 
+##' \code{dplyr::filter}; retain only certain rows in the data set
+##' @param .select passed to \code{dplyr::select}; retain only certain 
+##' columns in the data set; this should be the result of a call to 
+##' \code{dplyr::vars()}
 ##' @param object character name of an object existing in \code{$ENV} 
 ##' to use for the data set
 ##' @param need passed to \code{\link{inventory}}
 ##' @param ... passed along
-setGeneric("data_set", function(x,data,...) standardGeneric("data_set"))
-
-##' @rdname data_set
-##'
+##' 
 ##' @details
 ##' Input data sets are \code{R} data frames that can include columns 
 ##' with any valid name, however columns with selected names are 
@@ -87,47 +84,67 @@ setGeneric("data_set", function(x,data,...) standardGeneric("data_set"))
 ##' mod %>% mrgsim(data=extran1)
 ##' 
 ##' @export
-setMethod("data_set",c("mrgmod", "data.frame"), function(x,data,subset=TRUE,select=TRUE,object=NULL,need=NULL,...) {
+setGeneric("data_set", function(x,data,...) {
+  standardGeneric("data_set")
+})
+
+
+##' @rdname data_set
+##' @export
+setMethod("data_set",c("mrgmod", "data.frame"), function(x,data,.subset=TRUE,.select=TRUE,object=NULL,need=NULL,...) {
   
   if(is.character(need)) {
     suppressMessages(inventory(x,data,need))
   }
-  if(exists("data", x@args)) stop("data already has been set.")
-  if(!missing(subset)) data <- dplyr::filter_(data,.dots=lazy(subset))
-  if(!missing(select)) data <- dplyr::select_(data,.dots=lazy(select))
+  if(!missing(.subset)) {
+    data <- dplyr::filter(data,`!!!`(enquo(.subset)))
+  }
+  if(!missing(.select)) {
+    data <- dplyr::select(data,`!!!`(.select))
+  }
   if(nrow(data) ==0) {
     stop("Zero rows in data after filtering.", call.=FALSE)
   }
   if(is.character(object)) {
     data <- data_hooks(data,object,x@envir,param(x),...) 
   }
-  data <- valid_data_set(m=x,x=as.data.frame(data),...)
-  x@args <- merge(x@args,list(data=data), open=TRUE)
+  x@args[["data"]] <- data
   return(x)
 })
 
-##' @export
 ##' @rdname data_set
+##' @export
 setMethod("data_set",c("mrgmod", "ANY"), function(x,data,...) {
   return(data_set(x,as.data.frame(data),...))
 })
 
-##' @export
 ##' @rdname data_set
+##' @export
+setMethod("data_set", c("mrgmod", "ev"), function(x,data,...) {
+  return(data_set(x,As_data_set(data),...))
+})
+
+##' @rdname data_set
+##' @export
 setMethod("data_set", c("mrgmod", "missing"), function(x,object,...) {
   object <- data_hooks(object=object,envir=x@envir,param=param(x),...)
   return(data_set(x,as.data.frame(object),...))
 })
 
 
-##' Convert select upper case column names to lower case to conform to mrgsolve data expectations.
+##' Convert select upper case column names to lower case to conform 
+##' to mrgsolve data expectations
 ##'
 ##' @param data an nmtran-like data frame
-##' @return A data.frame with renamed columns.
+##' 
+##' @return A data.frame with renamed columns
 ##'
 ##' @details
-##' Columns that will be renamed with lower case versions: \code{AMT}, \code{II}, \code{SS}, \code{CMT}, \code{ADDL}, \code{RATE}, \code{EVID}, \code{TIME}.  If a lower case version
-##' of these names exist in the data set, the column will not be renamed.
+##' Columns that will be renamed with lower case versions: \code{AMT}, 
+##' \code{II}, \code{SS}, \code{CMT}, \code{ADDL}, \code{RATE}, \code{EVID}, 
+##' \code{TIME}.  If a lower case version of these names exist in the data 
+##' set, the column will not be renamed.
+##' 
 ##' @export
 lctran <- function(data) {
   n <- names(data)
@@ -141,7 +158,7 @@ lctran <- function(data) {
 
 data_hooks <- function(data,object,envir,param=list(),...) {
   param <- as.list(param)
-  envir <- merge(as.list(param),as.list(envir),open=TRUE)
+  envir <- combine_list(as.list(param),as.list(envir))
   objects <- cvec_cs(object)
   args <- list(...)
   if(missing(data)) {
@@ -156,4 +173,251 @@ data_hooks <- function(data,object,envir,param=list(),...) {
     data <- do.call(f,args,envir=as.environment(envir))
   }
   return(data)
+}
+
+
+##' Create a simulatinon data set from ev objects
+##'
+##'
+##' @param x ev objects
+##' @param ... more ev objects
+##' 
+##' @details
+##' The goal is to take a series of event objects and combine them 
+##' into a single data set that can be passed to \code{\link{data_set}}.  
+##' Each event object is added to the data frame as an \code{ID} 
+##' or set of \code{ID}s  that are distinct from the  \code{ID}s 
+##' in the other event objects. Note that including \code{ID} 
+##' argument to the \code{\link{ev}} call where \code{length(ID)} 
+##' is greater than one will render that set of 
+##' events for all of \code{ID}s that are requested.
+##'
+##' To get a data frame with one row (event) per \code{ID} 
+##' look at \code{\link{expand.ev}}.
+##' 
+##' @return a data frame suitable for passing into \code{\link{data_set}}
+##'
+##' @examples
+##'
+##' as_data_set(ev(amt=c(100,200), cmt=1, ID=1:3),
+##'             ev(amt=300, time=24, ID=1:2),
+##'             ev(amt=1000, ii=8, addl=10, ID=1:3))
+##'
+##' # Instead of this, use expand.ev
+##' as_data_set(ev(amt=100), ev(amt=200),ev(amt=300))
+##'
+##' @rdname as_data_set
+##' @export
+setGeneric("as_data_set", function(x,...) standardGeneric("as_data_set"))
+
+##' @rdname as_data_set
+setMethod("as_data_set","ev", function(x,...) {
+  other_ev <- list(...)
+  if(length(other_ev)==0) {
+    return(check_ev(x)) 
+  }
+  do.call(collect_ev,c(list(x),other_ev))
+})
+
+##' @rdname as_data_set
+setMethod("as_data_set","data.frame", function(x,...) {
+  as_data_set(as.ev(x),...)
+})
+
+##' Replicate a list of events into a data set
+##' 
+##' @param l list of event objects
+##' @param idata an idata set (one ID per row)
+##' @param evgroup the character name of the column in \code{idata} 
+##' that specifies event object to implement
+##' @param join if \code{TRUE}, join \code{idata} to the data set 
+##' before returning.
+##' 
+##' 
+##' @examples
+##' ev1 <- ev(amt=100)
+##' ev2 <- ev(amt=300, rate=100, ii=12, addl=10)
+##' 
+##' idata <- data.frame(ID=1:10) 
+##' idata$arm <- 1+(idata$ID %%2)
+##' 
+##' ev_assign(list(ev1,ev2), idata, "arm", join=TRUE)
+##' 
+##' 
+##' 
+##' @details
+##' \code{ev_assign} connects events in a list passed in as the
+##' \code{l} argument to values in the data set identified in the 
+##' \code{evgroup} argument.  For making assignments, the unique 
+##' values in the \code{evgroup} column are first sorted so that 
+##' the first sorted unique value in \code{evgroup} is assigned 
+##' to the first event in \code{l}, the second sorted value in 
+##' \code{evgroup} column is assigned to the second event in 
+##' \code{l}, and so on.  This is a change from previous behavior, 
+##' which did not sort the unique values in \code{evgroup} prior to 
+##' making the assignments. 
+##' 
+##' 
+##' @export
+ev_assign <- function(l,idata,evgroup,join=FALSE) {
+  
+  idata <- as.data.frame(idata)
+  
+  if(!("ID" %in% colnames(idata))) {
+    stop("ID column missing from idata set.", call.=FALSE) 
+  }
+  
+  cols <- c("ii", "addl", "evid", "rate","ss","cmt", "time", "amt")
+  
+  zeros <- matrix(rep(0,length(cols)),nrow=1,
+                  dimnames=list(NULL,cols))
+  
+  l <- lapply(l,as.matrix)
+  
+  ucols <- unique(unlist(sapply(l,colnames,simplify=FALSE,USE.NAMES=FALSE)))
+  
+  if(!all(ucols %in% cols)) {
+    invalid <- setdiff(ucols,cols)
+    invalid <- paste(invalid,collapse=", ")
+    stop("invalid event data items found: ", invalid, call.=FALSE)
+  }
+  
+  for(i in seq_along(l)) {
+    miss <- setdiff(ucols,colnames(l[[i]]))
+    if(length(miss) > 0) {
+      l[[i]] <- cbind(l[[i]],zeros[rep(1,nrow(l[[i]])),miss,drop=FALSE])
+    }
+  }
+  
+  l <- lapply(l,function(x) {
+    x[,colnames(l[[1]]),drop=FALSE]
+  })
+  
+  evgroup <- idata[,evgroup]
+  uevgroup <- sort(unique(evgroup))
+  evgroup <- match(evgroup,uevgroup)
+  
+  if(length(l) != length(uevgroup)) {
+    stop("For this idata set, please provide exactly ", 
+         length(uevgroup), 
+         " event objects.",call.=FALSE)
+  }
+  
+  x <- do.call(rbind,l[evgroup]) 
+  dimnames(x) <- list(NULL,colnames(x))
+  x <- as.data.frame(x)
+  
+  n <- (sapply(l,nrow))[evgroup]
+  ID <- rep(idata[["ID"]],times=n)
+  x[["ID"]] <- ID
+  
+  if(join) {
+    nu <- sapply(idata,is.numeric)
+    x <- dplyr::left_join(x,idata[,nu,drop=FALSE],by="ID") 
+  }
+  
+  return(x)
+  
+}
+
+##' @param ... used to pass arguments from \code{assign_ev}
+##' to \code{ev_assign}
+##' @rdname ev_assign
+##' @export
+assign_ev <- function(...) ev_assign(...)
+
+##' Schedule dosing events on days of the week
+##' 
+##' This function lets you schedule doses on specific 
+##' days of the week, allowing you to create dosing 
+##' regimens on Monday/Wednesday/Friday, or Tuesday/Thursday,
+##' or every other day (however you want to define that) etc.
+##' 
+##' @param ev an event object
+##' @param days comma- or space-separated character string of valid days of the
+##' the week (see details)
+##' @param addl additional doses to administer
+##' @param ii inter-dose interval; intended use is to keep this at the 
+##' default value
+##' @param unit time unit; the function can only currently handle hours or days
+##' @param ... event objects named by one the valid days of the week (see details)
+##' 
+##' @details
+##' Valid names of the week are: 
+##' 
+##' \itemize{
+##' \item \code{m} for Monday
+##' \item \code{t} for Tuesday
+##' \item \code{w} for Wednesday
+##' \item \code{th} for Thursday
+##' \item \code{f} for Friday
+##' \item \code{sa} for Saturday
+##' \item \code{s} for Sunday
+##' }
+##' 
+##' The whole purpose of this function is to schedule doses on specific
+##' days of the week, in a repeating weekly schedule.  Please do use caution 
+##' when changing \code{ii} from it's default value.
+##' 
+##' @examples
+##' 
+##' # Monday, Wednesday, Friday x 4 weeks
+##' ev_days(ev(amt=100), days="m,w,f", addl=3)
+##' 
+##' # 50 mg Tuesdays, 100 mg Thursdays x 6 months
+##' ev_days(t=ev(amt=50), th=ev(amt=100), addl=23)
+##' 
+##' 
+##' @export
+ev_days <- function(ev=NULL,days="",addl=0,ii=168,unit=c("hours", "days"),...) {
+  
+  unit <- match.arg(unit)
+  
+  max.time <- 24
+  start <- c(m=0,t=24,w=48,th=72,f=96,sa=120,s=144)
+  
+  if(unit=="days") {
+    max.time <- 1
+    start <- c(m=0,t=1,w=2,th=3,f=4,sa=5,s=6)
+    if(missing(ii)) ii <- 7
+  }
+  if(!is.null(ev)) {
+    if(missing(days)) {
+      stop("days argument must be supplied with ev argument.",
+           call.=FALSE) 
+    }
+    days <- cvec_cs(days)
+    if(!all(days %in% names(start))) {
+      valid <- paste(names(start),collapse=",")
+      err <- paste0("invalid day; valid days are: ", valid)
+      stop(err,call.=FALSE)
+    }
+    evs <- lapply(days,function(i) {
+      return(ev)
+    })
+    names(evs) <- days
+  } else {
+    args <- list(...)
+    evs <- args[names(args) %in% names(start)]
+    days <- names(evs)
+  }
+  if(length(evs)==0) {
+    stop("no events were found.", call.=FALSE) 
+  }
+  evs <- lapply(evs,as.data.frame)
+  for(d in days) {
+    if(any(evs[[d]]$time > max.time)) {
+      warning("not expecting time values greater than 24 hours or 1 day.",
+              call.=FALSE)  
+    }
+    evs[[d]]$time <- evs[[d]]$time + start[d] 
+  }
+  evs <- bind_rows(evs)
+  evs$ii <- ii
+  if(addl > 0) evs$addl <- addl
+  if("ID" %in% names(evs)) {
+    return(as.data.frame(arrange__(evs,.dots = c("ID","time"))))
+  } else {
+    return(as.data.frame(arrange__(evs,.dots = c("time"))))
+  }
 }

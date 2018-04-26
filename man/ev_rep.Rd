@@ -4,21 +4,23 @@
 \alias{ev_rep}
 \title{Replicate an event object}
 \usage{
-ev_rep(x, id = 1, n = NULL, wait = 0, as.ev = FALSE)
+ev_rep(x, ID = 1, n = NULL, wait = 0, as.ev = FALSE, id = NULL)
 }
 \arguments{
 \item{x}{event object}
 
-\item{id}{numeric vector if IDs}
+\item{ID}{numeric vector if IDs}
 
 \item{n}{passed to \code{\link{ev_repeat}}}
 
 \item{wait}{passed to \code{\link{ev_repeat}}}
 
 \item{as.ev}{if \code{TRUE} an event object is returned}
+
+\item{id}{deprecated; use \code{ID} instead}
 }
 \value{
-A single event object or event object as 
+A single data.frame or event object as 
 determined by the value of \code{as.ev}.
 }
 \description{

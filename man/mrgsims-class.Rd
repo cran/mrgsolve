@@ -10,11 +10,13 @@ S4 class for mrgsolve simulation output.
 \section{Slots}{
 
 \describe{
-\item{\code{request}}{character vector of compartments requested in simulated output}
+\item{\code{request}}{character vector of compartments requested in simulated 
+output}
 
-\item{\code{outnames}}{character vector of column names in simulated output coming from table step}
+\item{\code{outnames}}{character vector of column names in simulated output 
+coming from table step}
 
-\item{\code{data}}{matrix of simulated data}
+\item{\code{data}}{data.frame of simulated data}
 
 \item{\code{mod}}{the mrgmod model object}
 }}

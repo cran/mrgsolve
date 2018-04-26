@@ -36,7 +36,6 @@ struct databox {
   const double time;
   const int evid;
   unsigned short int  SYSTEMOFF;
-  dvec mtime;
   const double id;
   const double amt;
   const short int cmt;
@@ -49,6 +48,7 @@ struct databox {
   void stop() {SYSTEMOFF=9;}
   void stop_id() {SYSTEMOFF=2;}
   void stop_id_cf(){SYSTEMOFF=1;}
+  std::vector<shuttle> recs;
 };
 
 

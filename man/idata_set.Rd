@@ -6,12 +6,12 @@
 \alias{idata_set,mrgmod,data.frame-method}
 \alias{idata_set,mrgmod,ANY-method}
 \alias{idata_set,mrgmod,missing-method}
-\title{Select and modify a idata set for simulation.}
+\title{Select and modify a idata set for simulation}
 \usage{
 idata_set(x, data, ...)
 
-\S4method{idata_set}{mrgmod,data.frame}(x, data, subset = TRUE,
-  select = TRUE, object = NULL, need = NULL, ...)
+\S4method{idata_set}{mrgmod,data.frame}(x, data, .subset = TRUE,
+  .select = TRUE, object = NULL, need = NULL, ...)
 
 \S4method{idata_set}{mrgmod,ANY}(x, data, ...)
 
@@ -24,16 +24,20 @@ idata_set(x, data, ...)
 
 \item{...}{passed along}
 
-\item{subset}{passed to \code{dplyr::filter_}}
+\item{.subset}{an unquoted expression passed to 
+\code{dplyr::filter}; retain only certain rows in the data set}
 
-\item{select}{passed to \code{dplyr::select_}}
+\item{.select}{passed to \code{dplyr::select}; retain only certain 
+columns in the data set; this should be the result of a call to 
+\code{dplyr::vars()}}
 
-\item{object}{character name of an object existing in \code{$ENV} to use for the data set}
+\item{object}{character name of an object existing in \code{$ENV} 
+to use for the data set}
 
 \item{need}{passed to \code{\link{inventory}}}
 }
 \description{
-Select and modify a idata set for simulation.
+Select and modify a idata set for simulation
 }
 \details{
 The \code{idata_set} is a data.frame that specifies individual-level 

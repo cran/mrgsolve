@@ -1,4 +1,4 @@
-# Copyright (C) 2013 - 2017  Metrum Research Group, LLC
+# Copyright (C) 2013 - 2018  Metrum Research Group, LLC
 #
 # This file is part of mrgsolve.
 #
@@ -16,16 +16,18 @@
 # along with mrgsolve.  If not, see <http://www.gnu.org/licenses/>.
 
 
-##' Manipulate OMEGA matrices.
+##' Manipulate OMEGA matrices
 ##'
-##' The primary function is \code{omat} that can be used to both get the \code{$OMEGA} matrices
-##' out of a model object and to update \code{$OMEGA} matrices in a model object.
+##' The primary function is \code{omat} that can be used to both get the 
+##' \code{$OMEGA} matrices out of a model object and to update \code{$OMEGA} 
+##' matrices in a model object.
 ##'
 ##' @param .x a matrix, list of matrices or \code{matlist} object
 ##' @param x  \code{matlist} object
-##' @param labels character vector of names for \code{$OMEGA} elements; must be equal 
-##' to number of rows/columns in the matrix
+##' @param labels character vector of names for \code{$OMEGA} elements; must 
+##' be equal to number of rows/columns in the matrix
 ##' @param open passed to \code{\link{merge.list}}
+##' @param make logical; if TRUE, matrix list is rendered into a single matrix
 ##' @param ... passed to other functions, including \code{\link{modMATRIX}}
 ##' @export
 ##' @name omega
@@ -98,7 +100,6 @@ setMethod("omat", "omegalist", function(.x,...) {return(.x)})
 
 ##' @export
 ##' @rdname omega
-##' @param make logical; if TRUE, matrix list is rendered into a single matrix
 setMethod("omat", "mrgmod", function(.x,...,make=FALSE,open=FALSE) {
   
   args <- list(...)
@@ -115,7 +116,7 @@ setMethod("omat", "mrgsims", function(.x,make=FALSE,...) {
   as.matrix(mod(.x)@omega)
 })
 
-##' Manipulate SIGMA matrices.
+##' Manipulate SIGMA matrices
 ##'
 ##' The primary function is \code{smat} that can be used to both get the 
 ##' \code{$SIGMA} matrices out of a model object and to update \code{$SIGMA} 
@@ -125,6 +126,7 @@ setMethod("omat", "mrgsims", function(.x,make=FALSE,...) {
 ##' @param x  \code{matlist} object
 ##' @param labels character vector of names for \code{$SIGMA} elements; must be equal 
 ##' to number of rows/columns in the matrix
+##' @param make logical; if TRUE, matrix list is rendered into a single matrix
 ##' @param ... passed to other functions, including \code{\link{modMATRIX}}
 ##' @param open passed to \code{\link{merge.list}}
 ##' 
@@ -155,7 +157,7 @@ setGeneric("smat",function(.x,...) standardGeneric("smat"))
 ##' @rdname sigma
 setMethod("smat", "missing", function(...) {
   x <- list(...)
-  if(length(x)==0) return(create_matlist(class="omegalist"))
+  if(length(x)==0) return(create_matlist(class="sigmalist"))
   smat(lapply(x,as.matrix))
 })
 
@@ -177,7 +179,6 @@ setMethod("smat", "sigmalist", function(.x,...) return(.x))
 
 ##' @export
 ##' @rdname sigma
-##' @param make logical; if TRUE, matrix list is rendered into a single matrix
 setMethod("smat", "mrgmod", function(.x,...,make=FALSE,open=FALSE) {
   args <- list(...)
   if(length(args)>0) return(update(.x, sigma=smat(...), open=open))
@@ -194,12 +195,11 @@ setMethod("smat", "NULL", function(.x,...) {
 ##' @export
 ##' @rdname sigma
 setMethod("smat", "mrgsims", function(.x,make=FALSE,...) {
-  
   if(!make) return(mod(.x)@sigma)
   as.matrix(mod(.x)@sigma)
 })
 
-##' Methods for working with matrix-list objects.
+##' Methods for working with matrix-list objects
 ##'
 ##' @param .x a matlist object
 ##' @param x a matlist object
@@ -236,12 +236,10 @@ setGeneric("drop.re", function(.x,...) standardGeneric("drop.re"))
 ##' @export
 ##' @rdname matlist
 setMethod("drop.re", "mrgmod", function(.x,...) {
-  
   what <- as.character(eval(substitute(alist(...))))
   if(length(what)==0) what <- c("omega", "sigma")
   if(is.element("omega", what)) .x@omega <- new("omegalist")
   if(is.element("sigma", what)) .x@sigma <- new("sigmalist")
-  
   return(.x)
 })
 

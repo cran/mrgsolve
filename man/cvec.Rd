@@ -4,17 +4,14 @@
 \name{cvec}
 \alias{cvec}
 \alias{cvec,character-method}
-\alias{ch}
-\alias{s}
-\title{Create create character vectors.}
+\alias{s_}
+\title{Create create character vectors}
 \usage{
 cvec(x, ...)
 
 \S4method{cvec}{character}(x)
 
-ch(...)
-
-s(...)
+s_(...)
 }
 \arguments{
 \item{x}{comma-separated quoted string (for \code{cvec})}
@@ -22,12 +19,11 @@ s(...)
 \item{...}{unquoted strings (for \code{ch})}
 }
 \description{
-Create create character vectors.
+Create create character vectors
 }
 \examples{
 
 cvec("A,B,C")
-ch(A,B,C)
-s(A,B,C)
+s_(A,B,C)
 
 }
