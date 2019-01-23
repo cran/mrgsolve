@@ -1,4 +1,4 @@
-# Copyright (C) 2013 - 2018  Metrum Research Group, LLC
+# Copyright (C) 2013 - 2019  Metrum Research Group, LLC
 #
 # This file is part of mrgsolve.
 #
@@ -22,23 +22,6 @@ Sys.setenv(R_TESTS="")
 options("mrgsolve_mread_quiet"=TRUE)
 
 context("test-utils")
-
-test_that("columns are renamed", {
-  expect_equal(names(mrgsolve:::rename_cols(Theoph, c("time" = "Time", "dv" = "conc"))),
-               c("Subject", "Wt", "Dose", "time", "dv"))
-})
-
-test_that("columns are renamed and order preserved", {
-  expect_equal(names(mrgsolve:::rename_cols(Theoph, c("dv" = "conc", "time" = "Time"))),
-               c("Subject", "Wt", "Dose", "time", "dv"))
-})
-
-test_that("columns that don't exist throw an error", {
-  expect_error(mrgsolve:::rename_cols(Theoph, c("dv" = "Donc")),
-               "the following columns do not exist in the dataset:  Donc")
-  expect_error(mrgsolve:::rename_cols(Theoph, c("dv" = "Donc", "id" = "subject")),
-               "the following columns do not exist in the dataset:  Donc, subject")
-})
 
 
 a <- list(a = 1, b = 2, c = 3)

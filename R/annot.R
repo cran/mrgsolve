@@ -1,4 +1,4 @@
-# Copyright (C) 2013 - 2018  Metrum Research Group, LLC
+# Copyright (C) 2013 - 2019  Metrum Research Group, LLC
 #
 # This file is part of mrgsolve.
 #
@@ -16,14 +16,15 @@
 # along with mrgsolve.  If not, see <http://www.gnu.org/licenses/>.
 
 render_annot <- function(x,block,...) {
-  x <- dplyr::bind_rows(lapply(x,tibble::as_data_frame))
+  x <- dplyr::bind_rows(lapply(x,tibble::as_tibble))
   x <- dplyr::mutate(x,block=block) 
   x <- x[,unique(c("block", names(x))),drop=FALSE]
   as.data.frame(x)
 }
 
 
-parse_annot <- function(x,noname=FALSE,novalue=FALSE,block='.',name_value=TRUE,context="not given",...) {
+parse_annot <- function(x,noname=FALSE,novalue=FALSE,block='.',name_value=TRUE,
+                        context="not given",...) {
   ## x is a list
   if(is.null(x)) return(NULL)
   x <- x[nchar(x)>0]
@@ -88,14 +89,25 @@ parse_annot_line <- function(x, novalue=FALSE, noname=FALSE,context="not given")
   list(name=a[1],value=a[2],unit=units,options=options,descr=b)
 }
 
-##' Extract model details.
+##' Extract model details
 ##' 
 ##' @param x a model object
-##' @param complete logical; if \code{TRUE}, un-annotated parameters and compartments will be added to the output
-##' @param values logical; if \code{TRUE}, a values column will be added to the output
+##' @param complete logical; if \code{TRUE}, un-annotated parameters and 
+##' compartments will be added to the output
+##' @param values logical; if \code{TRUE}, a values column will be added to 
+##' the output
 ##' @param ... not used
 ##' 
-details <- function(x,complete=FALSE,values=FALSE,...) {
+##' @details
+##' This function is not exported.  You will have to call it 
+##' with \code{mrgsolve:::details()}. 
+##' 
+##' @examples
+##' mod <- mrgsolve:::house()
+##' 
+##' mrgsolve:::details(mod)
+##' 
+details <- function(x,complete=FALSE,values=TRUE,...) {
   
   stopifnot(is.mrgmod(x))
   
@@ -124,15 +136,15 @@ cobble_details <- function(x) {
   
   par <- as.numeric(param(x))
   if(length(par) > 0) {
-    ans[[1]] <- dplyr::data_frame(block="PARAM",name=names(par))  
+    ans[[1]] <- tibble(block="PARAM",name=names(par))  
   }
   fx <- as.numeric(x@fixed)
   if(length(fx)>0) {
-    ans[[3]] <- dplyr::data_frame(block="FIXED", name=names(fx)) 
+    ans[[3]] <- tibble(block="FIXED", name=names(fx)) 
   }
   cmt <- as.numeric(init(x))
   if(length(cmt)>0) {
-    ans[[3]] <- dplyr::data_frame(block="CMT", name=names(cmt)) 
+    ans[[3]] <- tibble(block="CMT", name=names(cmt)) 
   }
   
   ans <- dplyr::bind_rows(ans)
@@ -153,7 +165,7 @@ complete_details <- function(annot,x) {
   if(length(par) > 0) {
     miss <- setdiff(names(par),name)
     if(length(miss) > 0) {
-      par <- dplyr::data_frame(block="PARAM",name=miss,descr='.',unit='.',options='.')
+      par <- tibble(block="PARAM",name=miss,descr='.',unit='.',options='.')
     } else {
       par <- dum 
     }
@@ -163,7 +175,7 @@ complete_details <- function(annot,x) {
   if(length(cmt) > 0) {
     miss <- setdiff(names(cmt),name)
     if(length(miss) > 0) {
-      cmt <- dplyr::data_frame(block="CMT",name=miss,descr='.',unit='.',options='.')
+      cmt <- tibble(block="CMT",name=miss,descr='.',unit='.',options='.')
     } else {
       cmt <- dum 
     }
@@ -173,7 +185,7 @@ complete_details <- function(annot,x) {
   if(length(fx) > 0) {
     miss <- setdiff(names(fx),name)
     if(length(miss) > 0) {
-      fx <- dplyr::data_frame(block="FIXED",name=miss,descr='.',unit='.',options='.')
+      fx <- tibble(block="FIXED",name=miss,descr='.',unit='.',options='.')
     }  else {
       annot <- dplyr::bind_rows(annot,fx) 
     }
@@ -183,7 +195,11 @@ complete_details <- function(annot,x) {
 
 add_detail_values <- function(annot,x) {
   x <- c(as.numeric(allparam(x)),as.numeric(init(x)))
-  x <- dplyr::data_frame(name=names(x),value=x)
+  if(length(x)==0) {
+    annot <- mutate(annot, value = NA_real_)
+    return(annot)
+  }
+  x <- tibble(name=names(x),value=x)
   annot <- dplyr::left_join(annot,x,by="name")
   return(annot)
   

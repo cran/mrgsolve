@@ -1,4 +1,4 @@
-# Copyright (C) 2013 - 2018  Metrum Research Group, LLC
+# Copyright (C) 2013 - 2019  Metrum Research Group, LLC
 #
 # This file is part of mrgsolve.
 #
@@ -17,6 +17,7 @@
 
 ##' @export
 ##' @rdname stime
+##' @keywords internal
 setClass("tgrid", slots=c(start  = "numeric", 
                           end    = "numeric", 
                           delta  = "numeric", 
@@ -51,7 +52,7 @@ setClass("tgrids", slots=c(data="list"))
 ##' one for each unique value found in \code{descol}.
 ##' 
 ##' @examples
-##' idata <- dplyr::data_frame(ID=1:4, end=seq(24,96,24), delta=6,
+##' idata <- tibble::tibble(ID=1:4, end=seq(24,96,24), delta=6,
 ##' add=list(c(122,124,135),c(111), c(99),c(88)))
 ##' 
 ##' idata <- dplyr::mutate(idata, GRP = ID %%2)
@@ -250,10 +251,10 @@ setMethod("*", c("tgrids","numeric"), function(e1,e2) {
   e1
 })
 
-
-##' @export
 ##' @rdname tgrid
 ##' @param object passed to show
+##' @export
+##' @keywords internal
 setMethod("show", "tgrid", function(object) {
   x <- stime(object)
   min <- min(x)

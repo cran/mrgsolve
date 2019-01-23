@@ -32,7 +32,7 @@ value in a compartment can get extremely small; without this
 extra (lower) tolerance, the value can get so low that the number
 can randomly become negative.  However be aware that more precision
 here will result in longer run times. 
-\item \code{rtol} - the reltive solver tolerances; decrease this 
+\item \code{rtol} - the relative solver tolerances; decrease this 
 number when you want a more precise solution.  However be aware 
 that more precision here will result in longer run times.
 }
@@ -85,5 +85,5 @@ C-----------------------------------------------------------------------
 }
 
 \seealso{
-\code{\link{aboutsolver}}, \code{\link{update}}
+\code{\link{aboutsolver}}, \code{\link[mrgsolve]{update}}
 }

@@ -1,4 +1,4 @@
-# Copyright (C) 2013 - 2018  Metrum Research Group, LLC
+# Copyright (C) 2013 - 2019  Metrum Research Group, LLC
 #
 # This file is part of mrgsolve.
 #
@@ -16,7 +16,7 @@
 # along with mrgsolve.  If not, see <http://www.gnu.org/licenses/>.
 
 
-##' Methods for working with \code{mrgsims} objects.
+##' Methods for working with \code{mrgsims} objects
 ##'
 ##' These methods help the user view simulation output and extract 
 ##' simulated data to work with further.  The methods listed here 
@@ -29,8 +29,6 @@
 ##' commonly used in R (e.g. head, tail, as.data.frame, etc ...)
 ##'
 ##' \itemize{
-##'   \item{\code{subset}} coreces simulated output to data.frame and 
-##'   passes to subset.data.frame
 ##'   \item{\code{$}} selects a column in the simulated data and 
 ##'   returns numeric
 ##'   \item{\code{head}} see \code{\link{head.matrix}}; returns 
@@ -39,12 +37,12 @@
 ##'   simulated data
 ##'   \item{\code{dim}, \code{nrow}, \code{ncol}} returns dimensions, 
 ##'   number of rows, and number of columns in simulated data
-##'   \item{\code{as.data.frame}} coreces simulated data to data.frame 
+##'   \item{\code{as.data.frame}} coerces simulated data to data.frame 
 ##'   and returns the data.frame
 ##'   \item{\code{as.matrix}} returns matrix of simulated data
-##'   \item{\code{as.tbl}} coreces simulated to \code{tbl_df}; 
+##'   \item{\code{as.tbl}} coerces simulated to \code{tbl_df}; 
 ##'   requires \code{dplyr}
-##'   \item{\code{summary}} coreces simulated data to data.frame 
+##'   \item{\code{summary}} coerces simulated data to data.frame 
 ##'   and passes to \code{\link{summary.data.frame}}
 ##'   \item{\code{plot}} plots simulated data; see \code{\link{plot_mrgsims}}
 ##' }
@@ -67,7 +65,6 @@
 ##' head(out)
 ##' tail(out)
 ##'
-##' mrgsolve:::mod(out)
 ##'
 ##' dim(out)
 ##' names(out)
@@ -75,7 +72,6 @@
 ##' mat <- as.matrix(out)
 ##' df <- as.data.frame(out)
 ##'
-##' df <- subset(out, time < 12) ## a data frame
 ##' out$CP
 ##'
 ##' plot(out)
@@ -86,6 +82,7 @@ NULL
 
 
 ##' @rdname mod
+##' @keywords internal
 setMethod("mod", "mrgsims", function(x,...) {x@mod})
 
 request <- function(x) x@request
@@ -108,14 +105,12 @@ setMethod("$", "mrgsims", function(x,name) {
 ##' @rdname mrgsims
 ##' @export
 setMethod("tail", "mrgsims", function(x,...) {
-  cat("Model: ", model(mod(x)), "\n")
   return(tail(x@data,...))
 })
 
 ##' @rdname mrgsims
 ##' @export
 setMethod("head", "mrgsims", function(x,...) {
-  #cat("Model: ", model(mod(x)), "\n")
   return(head(x@data,...))
 })
 
@@ -154,13 +149,13 @@ as.tbl.mrgsims <- function(x,...) {
 ##' @rdname mrgsims_dplyr
 ##' @export
 pull.mrgsims <- function(.data, ...) {
-  dplyr::pull(as_data_frame.mrgsims(.data), ...)
+  dplyr::pull(as_tibble.mrgsims(.data), ...)
 }
 
 ##' @rdname mrgsims_dplyr
 ##' @export
 filter_.mrgsims <- function(.data,...) {
-  dplyr::filter_(as_data_frame.mrgsims(.data),...)
+  dplyr::filter_(as_tibble.mrgsims(.data),...)
 }
 
 ##' @rdname mrgsims_dplyr
@@ -173,20 +168,20 @@ filter_sims <- function(.data, ... ) {
 ##' @rdname mrgsims_dplyr
 ##' @export
 group_by.mrgsims <- function(.data,...,add=FALSE) {
-  dplyr::group_by(as_data_frame.mrgsims(.data),...,add = add)
+  dplyr::group_by(as_tibble.mrgsims(.data),...,add = add)
 }
 
 ##' @rdname mrgsims_dplyr
 ##' @export
 distinct.mrgsims <- function(.data,...,.keep_all=FALSE) {
-  dplyr::distinct(as_data_frame.mrgsims(.data),...,
+  dplyr::distinct(as_tibble.mrgsims(.data),...,
                   .keep_all=.keep_all)
 }
 
 ##' @rdname mrgsims_dplyr
 ##' @export
 mutate.mrgsims <- function(.data,...) {
-  dplyr::mutate(as_data_frame.mrgsims(.data),...)
+  dplyr::mutate(as_tibble.mrgsims(.data),...)
 }
 
 ##' @rdname mrgsims_dplyr
@@ -199,39 +194,46 @@ mutate_sims <- function(.data, ...) {
 ##' @rdname mrgsims_dplyr
 ##' @export
 summarise.each <- function(.data,funs,...) {
-  dplyr::summarise_each(as_data_frame.mrgsims(.data),funs,...)
+  dplyr::summarise_each(as_tibble.mrgsims(.data),funs,...)
 }
 
 ##' @rdname mrgsims_dplyr
 ##' @export
 summarise.mrgsims <- function(.data,...) {
-  dplyr::summarise(as_data_frame.mrgsims(.data),...)
+  dplyr::summarise(as_tibble.mrgsims(.data),...)
 }
 
 ##' @rdname mrgsims_dplyr
 ##' @export
 do.mrgsims <- function(.data,...,.dots) {
-  dplyr::do(as_data_frame.mrgsims(.data),...)
+  dplyr::do(as_tibble.mrgsims(.data),...)
 }
 
 ##' @rdname mrgsims_dplyr
 ##' @export
 select.mrgsims <- function(.data,...) {
-  dplyr::select(as_data_frame.mrgsims(.data),...)
+  dplyr::select(as_tibble.mrgsims(.data),...)
 }
 
 ##' @rdname mrgsims_dplyr
 ##' @export
 slice.mrgsims <- function(.data,...) {
-  dplyr::slice(as_data_frame.mrgsims(.data),...)
+  dplyr::slice(as_tibble.mrgsims(.data),...)
 }
 
 ##' @rdname mrgsims_dplyr
 ##' @param .data_ mrgsims object
 ##' @export
 as_data_frame.mrgsims <- function(.data_,...) {
-  as_data_frame(as.data.frame(.data_),...)
+  as_tibble(as.data.frame(.data_),...)
 }
+
+##' @rdname mrgsims_dplyr
+##' @export
+as_tibble.mrgsims <- function(.data_,...) {
+  as_tibble(as.data.frame(.data_),...)  
+}
+
 
 ##' @rdname mrgsims
 ##' @param row.names passed to \code{\link{as.data.frame}}
@@ -244,14 +246,9 @@ setMethod("as.data.frame", "mrgsims", function(x,row.names=NULL, optional=FALSE,
 ##' @export
 ##' @rdname mrgsims
 ##' @export
+##' @keywords internal
 setMethod("as.matrix", "mrgsims", function(x,...) {
   return(as.matrix(x@data))
-})
-
-##' @rdname mrgsims
-##' @export
-setMethod("subset", "mrgsims", function(x,...) {
-  subset(as.data.frame(x@data), ...)
 })
 
 ##' @param object passed to show
@@ -263,14 +260,16 @@ setMethod("summary", "mrgsims", function(object,...) {
 
 ##' @rdname mrgsims
 ##' @export
+##' @keywords internal
 setMethod("show", "mrgsims", function(object) {
   digits <- 4
   n <- min(8,nrow(object@data))
-  top <- data.matrix(object@data[seq_len(n),,drop=FALSE],rownames.force=FALSE)
+  top <- object@data[seq_len(n),,drop=FALSE]
+  rownames(top) <- paste0(seq_len(n), ": ")
   tcol <- timename(object@data)
   cat("Model: ", model(mod(object)), "\n")
   cat("Dim:   ", dim(object)[1], "x", dim(object)[2], "\n")
-  cat("Time:  ", paste(range(object@data[,tcol]), collapse=" to "), "\n")
+  cat("Time:  ", paste(round(range(object@data[,tcol]),2), collapse=" to "), "\n")
   cat("ID:    ", length(unique(object@data[,"ID"])), "\n")
   print(top, digits=digits)
 })
@@ -286,6 +285,10 @@ setMethod("show", "mrgsims", function(object) {
 ##' @param show.grid logical indicating whether or not to draw panel.grid
 ##' @param ylab passed to xyplot
 ##' @param scales passed to xyplot
+##' @param logy plot the y variables on log scale
+##' @param logbr log scale breaks indicator; use `1` for breaks every log
+##' unit; use `3` for breaks every half log unit; use `0` for default 
+##' breaks
 ##' @param type passed to xyplot
 ##' @param lwd passed to xyplot
 ##' @param outer passed to xyplot
@@ -310,6 +313,7 @@ setMethod("show", "mrgsims", function(object) {
 ##'
 ##' plot(out, CP+RESP~time, col="black", scales="same", lty=2)
 ##' 
+##' @md
 ##' @export
 setMethod("plot", c("mrgsims","missing"), function(x,limit=16,...) {
   
@@ -330,7 +334,6 @@ setMethod("plot", c("mrgsims","missing"), function(x,limit=16,...) {
       ), call.=FALSE)
     }
   }
-  
   tname <- timename(x@data)
   lhs <- paste(ynames, collapse="+")
   fmla <- as.formula(paste0(lhs, "~", tname))
@@ -347,10 +350,12 @@ setMethod("plot", c("mrgsims","formula"), function(x,y,
                                                    ylab="value",
                                                    groups=ID,
                                                    scales=list(y=list(relation='free')),
+                                                   logy = FALSE,
+                                                   logbr = 3,
                                                    ...) {
   requireNamespace("lattice", quietly=TRUE)
   
-  data <- as.data.frame(subset(x,...))
+  data <- as.data.frame(subset(as.data.frame(x),...))
   
   if(length(y)==2) y[[3]] <- as.symbol(".")
   
@@ -364,19 +369,36 @@ setMethod("plot", c("mrgsims","formula"), function(x,y,
   
   if(y[[3]] == '.')  y[[3]] <- quote(time)
   
+  if(length(y[[2]])==1) ylab <- deparse(y[[2]])
+  
+  if(logy) {
+    scales[["y"]][["log"]] <- TRUE
+    if(!logbr %in% c(0,1,3)) {
+      stop("'logbr' must be either 0, 1, or 3.", call.=FALSE)  
+    }
+    if(logbr > 0) {
+      breaks <- 10^seq(-10,10)
+      if(logbr==3) breaks <- sort(c(breaks,3*breaks))
+      scales[["y"]][["at"]] <- breaks
+    }
+  }
+
   y <- structure(y, .Environment=environment())
   gr <- eval(substitute(groups),data)
-  ans <- lattice::xyplot(y,data=data,
-                         groups=gr,
-                         ylab=ylab,
-                         outer=outer,
-                         type=type,
-                         scales=scales,
-                         lwd=lwd,
-                         panel=function(...) {
-                           if(show.grid) lattice::panel.grid(h=-1,v=-1)
-                           lattice::panel.xyplot(...)
-                         },...
+  ans <- lattice::xyplot(
+    y,
+    data=data,
+    groups=gr,
+    ylab=ylab,
+    outer=outer,
+    type=type,
+    scales=scales,
+    lwd=lwd,
+    strip = lattice::strip.custom(style=1,bg="grey85"),
+    panel=function(...) {
+      if(show.grid) lattice::panel.grid(h=-1,v=-1)
+      lattice::panel.xyplot(...)
+    },...
   )
   ans
 })

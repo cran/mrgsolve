@@ -16,7 +16,8 @@ S4 class for mrgsolve model object
 
 \item{\code{package}}{the shared object file name \code{character>}}
 
-\item{\code{project}}{working directory; must be writeable with no spaces \code{<character>}}
+\item{\code{project}}{working directory; must be writeable with no spaces 
+\code{<character>}}
 
 \item{\code{start}}{simulation start time \code{<numeric>}}
 
@@ -33,15 +34,15 @@ these are not updatable from \code{R}}
 
 \item{\code{init}}{\code{<cmt_list>}}
 
-\item{\code{events}}{deprecated}
-
-\item{\code{digits}}{significant digits in simulated output; negative integer means ignore \code{<numeric>}}
+\item{\code{digits}}{significant digits in simulated output; negative integer means 
+ignore \code{<numeric>}}
 
 \item{\code{hmin}}{passed to \code{\link[=solversettings]{dlsoda}}  \code{<numeric>}}
 
 \item{\code{hmax}}{passed to \code{\link[=solversettings]{dlsoda}} \code{<numeric>}}
 
-\item{\code{mxhnil}}{passed to \code{\link[=solversettings]{dlsoda}} \code{<numeric>}}
+\item{\code{mxhnil}}{passed to \code{\link[=solversettings]{dlsoda}} 
+\code{<numeric>}}
 
 \item{\code{ixpr}}{passed to \code{\link[=solversettings]{dlsoda}} \code{<numeric>}}
 
@@ -49,7 +50,8 @@ these are not updatable from \code{R}}
 
 \item{\code{rtol}}{passed to \code{\link[=solversettings]{dlsoda}} \code{<numeric>}}
 
-\item{\code{maxsteps}}{passed to \code{\link[=solversettings]{dlsoda}} \code{<numeric>}}
+\item{\code{maxsteps}}{passed to \code{\link[=solversettings]{dlsoda}} 
+\code{<numeric>}}
 
 \item{\code{preclean}}{passed to R CMD SHLIB during compilation \code{<logical>}}
 
@@ -61,7 +63,8 @@ these are not updatable from \code{R}}
 
 \item{\code{tscale}}{used to scale time in simulated output \code{<numeric>}}
 
-\item{\code{omega}}{\code{\link{matlist}} for simulating individual-level random effects}
+\item{\code{omega}}{\code{\link{matlist}} for simulating individual-level random 
+effects}
 
 \item{\code{sigma}}{\code{\link{matlist}} for simulating residual error variates}
 
@@ -73,7 +76,8 @@ these are not updatable from \code{R}}
 
 \item{\code{request}}{vector of compartments to request \code{<character>}}
 
-\item{\code{soloc}}{directory path for storing the model shared object \code{<character>}}
+\item{\code{soloc}}{directory path for storing the model shared object 
+\code{<character>}}
 
 \item{\code{code}}{a character vector of the model code}
 
@@ -85,6 +89,8 @@ the simulation \code{<character>}}
 \item{\code{envir}}{internal model environment \code{<environment>}}
 
 \item{\code{shlib}}{a list of data related to build outcome \code{<list>}}
+
+\item{\code{funs}}{symbol names for model functions in the shared object}
 
 \item{\code{annot}}{model annotations \code{<list>}}
 
@@ -100,5 +106,6 @@ the simulation \code{<character>}}
 }
 
 \seealso{
-\code{\link{update}}, \code{\link{solversettings}}
+\code{\link[mrgsolve]{update}}, \code{\link{solversettings}}
 }
+\keyword{internal}

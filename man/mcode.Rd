@@ -5,9 +5,11 @@
 \alias{mcode_cache}
 \title{Write, compile, and load model code}
 \usage{
-mcode(model, code, project = tempdir(), ...)
+mcode(model, code, project = getOption("mrgsolve.project", tempdir()),
+  ...)
 
-mcode_cache(model, code, project = tempdir(), ...)
+mcode_cache(model, code, project = getOption("mrgsolve.project",
+  tempdir()), ...)
 }
 \arguments{
 \item{model}{model name}
@@ -16,14 +18,19 @@ mcode_cache(model, code, project = tempdir(), ...)
 
 \item{project}{project name}
 
-\item{...}{passed to \code{\link{mread}}}
+\item{...}{passed to \code{\link{mread}}; see that help topic for other
+arguments that can be set}
 }
 \description{
 This is a convenience function that ultimately calls \code{\link{mread}}.
+Model code is written to a file and read back in using \code{\link{mread}}.
 }
 \details{
 Note that the arguments are in slightly different order than 
 \code{\link{mread}}.  The default \code{project} is \code{tempdir()}.
+
+See the \code{\link{mread}} help topic for discussion about caching
+compilation results with \code{mcode_cache}.
 }
 \examples{
 

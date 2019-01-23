@@ -1,4 +1,4 @@
-// Copyright (C) 2013 - 2017  Metrum Research Group, LLC
+// Copyright (C) 2013 - 2019  Metrum Research Group, LLC
 //
 // This file is part of mrgsolve.
 //
@@ -23,21 +23,11 @@
 #define MRGSOLV_H
 
 #include <vector>
-#include <map>
-#include <string>
-
-
-//! vector of doubles
-typedef std::vector<double> dvec;
-
-//! vector of strings
-typedef std::vector<std::string > svec;
-
-//! vector of integers
-typedef std::vector<int> ivec;
+#include <iostream>
 
 typedef void (*refun)(void*);
 
+namespace mrgsolve {
 /**
  * @brief Resim functor.
  * 
@@ -53,26 +43,76 @@ struct resim {
     return fun(prob);
   }
   
-protected:
+protected: 
   refun fun; ///< function to call to re-simulate
   void* prob; ///< object to pass to re-simulated function
-};
+}; 
 
-struct shuttle {
-  shuttle(double a_, int b_, int c_ = 1) :  time(a_), evid(b_), cmt(c_){}
+struct evdata {
+  evdata(double a_, int b_) :  time(a_), evid(b_) {
+    cmt = 1;
+    amt = 0.0;
+    rate = 0.0;
+    now = false;
+  } 
   double time; 
   int evid;
-  double cmt;
+  int cmt;
   double amt; 
   double rate;
-};
+  bool now;
+}; 
+
+// Some functions for reporting values during a
+// simulation run
+template <class type> void report(type a) {
+  std::cout << "from report " << a << std::endl;
+}
+template <class type1, class type2> void report(type1 a, type2 b) {
+  std::cout << a << " " << b << std::endl;
+}
+
+}
+namespace mrg = mrgsolve;
+
+
+
+
+//! member functions mevent and tad come in via housemodel; see inst/base/databox.cpp
+class databox {
+public: 
+  std::vector<double> ETA; ///< vector of ETA values
+  std::vector<double> EPS; ///< vector of EPS values
+  unsigned int newind; ///< new individual flag
+  double time; ///< current simulation time
+  int evid;  ///< event ID flag
+  unsigned short int SYSTEMOFF; ///< flag to stop advancing system for current ID
+  double id;  ///< current ID
+  double amt; ///< current dosing amount value
+  short int cmt; ///< current compartment value
+  int nid; ///< number of IDs in the data set
+  int idn; ///< current ID number
+  int nrow; ///< number of rows in output data set
+  int rown; ///< current output row number
+  bool CFONSTOP; ///< carry forward on stop indicator
+  void* envir; ///< model environment
+  void stop() {SYSTEMOFF=9;}
+  void stop_id() {SYSTEMOFF=1;}
+  void stop_id_cf(){SYSTEMOFF=2;}
+  std::vector<mrgsolve::evdata> mevector;
+  void mevent(double time, int evid);
+  double tad();
+}; 
+
+//! vector of doubles
+typedef std::vector<double> dvec;
 
 //! signature for <code>$MAIN</code>
-#define MRGSOLVE_INIT_SIGNATURE  dvec& _A_0_,const double* _A_, const double* _THETA_, dvec& _F_, dvec& _ALAG_, dvec& _R_, dvec& _D_,  databox& self, dvec& _pred_, resim& simeta
+#define MRGSOLVE_INIT_SIGNATURE  dvec& _A_0_,const double* _A_, const double* _THETA_, dvec& _F_, dvec& _ALAG_, dvec& _R_, dvec& _D_,  databox& self, dvec& _pred_, mrgsolve::resim& simeta
 #define MRGSOLVE_INIT_SIGNATURE_N 10
 
 //! signature for <code>$TABLE</code>
-#define MRGSOLVE_TABLE_SIGNATURE const double* _A_, const dvec& _A_0_,  const double* _THETA_,  const dvec& _F_, const dvec& _R_,  databox& self, const dvec& _pred_, dvec& _capture_, resim& simeps
+#define MRGSOLVE_TABLE_SIGNATURE const double* _A_, const dvec& _A_0_,  const double* _THETA_,  const dvec& _F_, const dvec& _R_,  databox& self, const dvec& _pred_, dvec& _capture_, mrgsolve::resim& simeps
 #define MRGSOLVE_TABLE_SIGNATURE_N 9
 
 //! signature for <code>$ODE</code>

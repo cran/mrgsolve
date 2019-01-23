@@ -12,30 +12,37 @@ ev(x, ...)
 
 \S4method{ev}{mrgmod}(x, object = NULL, ...)
 
-\S4method{ev}{missing}(time = 0, evid = 1, ID = numeric(0), cmt = 1,
-  replicate = TRUE, until = NULL, realize_addl = FALSE, ...)
+\S4method{ev}{missing}(time = 0, amt, evid = 1, cmt = 1,
+  ID = numeric(0), replicate = TRUE, until = NULL, tinf = NULL,
+  realize_addl = FALSE, ...)
 
 \S4method{ev}{ev}(x, realize_addl = FALSE, ...)
 }
 \arguments{
 \item{x}{a model object}
 
-\item{...}{passed on}
+\item{...}{other items to be incorporated into the event object; see 
+details}
 
 \item{object}{passed to show}
 
 \item{time}{event time}
 
+\item{amt}{dose amount}
+
 \item{evid}{event ID}
 
-\item{ID}{subject ID}
-
 \item{cmt}{compartment}
+
+\item{ID}{subject ID}
 
 \item{replicate}{logical; if \code{TRUE}, events will be replicated for 
 each individual in \code{ID}}
 
 \item{until}{the expected maximum \bold{observation} time for this regimen}
+
+\item{tinf}{infusion time; if greater than zero, then the \code{rate} item 
+will be derived as \code{amt/tinf}}
 
 \item{realize_addl}{if \code{FALSE} (default), no change to \code{addl} 
 doses.  If \code{TRUE}, \code{addl} doses are made explicit with 
@@ -45,37 +52,38 @@ doses.  If \code{TRUE}, \code{addl} doses are made explicit with
 events object
 }
 \description{
-An event object contains one or more dosing records that 
-makes up a dosing regimen.  The event object may include 
-an ID column, but it usually doesn't.  Event objects have 
-operators and other functions that can take simple or elementary 
-event sequences and combine them in potentially more complicated
-ways.
+An event object specifies dosing or other interventions that get implemented
+during simulation. Event objects do similar things as \code{\link{data_set}}, 
+but simpler and quicker.
 }
 \details{
 \itemize{
-\item Required input for creating events objects include 
-\code{time} and \code{cmt}
+\item Required items in events objects include 
+\code{time}, \code{amt}, \code{evid} and \code{cmt}.
 \item If not supplied, \code{evid} is assumed to be 1.
 \item If not supplied, \code{cmt}  is assumed to be 1.
 \item If not supplied, \code{time} is assumed to be 0.
+\item If \code{amt} is not supplied, an error will be generated.
+\item If \code{total} is supplied, then \code{addl} will be set 
+to \code{total} - 1.
+\item Other items can include \code{ii}, \code{ss}, and \code{addl}
+(see \code{\link{data_set}} for details on all of these items).
 \item \code{ID} may be specified as a vector.
-\item If replicate is \code{TRUE} (default), thenthe events 
+\item If replicate is \code{TRUE} (default), then the events 
 regimen is replicated for each \code{ID}; otherwise, the number of
 event rows must match the number of \code{ID}s entered
 }
 }
 \examples{
 mod <- mrgsolve:::house()
+
 mod <- mod \%>\% ev(amt=1000, time=0, cmt=1)
-events(mod)
 
 loading <- ev(time=0, cmt=1, amt=1000)
+
 maint <- ev(time=12, cmt=1, amt=500, ii=12, addl=10)
+
 loading + maint
-
-
-ev(ID=1:10, cmt=1, time=0, amt=100)
 
 
 }

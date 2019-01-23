@@ -1,4 +1,4 @@
-# Copyright (C) 2013 - 2018  Metrum Research Group, LLC
+# Copyright (C) 2013 - 2019  Metrum Research Group, LLC
 #
 # This file is part of mrgsolve.
 #
@@ -16,7 +16,10 @@
 # along with mrgsolve.  If not, see <http://www.gnu.org/licenses/>.
 
 ##' Select and modify a data set for simulation
-##'
+##' 
+##' The input data set (\code{data_set}) is a data frame that specifies
+##' observations, model events, and / or parameter values for a population
+##' of individuals. 
 ##'
 ##' @param x model object
 ##' @param data data set
@@ -46,8 +49,14 @@
 ##'
 ##' Input data set may include the following columns related to 
 ##' PK dosing events: \code{time}, \code{cmt}, \code{amt}, \code{rate},
-##' \code{ii}, \code{addl}, \code{ss}.  \code{time} and \code{cmt} 
-##' (and \code{ID}) are required columns in the input data set. 
+##' \code{ii}, \code{addl}, \code{ss}.  Along with \code{ID}, \code{time} 
+##' is a required column in the input data set unless \code{$PRED} is in 
+##' use.  Upper case PK dosing column names including
+##' \code{TIME}, \code{CMT}, \code{AMT}, \code{RATE}, \code{II},
+##' \code{ADDL}, \code{SS} are also recognized.  However, an 
+##' error will be generated if a mix of upper case and lower
+##' case columns in this family are found.
+##'  
 ##' \code{time} is the observation or event time, \code{cmt} 
 ##' is the compartment number (see \code{\link{init}}), \code{amt} 
 ##' is the dosing amount, \code{rate} is the infusion rate, 
@@ -55,14 +64,22 @@
 ##' additional doses to administer, and \code{ss} is a flag 
 ##' for steady state dosing.  These column names operate 
 ##' similarly to other non-linear mixed effects modeling 
-##' software.  Upper case PK dosing column names including
-##' \code{TIME}, \code{CMT}, \code{AMT}, \code{RATE}, \code{II},
-##' \code{ADDL}, \code{SS} are also recognized.  However, an 
-##' error will be generated if a mix of upper case and lower
-##' case columns are found.
-##'
+##' software. 
+##' 
+##' An error will be generated when mrgsolve detects that the data set
+##' is not sorted by \code{time} within an individual.  Also, an error 
+##' will be generated in case mrgsolve finds negative values for 
+##' \code{time}, unless \code{$PRED} is in use.
+##' 
 ##' Only numeric data can be brought in to the problem.  
-##' Any non-numeric data columns will be dropped with warning.
+##' Any non-numeric data columns will be dropped with warning.  
+##' See \code{\link{numerics_only}}, which is used 
+##' to prepare the data set. 
+##' 
+##' An error will be generated if any parameter columns in the 
+##' input data set contain \code{NA}.  Likewise, and error will 
+##' be generated if missing values are found in the following
+##' columns: \code{ID}, \code{time}/\code{TIME}, \code{rate}/\code{RATE}. 
 ##'
 ##' See \code{\link{exdatasets}} for different example data sets.
 ##' 
@@ -126,7 +143,7 @@ setMethod("data_set", c("mrgmod", "ev"), function(x,data,...) {
 
 ##' @rdname data_set
 ##' @export
-setMethod("data_set", c("mrgmod", "missing"), function(x,object,...) {
+setMethod("data_set", c("mrgmod", "missing"), function(x, object,...) {
   object <- data_hooks(object=object,envir=x@envir,param=param(x),...)
   return(data_set(x,as.data.frame(object),...))
 })
@@ -176,7 +193,7 @@ data_hooks <- function(data,object,envir,param=list(),...) {
 }
 
 
-##' Create a simulatinon data set from ev objects
+##' Create a simulation data set from ev objects
 ##'
 ##'
 ##' @param x ev objects
@@ -420,4 +437,41 @@ ev_days <- function(ev=NULL,days="",addl=0,ii=168,unit=c("hours", "days"),...) {
   } else {
     return(as.data.frame(arrange__(evs,.dots = c("time"))))
   }
+}
+
+
+##' Insert observations into a data set
+##' 
+##' @param data a data set or event object
+##' @param times a vector of observation times
+##' @param unique `logical`; if `TRUE` then values for `time` are 
+##' dropped if they are found anywhere in `data`
+##'
+##' 
+##' @details
+##' Non-numeric columns will be dropped with a warning.
+##' 
+##' @return A data frame
+##' 
+##' @examples
+##' data <- expand.ev(amt = c(100,200,300))
+##' 
+##' expand_observations(data, times = seq(0,48,2))
+##' 
+##' @export
+expand_observations <- function(data, times, unique = FALSE) {
+  
+  data <- As_data_set(data)
+  if(unique) {
+    tcol <- timename(data)
+    times <- times[!times %in% unique(data[[tcol]])]
+  }
+  dont_copy <- c("ID", "amt", "cmt", "evid", "ii", "ss", "rate","time","addl")
+  dont_copy <- unique(c(dont_copy,toupper(dont_copy)))
+  dat <- data.matrix(numerics_only(data))
+  copy <- which(!is.element(colnames(dat),dont_copy))-1
+  a <- EXPAND_OBSERVATIONS(dat,times,copy)
+  ans <- as.data.frame(a$data)
+  names(ans) <- colnames(dat)
+  ans
 }

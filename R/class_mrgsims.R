@@ -1,4 +1,4 @@
-# Copyright (C) 2013 - 2018  Metrum Research Group, LLC
+# Copyright (C) 2013 - 2019  Metrum Research Group, LLC
 #
 # This file is part of mrgsolve.
 #
@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with mrgsolve.  If not, see <http://www.gnu.org/licenses/>.
 
-##' S4 class for mrgsolve simulation output.
+##' S4 class for mrgsolve simulation output
 ##'
 ##' @slot request character vector of compartments requested in simulated 
 ##' output
@@ -23,6 +23,7 @@
 ##' coming from table step
 ##' @slot data data.frame of simulated data
 ##' @slot mod the mrgmod model object
+##' @keywords internal
 setClass("mrgsims",
          slots=c(
            request="character",
@@ -43,7 +44,7 @@ setClass("batch_mrgsims",contains="mrgsims",
 )
 
 
-##' Check if an object is mrgsim output.
+##' Check if an object is mrgsim output
 ##' 
 ##' @param x any object
 ##' 
@@ -53,7 +54,7 @@ setClass("batch_mrgsims",contains="mrgsims",
 is.mrgsims <- function(x) inherits(x,"mrgsims")
 
 
-##' Corece an mrgsims object to list
+##' Coerce an mrgsims object to list
 ##' 
 ##' @param x an mrgsims object
 ##' @param ... not used

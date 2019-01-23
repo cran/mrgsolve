@@ -20,7 +20,7 @@ idata_set(x, data, ...)
 \arguments{
 \item{x}{model object}
 
-\item{data}{a data set coercable to data.frame}
+\item{data}{a data set that can be coerced to data.frame}
 
 \item{...}{passed along}
 
@@ -37,14 +37,16 @@ to use for the data set}
 \item{need}{passed to \code{\link{inventory}}}
 }
 \description{
-Select and modify a idata set for simulation
+The individual data set (\code{idata_set}) is a data frame with one 
+row for each individual in a population, specifying parameters and 
+other individual-level data.
 }
 \details{
 The \code{idata_set} is a data.frame that specifies individual-level 
 data for the problem.  An  \code{ID} column is required and there 
 can be no more than one row in the data frame for each individual.  
 
-In most cases, the columns in the `idata_set` have the same names
+In most cases, the columns in the \code{idata_set} have the same names
 as parameters in the \code{\link{param}} list.  When this is the case, 
 the parameter set is updated as the simulation proceeds once at the 
 start of each individual.  The `idata_set` can also be used to 
@@ -55,7 +57,7 @@ this initial condition will be over-ridden if you also set the \code{CMT_0}
 in \code{$MAIN}.
 
 The most common application of \code{idata_set} is to specify a population
-or bach of simulations to do.  We commonly use \code{idata_set} with an 
+or batch of simulations to do.  We commonly use \code{idata_set} with an 
 event object (see \code{\link{ev}}).  In that case, the event gets applied
 to each individual in the \code{\link{idata_set}}.  
 
@@ -64,20 +66,29 @@ In this case, the \code{idata_set} is used as a parameter lookup for \code{IDs}
 found in the \code{data_set}.  Remember in this case, it is the \code{data_set}
 (not the \code{idata_set}) that determines the number of individuals in the
 simulation.
+
+An error will be generated if any parameter columns in the 
+input idata set contain \code{NA}.
 }
 \examples{
-
 mod <- mrgsolve:::house()
 
 data(exidata)
 
 exidata
 
-mod \%>\% idata_set(exidata, ID <= 2) \%>\% mrgsim \%>\% plot
+mod \%>\% 
+  idata_set(exidata, ID <= 2) \%>\% 
+  ev(amt = 100) \%>\%
+  mrgsim() \%>\% 
+  plot()
 
-mod \%>\% idata_set(exidata) \%>\% mrgsim
+mod \%>\% 
+  idata_set(exidata) \%>\% 
+  ev(amt = 100) \%>\%
+  mrgsim()
 
-mod \%>\% mrgsim(idata=exidata) 
+mod \%>\% ev(amt = 100) \%>\% mrgsim(idata=exidata) 
 
 }
 \seealso{

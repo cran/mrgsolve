@@ -8,13 +8,6 @@
 \alias{init,missing-method}
 \alias{init,list-method}
 \alias{init,ANY-method}
-\alias{as.init}
-\alias{as.init,list-method}
-\alias{as.init,numeric-method}
-\alias{as.init,cmt_list-method}
-\alias{as.init,missing-method}
-\alias{as.init,NULL-method}
-\alias{show,cmt_list-method}
 \title{Methods for working with the model compartment list}
 \usage{
 init(.x, ...)
@@ -28,32 +21,16 @@ init(.x, ...)
 \S4method{init}{list}(.x, ...)
 
 \S4method{init}{ANY}(.x, ...)
-
-as.init(.x, ...)
-
-\S4method{as.init}{list}(.x, ...)
-
-\S4method{as.init}{numeric}(.x, ...)
-
-\S4method{as.init}{cmt_list}(.x, ...)
-
-\S4method{as.init}{missing}(.x, ...)
-
-\S4method{as.init}{`NULL`}(.x, ...)
-
-\S4method{show}{cmt_list}(object)
 }
 \arguments{
 \item{.x}{the model object}
 
-\item{...}{passsed along}
+\item{...}{passed along}
 
 \item{.y}{list to be merged into parameter list}
 
 \item{.pat}{a regular expression (character) to be applied as 
 a filter when printing compartments to the screen}
-
-\item{object}{to show}
 }
 \value{
 an object of class \code{cmt_list} (see 
@@ -71,7 +48,7 @@ Can be used to either get a compartment list object from a
 conditions in a model object.  For both uses, the return value 
 is a \code{cmt_list} object. For the former use, \code{init} 
 is usually called to print the compartment initial conditions 
-to the screen, but the \code{cmt_list} object can also be coreced 
+to the screen, but the \code{cmt_list} object can also be coerced 
 to a list or numeric R object.
 }
 \examples{

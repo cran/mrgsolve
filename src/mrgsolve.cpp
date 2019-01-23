@@ -1,4 +1,4 @@
-// Copyright (C) 2013 - 2017  Metrum Research Group, LLC
+// Copyright (C) 2013 - 2019  Metrum Research Group, LLC
 //
 // This file is part of mrgsolve.
 //
@@ -113,7 +113,6 @@ arma::mat MVGAUSS(Rcpp::NumericMatrix& OMEGA_, int n) {
   arma::mat OMEGA(OMEGA_.begin(), OMEGA_.nrow(), OMEGA_.ncol(), false );
   
   return MVGAUSS(OMEGA,n);
-  
 }
 
 arma::mat MVGAUSS(arma::mat& OMEGA, int n) {

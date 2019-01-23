@@ -3,14 +3,22 @@
 \name{mrgsim}
 \alias{mrgsim}
 \alias{mrgsim_df}
+\alias{do_mrgsim}
 \title{Simulate from a model object}
 \usage{
 mrgsim(x, data = NULL, idata = NULL, events = NULL, nid = 1, ...)
 
-mrgsim_df(...)
+mrgsim_df(..., output = "df")
+
+do_mrgsim(x, data, idata = no_idata_set(), carry_out = carry.out,
+  carry.out = character(0), seed = as.integer(NA),
+  Request = character(0), output = NULL, capture = NULL,
+  obsonly = FALSE, obsaug = FALSE, tgrid = NULL, recsort = 1,
+  deslist = list(), descol = character(0), filbak = TRUE,
+  tad = FALSE, nocb = TRUE, skip_init_calc = FALSE, ...)
 }
 \arguments{
-\item{x}{the model objects}
+\item{x}{the model object}
 
 \item{data}{NMTRAN-like data set (see \code{\link{data_set}})}
 
@@ -22,24 +30,93 @@ one parameter per row (see \code{\link{idata_set}})}
 \item{nid}{integer number of individuals to simulate; only used if 
 idata and data are missing}
 
-\item{...}{passed to \code{\link[mrgsolve]{update}}}
+\item{...}{passed to \code{\link[mrgsolve]{update}} and 
+\code{\link{do_mrgsim}}}
+
+\item{output}{if \code{NULL} (the default) a mrgsims object is returned; 
+otherwise, pass \code{df} to return a data.frame or \code{matrix} to 
+return a matrix}
+
+\item{carry_out}{data items to copy into the output}
+
+\item{carry.out}{soon to be deprecated; use \code{carry_out} instead}
+
+\item{seed}{deprecated}
+
+\item{Request}{compartments or captured variables to retain
+in the simulated output; this is different than the \code{request}
+slot in the model object, which refers only to model compartments}
+
+\item{capture}{character file name used for debugging (not related
+to \code{$CAPTURE})}
+
+\item{obsonly}{if \code{TRUE}, dosing records are not included
+in the output}
+
+\item{obsaug}{augment the data set with time grid observations; when 
+\code{TRUE} and a full data set is used, the simulated output is augmented 
+with an observation at each time in \code{\link{stime}}().  When using
+\code{obsaug}, a flag indicating augmented observations can be requested by
+including \code{a.u.g} in  \code{carry_out}}
+
+\item{tgrid}{a tgrid object; or a numeric vector of simulation times
+or another object with an \code{stime} method}
+
+\item{recsort}{record sorting flag.  Default value is 1.  Possible values 
+are 1,2,3,4: 1 and 2 put doses in a data set after padded observations at 
+the same time; 3 and 4 put those doses before padded observations at the 
+same time.  2 and 4 will put doses scheduled through \code{addl} after 
+observations at the same time; 1 and 3 put doses scheduled through 
+\code{addl} before observations at the same time. \code{recsort} will 
+not change the order of your input data set if both doses and observations 
+are given.}
+
+\item{deslist}{a list of tgrid objects}
+
+\item{descol}{the name of a column for assigning designs}
+
+\item{filbak}{carry data items backward when the first 
+data set row has time greater than zero}
+
+\item{tad}{when \code{TRUE} a column is added to simulated 
+output is added showing the time since the last dose.  Only data records 
+with \code{evid == 1} will be considered doses for the purposes of 
+\code{tad} calculation. The \code{tad} can be properly calculated with 
+a dosing lag time in the model as long as the dosing lag time (specified 
+in \code{$MAIN})  is always  appropriate for any subsequent doses scheduled 
+through \code{addl}.  This will always be true if the lag time doesn't 
+change over time.  But it might (possibly) not hold if the lag time changes
+prior to the last dose in the \code{addl} sequence.  This known limitation
+shouldn't affect \code{tad} calculation in most common dosing lag time
+implementations.}
+
+\item{nocb}{if \code{TRUE}, use next observation carry 
+backward method; otherwise, use \code{locf}.}
+
+\item{skip_init_calc}{don't use \code{$MAIN} to 
+calculate initial conditions}
 }
 \value{
-an object of class \code{\link{mrgsims}}
+An object of class \code{\link{mrgsims}}
 }
 \description{
 This function sets up the simulation run from data stored in the model
-object as well as arguments passed in.  Note that there are several 
-non-formal arguments to this function that can be used to customize 
-the simulation run and it's output. Use \code{mrgsim_df} to 
-return a data frame rather than \code{mrgsims} object.
+object as well as arguments passed in.  Use \code{\link{mrgsim_q}} instead 
+to benchmark mrgsolve or to do repeated quick simulation for tasks like 
+parameter optimization, sensitivity analyses, or optimal design.  See
+\code{\link{mrgsim_variants}} for other mrgsim-like functions that have 
+more focused inputs. \code{mrgsim_df} coerces output to data.frame 
+prior to returning.
 }
 \details{
 \itemize{
 
-\item{Both \code{data} and \code{idata} will be coreced to numeric matrix}
+\item Use \code{mrgsim_df} to return a data frame rather than 
+\code{mrgsims} object.
 
-\item{\code{carry.out} can be used to insert data columns into the output 
+\item{Both \code{data} and \code{idata} will be coerced to numeric matrix}
+
+\item{\code{carry_out} can be used to insert data columns into the output 
 data set.  This is partially dependent on the nature of the data brought 
 into the problem.}
 
@@ -50,9 +127,9 @@ assumed to be uniquely keyed to ID in \code{data}.  No error is
 generated if ID is duplicated in \code{data}; parameters will be used 
 from the first occurrence found in \code{idata}.
  
- \item \code{carry.out}: \code{idata} is assumed to be 
+ \item \code{carry_out}: \code{idata} is assumed to be 
 individual-level and variables that are carried from \code{idata} 
-are repeated throughout the invidivual's simulated data.  Variables 
+are repeated throughout the individual's simulated data.  Variables 
 carried from \code{data} are carried via last-observation carry forward.  
 \code{NA} is returned from observations that are inserted into 
 simulated output that occur prior to the first record in \code{data}.
@@ -60,88 +137,47 @@ simulated output that occur prior to the first record in \code{data}.
 
 }
 }
-\section{Additional arguments}{
-
-
-\itemize{
-
-
-\item \code{Request} a vector of compartment or table names to take in 
-simulated output; if this is specified, \code{request} is ignored
-
-\item \code{obsonly} omit records with \code{evid} != 0 from simulated 
-output
-
-\item \code{obsaug} logical; when \code{TRUE} and a full data set is 
-used, the simulated output is augmented with an observation at each 
-time in \code{\link{stime}}().  When using \code{obsaug}, a flag indicating 
-augmented observations can be requested by including \code{a.u.g} in 
-\code{carry.out}
-
-\item \code{recsort}  Default value is 1.  Possible values are 1,2,3,4: 
-1 and 2 put doses in a data set after padded observations at the same 
-time; 3 and 4 put those doses before padded observations at the same 
-time.  2 and 4 will put doses scheduled through \code{addl} after 
-observations at the same time; 1 and 3 put doses scheduled through 
-\code{addl} before observations at the same time. \code{recsort} will 
-not change the order of your input data set if both doses and observations 
-are given.
-
-\item \code{filbak} For each \code{ID}, carry the first record  \code{data} 
-backward to start of the simulation
-
-\item \code{tad} logical; when \code{TRUE} a column is added to simulated 
-output is added showing the time since the last dose.  Only data records 
-with \code{evid == 1} will be considered doses for the purposes of 
-\code{tad} calculation. The \code{tad} can be properly calculated with 
-a dosing lag time in the model as long as the dosing lag time (specified 
-in \code{$MAIN})  is always  appropriate for any subsequent doses scheduled 
-through \code{addl}.  This will always be true if the lag time doesn't 
-change over time.  But it might (possibly) not hold if the lag time changes
-prior to the last dose in the \code{addl} sequence.  This known limitation
-shouldn't affect \code{tad} calculation in most common dosing lag time
-implementations.  
- 
-\item \code{nocb} if \code{TRUE} (default), time-varying items in a data 
-set will be implemented as next observation carried back; if \code{FALSE} 
-time-varying items in a data set will be implemented as last observation 
-carried forward.  
-
-}
-}
-
 \examples{
 ## example("mrgsim")
 
 e <- ev(amt = 1000)
+
 mod <- mrgsolve:::house() 
+
 out <- mod \%>\% ev(e) \%>\% mrgsim()
+
 plot(out)
 
 out <- mod \%>\% ev(e) \%>\% mrgsim(end=22)
+
 out
 
 data(exTheoph)
 
 out <- mod \%>\% data_set(exTheoph) \%>\% mrgsim()
+
 out
 
 out <- mod \%>\% mrgsim(data=exTheoph)
 
 out <- mrgsim(mod, data=exTheoph, obsonly=TRUE)
+
 out
 
-out <- mod \%>\% mrgsim(data=exTheoph, obsaug=TRUE, carry.out="a.u.g")
+out <- mod \%>\% mrgsim(data=exTheoph, obsaug=TRUE, carry_out="a.u.g")
+
 out
 
 out <- mod \%>\% ev(e) \%>\% mrgsim(req="CENT")
+
 out
 
 out <- mrgsim(mod, Req="CP,RESP", events = e)
+
 out
 
 
 }
 \seealso{
-\code{\link{mrgsim_variants}}
+\code{\link{mrgsim_variants}}, \code{\link{mrgsim_q}}
 }

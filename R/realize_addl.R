@@ -1,3 +1,21 @@
+# Copyright (C) 2013 - 2019  Metrum Research Group, LLC
+#
+# This file is part of mrgsolve.
+#
+# mrgsolve is free software: you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#
+# mrgsolve is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with mrgsolve.  If not, see <http://www.gnu.org/licenses/>.
+
+
 ##' Make addl doses explicit in an event object or data set
 ##' 
 ##' @param x a \code{data_set} data frame or an \code{ev} object (see details)
@@ -40,11 +58,14 @@
 ##'  
 ##' @export
 realize_addl <- function(x,...) UseMethod("realize_addl")
+
 ##' @rdname realize_addl
 ##' @export
 realize_addl.data.frame <- function(x, warn = FALSE, mark_new = FALSE, 
                                     fill = c("inherit", "na", "locf"), 
                                     ...) {
+  
+  x <- ungroup(x)
   
   fill <- match.arg(fill)
   locf <- fill=="locf"
@@ -53,6 +74,7 @@ realize_addl.data.frame <- function(x, warn = FALSE, mark_new = FALSE,
   hasid <- has_ID(x)
   
   addlcol <- which(names(x) %in% c("ADDL", "addl"))[1]
+  
   if(is.na(addlcol)) {
     if(warn) warning("missing addl/ADDL column", call. = FALSE)
     return(x)
@@ -96,7 +118,7 @@ realize_addl.data.frame <- function(x, warn = FALSE, mark_new = FALSE,
   }
   addl[[iicol]] <- 0
   
-  addl[[evidcol]] <- if_else(
+  addl[[evidcol]] <- ifelse(
     addl[[evidcol]] == 4, 
     1, 
     addl[[evidcol]]
@@ -129,9 +151,9 @@ realize_addl.data.frame <- function(x, warn = FALSE, mark_new = FALSE,
   if(locf) {
     has_na <- any(is.na(x))
     if(has_na & hasid) {
-      df <- locf_data_frame(group_by__(df,"ID"))
+      df <- locf_tibble(group_by__(df,"ID"))
     } else {
-      df <- locf_data_frame(df) 
+      df <- locf_tibble(df) 
     }
   }
   as.data.frame(df)

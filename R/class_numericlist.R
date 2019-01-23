@@ -1,4 +1,4 @@
-# Copyright (C) 2013 - 2018  Metrum Research Group, LLC
+# Copyright (C) 2013 - 2019  Metrum Research Group, LLC
 #
 # This file is part of mrgsolve.
 #
@@ -63,7 +63,8 @@ create_numeric_list <- function(x,class,...) {
 ##' @param pattern character of length 1 containing regular 
 ##' expression to be used as a filter when printing data to the 
 ##' console
-##' 
+##' @keywords internal
+##' @export
 setClass("numericlist", 
          slots=c(
            data="list", 
@@ -75,7 +76,7 @@ setClass("numericlist",
 
 ##' Methods for numericlist
 ##' 
-##' These methods can be used to corece \code{param} and 
+##' These methods can be used to coerce \code{param} and 
 ##' \code{init} objects into common \code{R} data structures,
 ##' extract elements from \code{numericlist}s, or get attributes 
 ##' from \code{numericlist}s.
@@ -124,16 +125,26 @@ setMethod("names", "numericlist", function(x) {
 ##' @rdname numericlist
 ##' @param name column to take
 ##' @export
+##' @keywords internal
 setMethod("$", "numericlist", function(x,name){
   unlist(x@data[name],use.names=FALSE)
 })
 
+##' @rdname numericlist
+##' @param exact not used
 ##' @export
+##' @keywords internal
+setMethod("[[", "numericlist", function(x,i,...,exact=TRUE){
+  unlist(x@data[[i]],use.names=FALSE)
+})
+
 ##' @rdname numericlist
 ##' @param i elements to keep
 ##' @param j not used
 ##' @param drop not used
 ##' @aliases [,numericlist-method
+##' @export
+##' @keywords internal
 setMethod("[", "numericlist", function(x,i,j,...){
   x@data[i,...]
 })

@@ -1,4 +1,4 @@
-# Copyright (C) 2013 - 2018  Metrum Research Group, LLC
+# Copyright (C) 2013 - 2019  Metrum Research Group, LLC
 #
 # This file is part of mrgsolve.
 #
@@ -17,10 +17,10 @@
 
 
 FUNSET_ERROR__ <- 
-'
+  '
 There was a problem accessing the model shared object.
   Either the model object is corrupted or  
-  the model was not properly compiled.
+  the model was not properly compiled and/or loaded.
 Check mrgsolve:::funset(mod) for more information.
 '
 
@@ -68,7 +68,6 @@ funs_loaded <- function(x,crump=TRUE) {
 
 all_loaded <- function(x) all(which_loaded(x))  
 
-
 pointers <- function(x) {
   if(!funs_loaded(x)) stop(FUNSET_ERROR__)
   what <- funs(x)
@@ -79,26 +78,27 @@ pointers <- function(x) {
 funset <- function(x) {
   pkg <- dllname(x)
   ans <- lapply(unname(funs(x)), function(w) {
-      loaded <- is.loaded(w,pkg)
-      if(loaded) {
-        info <- getNativeSymbolInfo(w,pkg)
-        name <- info$name
-      } else {
-        name <- as.character(NA)
-      }
-      dplyr::data_frame(name=name,loaded=loaded)
+    loaded <- is.loaded(w,pkg)
+    if(loaded) {
+      info <- getNativeSymbolInfo(w,pkg)
+      name <- info$name
+    } else {
+      name <- as.character(NA)
+    }
+    tibble(name=name,loaded=loaded)
   }) 
   
   ans <- 
-    dplyr::bind_rows(unname(ans)) %>% 
-    dplyr::mutate(func = names(funs(x)))  
-
+    bind_rows(unname(ans)) %>% 
+    mutate(func = names(funs(x)))  
+  
   ans <- as.data.frame(ans[,c("name", "loaded"),drop=FALSE])
   
-  shlib <- dplyr::data_frame(package=pkg,
-                             version=as.character(build_version(x)),
-                             compiled=compiled(x)
-                             )
+  shlib <- tibble(
+    package=pkg,
+    version=as.character(build_version(x)),
+    compiled=compiled(x)
+  )
   
   list(symbols = ans, shlib = data.frame(shlib))
 }

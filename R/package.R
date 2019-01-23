@@ -1,4 +1,4 @@
-# Copyright (C) 2013 - 2018  Metrum Research Group, LLC
+# Copyright (C) 2013 - 2019  Metrum Research Group, LLC
 #
 # This file is part of mrgsolve.
 #
@@ -20,39 +20,31 @@
 ##' @name mrgsolve
 ##' 
 ##'
-##' @section Input data sets:
-##' See \code{\link{data_set}} for help creating input data sets.  
-##' See \code{\link{exdatasets}} for example input data sets.
-##'
-##' @section Package help:
+##' @section Resources:
+##' \itemize{
+##' \item Main mrgsolve resource page: \href{https://mrgsolve.github.io}{https://mrgsolve.github.io}
+##' \item User guide: \href{https://mrgsolve.github.io/user_guide}{https://mrgsolve.github.io/user_guide}
+##' \item Vignettes: \href{https://mrgsolve.github.io/vignettes}{https://mrgsolve/github.io/vignettes}
+##' }
+##' 
+##' 
+##' @section Also see:
 ##' \itemize{
 ##'  \item  Package \href{00Index.html}{index}, including a listing 
 ##'  of all functions
-##'  \item Reserved words in \code{mrgsolve}: \code{\link[mrgsolve]{reserved}}
 ##' }
-##'
-##' @section About the model object:
-##' The model object has class \code{\link[=mrgmod-class]{mrgmod}}.
-##'
-##'
-##' @name mrgsolve
+##' 
 ##' @description
 ##' mrgsolve is an R package maintained under the auspices of 
-##' Metrum Research Group, LLC, that facilitates simulation from 
+##' Metrum Research Group that facilitates simulation from 
 ##' models based on systems of ordinary differential equations (ODE) 
 ##' that are typically employed for understanding pharmacokinetics, 
-##' pharmacodynamics, and systems biology and pharmacology. mrgsovle 
+##' pharmacodynamics, and systems biology and pharmacology. mrgsolve 
 ##' consists of computer code written in the R and C++ languages, 
 ##' providing an interface to the DLSODA differential equation solver 
 ##' (written in FORTRAN) provided through ODEPACK -
 ##' A Systematized Collection of ODE Solvers.
-##'
-##' @section Handling simulated output:
-##' See \code{\link{mrgsims}} for methods to use with simulated output.
-##'
-##' @section About the solver used by \code{mrgsolve}:
-##' See: \code{\link{aboutsolver}}
-##'
+##' 
 ##' @rdname mrgsolve_package
 ##' @docType package
 ##' @useDynLib mrgsolve, .registration=TRUE
@@ -88,7 +80,7 @@
 ##'
 ##' sims <- as.data.frame(out)
 ##'
-##' t72 <- subset(sims, time==72)
+##' t72 <- dplyr::filter(sims, time==72)
 ##' str(t72)
 ##' 
 ##' idata <- data.frame(ID=c(1,2,3), CL=c(0.5,1,2),VC=12)
@@ -206,7 +198,7 @@ NULL
 ##'
 ##' @name solversettings
 ##' @rdname solversettings
-##' @seealso \code{\link{aboutsolver}}, \code{\link{update}}
+##' @seealso \code{\link{aboutsolver}}, \code{\link[mrgsolve]{update}}
 ##' 
 ##' @details
 ##' 
@@ -232,7 +224,7 @@ NULL
 ##' extra (lower) tolerance, the value can get so low that the number
 ##' can randomly become negative.  However be aware that more precision
 ##' here will result in longer run times. 
-##' \item \code{rtol} - the reltive solver tolerances; decrease this 
+##' \item \code{rtol} - the relative solver tolerances; decrease this 
 ##' number when you want a more precise solution.  However be aware 
 ##' that more precision here will result in longer run times.
 ##' }
@@ -286,8 +278,7 @@ NULL
 ##' }
 NULL
 
-
-##' Reserved words.
+##' Reserved words
 ##'
 ##' @name reserved
 ##' @details

@@ -4,16 +4,14 @@
 \name{matlist}
 \alias{matlist}
 \alias{zero.re}
-\alias{drop.re}
 \alias{zero.re,mrgmod-method}
 \alias{zero_re}
-\alias{drop.re}
-\alias{drop.re,mrgmod-method}
 \alias{drop_re}
+\alias{drop.re}
 \alias{as.list,matlist-method}
 \alias{as.matrix,matlist-method}
-\alias{names,matlist-method}
-\alias{length,matlist-method}
+\alias{names.matlist}
+\alias{length.matlist}
 \alias{labels,matlist-method}
 \alias{dim,matlist-method}
 \alias{nrow,matlist-method}
@@ -22,23 +20,21 @@
 \usage{
 zero.re(.x, ...)
 
-\S4method{zero.re}{mrgmod}(.x, ...)
+\S4method{zero.re}{mrgmod}(.x, ..., .drop = FALSE)
 
 zero_re(...)
 
-drop.re(.x, ...)
+drop_re(.x, ...)
 
-\S4method{drop.re}{mrgmod}(.x, ...)
-
-drop_re(...)
+drop.re(...)
 
 \S4method{as.list}{matlist}(x, ...)
 
 \S4method{as.matrix}{matlist}(x, ...)
 
-\S4method{names}{matlist}(x)
+\method{names}{matlist}(x)
 
-\S4method{length}{matlist}(x)
+\method{length}{matlist}(x)
 
 \S4method{labels}{matlist}(object, ...)
 
@@ -53,6 +49,9 @@ drop_re(...)
 
 \item{...}{passed along}
 
+\item{.drop}{if \code{TRUE}, \code{zero_re} will drop \code{omega}
+or \code{sigma} or both entirely}
+
 \item{x}{a matlist object}
 
 \item{object}{passed to showmatlist}
@@ -60,3 +59,4 @@ drop_re(...)
 \description{
 Methods for working with matrix-list objects
 }
+\keyword{internal}

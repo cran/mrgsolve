@@ -1,4 +1,4 @@
-# Copyright (C) 2013 - 2018  Metrum Research Group, LLC
+# Copyright (C) 2013 - 2019  Metrum Research Group, LLC
 #
 # This file is part of mrgsolve.
 #
@@ -109,4 +109,45 @@ test_that("Data set column order gives same answer", {
   expect_false(all(names(extran3)==names(extran3b)))
   rm(mod)
 })
+
+test_that("numerics_only", {
+  n <- 10
+  data <- tibble(
+    ID = as.numeric(seq(n)), 
+    EYES = "black", 
+    DATETM = as.POSIXct("2018-01-01 08:00:00"), 
+    DATE = as.Date(DATETM),
+    INT = as.integer(ID),
+    BOOL = INT > 6
+  )
+  df <- numerics_only(data)
+  expect_equal(names(df), c("ID", "INT", "BOOL"))
+  expect_true(all(mrgsolve:::is.numeric.data.frame(df)))
+  expect_message(numerics_only(data))
+  df <- numerics_only(data,convert_lgl = FALSE)
+  expect_equal(names(df), c("ID", "INT"))
+  expect_true(all(mrgsolve:::is.numeric.data.frame(df)))
+  expect_silent(numerics_only(data,quiet=TRUE))
+})
+
+test_that("missing value in param column is message", {
+  data <- expand.ev(amt = 100, ii = 24, addl = 2, WT = NA_real_, FOO = 2)
+  expect_warning(mrgsim_d(mod,data), 
+                 regexp="Parameter column WT must not contain missing values.")
+  
+  idata <- dplyr::select(data, ID,WT)
+  expect_warning(mrgsim_i(mod,idata), 
+                 regexp="Parameter column WT must not contain missing values.")
+})
+
+test_that("missing value in time/rate/ID is error", {
+  data <- data.frame(ID = 1, time = NA_real_, amt = 100, cmt = 1, evid=1)
+  expect_error(mrgsim_d(mod,data), 
+               regexp="Found missing values in input data.")
+  
+  data <- data.frame(ID = NA_real_, rate = 100, amt = 100, cmt = 1, evid=1,time=0)
+  expect_error(mrgsim_d(mod,data), 
+               regexp="Found missing values in input data.")
+})
+
 

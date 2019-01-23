@@ -2,10 +2,10 @@
 % Please edit documentation in R/modspec.R
 \name{PKMODEL}
 \alias{PKMODEL}
-\title{Parse PKMODEL BLOCK data.}
+\title{Parse PKMODEL BLOCK data}
 \usage{
-PKMODEL(ncmt = 1, depot = FALSE, cmt = NULL, trans = pick_trans(ncmt,
-  depot), env = list(), pos = 1, ...)
+PKMODEL(ncmt = 1, depot = FALSE, cmt = NULL,
+  trans = pick_trans(ncmt, depot), env = list(), pos = 1, ...)
 }
 \arguments{
 \item{ncmt}{number of compartments; must be 1 (one-compartment, 
@@ -25,7 +25,7 @@ not including a depot dosing compartment)}
 \item{...}{not used}
 }
 \description{
-Parse PKMODEL BLOCK data.
+Parse PKMODEL BLOCK data
 }
 \details{
 When using \code{$PKMODEL}, certain symbols must be defined in the 
@@ -34,13 +34,16 @@ and \code{trans}.
 
 \itemize{
 \item \code{ncmt} 1, \code{depot FALSE}, trans 2: \code{CL}, \code{V}
-\item \code{ncmt} 1, \code{depot TRUE} , trans 2: \code{CL}, \code{V},  \code{KA}
-\item \code{ncmt} 2, \code{depot FALSE}, trans 4: \code{CL}, \code{V1}, \code{Q}, \code{V2}
-\item \code{ncmt} 2, \code{depot TRUE} , trans 4: \code{CL}, \code{V2}, \code{Q}, \code{V3}, \code{KA}
+\item \code{ncmt} 1, \code{depot TRUE} , trans 2: \code{CL}, \code{V},  
+\code{KA}
+\item \code{ncmt} 2, \code{depot FALSE}, trans 4: \code{CL}, \code{V1}, 
+\code{Q}, \code{V2}
+\item \code{ncmt} 2, \code{depot TRUE} , trans 4: \code{CL}, \code{V2}, 
+\code{Q}, \code{V3}, \code{KA}
 
 }
 
-If \code{trans=11} is specfied, use the symbols listed above for the 
+If \code{trans=11} is specified, use the symbols listed above for the 
 \code{ncmt} / \code{depot} combination, but append \code{i} at the end 
 (e.g. \code{CLi} or \code{Qi} or \code{KAi}).
 
@@ -48,7 +51,8 @@ If \code{trans=1}, the user must utilize the following symbols:
 
 \itemize{
 \item \code{pred_CL} for clearance
-\item \code{pred_V}  or \code{pred_V2} for central compartment volume of distribution
+\item \code{pred_V}  or \code{pred_V2} for central compartment volume of 
+distribution
 \item \code{pred_Q}  for intercompartmental clearance
 \item \code{pred_V3} for for peripheral compartment volume of distribution
 \item \code{pred_KA} for absorption rate constant

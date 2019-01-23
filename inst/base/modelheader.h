@@ -1,4 +1,4 @@
-// Copyright (C) 2013 - 2017  Metrum Research Group, LLC
+// Copyright (C) 2013 - 2019  Metrum Research Group, LLC
 //
 // This file is part of mrgsolve.
 //
@@ -15,43 +15,16 @@
 // You should have received a copy of the GNU General Public License
 // along with mrgsolve.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef MODELINCLUDEGUARD
-#define MODELINCLUDEGUARD
+#ifndef MODELHEADER_H
+#define MODELHEADER_H
 
-
-#include <iostream>
 #include <vector>
 #include <math.h>
 #include "mrgsolv.h"
 
 typedef double local_double;
-typedef int local_int;
-typedef bool local_bool;
-
-// A box of data that gets passed to $MAIN and $TABLE
-struct databox {
-  const dvec ETA;
-  const dvec EPS;
-  const unsigned int newind;
-  const double time;
-  const int evid;
-  unsigned short int  SYSTEMOFF;
-  const double id;
-  const double amt;
-  const short int cmt;
-  const int nid;
-  const int idn;
-  const int nrow;
-  const int rown;
-  bool CFONSTOP;
-  void* envir;
-  void stop() {SYSTEMOFF=9;}
-  void stop_id() {SYSTEMOFF=2;}
-  void stop_id_cf(){SYSTEMOFF=1;}
-  std::vector<shuttle> recs;
-};
-
-
+typedef int    local_int;
+typedef bool   local_bool;
 
 // pred_P definitions for $PKMODEL
 // Note that V/VC/V2 are synonymous when using the pred_P construct
@@ -146,14 +119,5 @@ struct databox {
 
 // Macro to insert dxdt_CMT = 0; for all compartments
 #define DXDTZERO() for(int _i_ = 0; _i_ < _nEQ; ++_i_) _DADT_[_i_] = 0;
-
-// Some functions for reporting values during a
-// simulation run
-template <class type> void report(type a) {
-  std::cout << "from report " << a << std::endl;
-}
-template <class type1, class type2> void report(type1 a, type2 b) {
-  std::cout << a << " " << b << std::endl;
-}
 
 #endif

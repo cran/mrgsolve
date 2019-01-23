@@ -1,4 +1,4 @@
-# Copyright (C) 2013 - 2018  Metrum Research Group, LLC
+# Copyright (C) 2013 - 2019  Metrum Research Group, LLC
 #
 # This file is part of mrgsolve.
 #
@@ -27,10 +27,10 @@ project <- file.path(system.file(package="mrgsolve"), "models")
 
 out  <- mrgsolve:::house() %>% ev(amt=100) %>% mrgsim(end=122)
 
-test_that("Pipe to as.tbl", {
-  expect_is( out %>% as.tbl, "tbl_df")
+test_that("Pipe to tibble", {
+  expect_is(out %>% as.tbl, "tbl_df")
+  expect_is(out %>% as_tibble, "tbl_df")
 })
-
 
 test_that("Pipe to mutate", {
   x <- out %>% mutate(test=2)
@@ -39,13 +39,11 @@ test_that("Pipe to mutate", {
   expect_true(all(x$test==2))
 })
 
-
 test_that("Pipe to filter", {
   x <- out %>% filter(time <=10)
   expect_is(x, "tbl_df")
   expect_true(max(x$time)==10)
 })
-
 
 test_that("Pipe to summarise", {
   x <- out %>% summarise(max=max(time))
@@ -54,16 +52,11 @@ test_that("Pipe to summarise", {
   expect_true(x$max==122)
 })
 
-
-
-
 test_that("Pipe to select", {
   x <- out %>% dplyr::select(ID,RESP,time)
   expect_is(x, "tbl_df")
   expect_identical(names(x),c("ID","RESP", "time"))
 })
-
-
 
 test_that("Pipe to group_by", {
   x <- out %>% group_by(ID,RESP)
@@ -89,6 +82,3 @@ test_that("mutate_mrgsims", {
   expect_is(x, "mrgsims")
   expect_true(all(x$foo == chk))
 })
-
-
-

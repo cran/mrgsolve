@@ -1,4 +1,4 @@
-# Copyright (C) 2013 - 2018  Metrum Research Group, LLC
+# Copyright (C) 2013 - 2019  Metrum Research Group, LLC
 #
 # This file is part of mrgsolve.
 #
@@ -36,7 +36,6 @@ test_that("Run via idata and separate", {
     mrgsim(idata=exidata,events=e) %>%
     as.data.frame
   
-  
   out2 <- lapply(seq_along(exidata$ID), function(i) {
     mod %>% 
       mrgsim(idata=exidata[i,],events=e) %>%
@@ -52,7 +51,6 @@ test_that("Run via idata and separate", {
       param(exidata[i,]) %>%
       mrgsim(events=e) %>%
       as.data.frame
-    
   }) %>% bind_rows %>% as.data.frame
   
   expect_identical(out1, out3)

@@ -1,4 +1,4 @@
-// Copyright (C) 2013 - 2017  Metrum Research Group, LLC
+// Copyright (C) 2013 - 2019  Metrum Research Group, LLC
 //
 // This file is part of mrgsolve.
 //
@@ -66,6 +66,7 @@ public:
   unsigned int get_idata_row(const double ID);  
   void locate_tran();
   void get_records(recstack& a, int NID, int neq, unsigned int& obscount, unsigned int& evcount, bool obsonly,bool debug);
+  void get_records_pred(recstack& a, int NID, int neq, unsigned int& obscount, unsigned int& evcount, bool obsonly,bool debug);
   void check_idcol(dataobject& data);
   double get_value(const int row, const int col) const {return Data(row,col);}
   double get_id_value(const int row) const {return Data(row,Idcol);}
@@ -78,7 +79,9 @@ public:
                  const unsigned int data_carry_start,
                  const Rcpp::IntegerVector& idata_carry,
                  const unsigned int idata_carry_start);
-    
+  std::vector<unsigned int> col;
+  Rcpp::CharacterVector Data_names;
+  
 protected:
   
   uidtype Uid;  ///< unique IDs in the data set
@@ -86,10 +89,7 @@ protected:
   datarowtype Endrow; ///< data set end row for each ID
   int Idcol; ///< which column holds ID
   
-  Rcpp::CharacterVector Data_names;
-  
-  std::vector<unsigned int> col;
-  
+
   Rcpp::IntegerVector par_from;  ///< index for parameters in data set
   Rcpp::IntegerVector par_to;    ///< index for parameters in param list
   Rcpp::CharacterVector parnames; ///< names of model parameters

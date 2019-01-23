@@ -1,4 +1,4 @@
-# Copyright (C) 2013 - 2018  Metrum Research Group, LLC
+# Copyright (C) 2013 - 2019  Metrum Research Group, LLC
 #
 # This file is part of mrgsolve.
 #
@@ -124,7 +124,8 @@ setMethod("omat", "mrgsims", function(.x,make=FALSE,...) {
 ##'
 ##' @param .x a matrix, list of matrices or \code{matlist} object
 ##' @param x  \code{matlist} object
-##' @param labels character vector of names for \code{$SIGMA} elements; must be equal 
+##' @param labels character vector of names for \code{$SIGMA} elements; must be
+##' equal 
 ##' to number of rows/columns in the matrix
 ##' @param make logical; if TRUE, matrix list is rendered into a single matrix
 ##' @param ... passed to other functions, including \code{\link{modMATRIX}}
@@ -203,17 +204,20 @@ setMethod("smat", "mrgsims", function(.x,make=FALSE,...) {
 ##'
 ##' @param .x a matlist object
 ##' @param x a matlist object
+##' @param .drop if \code{TRUE}, \code{zero_re} will drop \code{omega}
+##' or \code{sigma} or both entirely
 ##' @param ... passed along
 ##'
 ##' @export
-##' @aliases zero.re drop.re
+##' @aliases zero.re 
 ##' @name matlist
 ##' @rdname matlist
 setGeneric("zero.re", function(.x,...) standardGeneric("zero.re"))
 
 ##' @export
 ##' @rdname matlist
-setMethod("zero.re", "mrgmod", function(.x,...) {
+setMethod("zero.re", "mrgmod", function(.x,...,.drop=FALSE) {
+  if(.drop) return(drop_re(.x,...))
   what <- as.character(eval(substitute(alist(...))))
   if(length(what)==0) what <- c("omega", "sigma")
   if(is.element("omega", what) & !is.null(nrow(omat(.x)))) {
@@ -229,23 +233,20 @@ setMethod("zero.re", "mrgmod", function(.x,...) {
 ##' @export
 zero_re <- function(...) zero.re(...)
 
-##' @export
 ##' @rdname matlist
-setGeneric("drop.re", function(.x,...) standardGeneric("drop.re"))
-
 ##' @export
-##' @rdname matlist
-setMethod("drop.re", "mrgmod", function(.x,...) {
+drop_re <- function(.x,...) {
+  .Deprecated(msg="drop.re and drop_re are deprecated.  Use zero_re instead.")
   what <- as.character(eval(substitute(alist(...))))
   if(length(what)==0) what <- c("omega", "sigma")
   if(is.element("omega", what)) .x@omega <- new("omegalist")
   if(is.element("sigma", what)) .x@sigma <- new("sigmalist")
   return(.x)
-})
+}
 
 ##' @rdname matlist
 ##' @export
-drop_re <- function(...) drop.re(...)
+drop.re <- function(...) drop_re(...)
 
 ##' @export
 ##' @rdname matlist
@@ -259,11 +260,15 @@ setMethod("as.matrix", "matlist", function(x,...) {
 
 ##' @export
 ##' @rdname matlist
-setMethod("names", "matlist", function(x) names(x@data))
+names.matlist <- function(x) {
+  names(x@data)  
+}
 
 ##' @export
 ##' @rdname matlist
-setMethod("length", "matlist", function(x) length(x@data))
+length.matlist <- function(x) {
+  length(x@data)  
+}
 
 ##' @export
 ##' @rdname matlist
@@ -279,9 +284,10 @@ setMethod("dim", "matlist", function(x)  lapply(x@data, dim))
 ##' @rdname matlist
 setMethod("nrow", "matlist", function(x) unlist(lapply(x@data, nrow)))
 
-##' @export
 ##' @rdname matlist
 ##' @param object passed to showmatlist
+##' @export
+##' @keywords internal
 setMethod("show", "matlist", function(object) showmatlist(object))
 showmatlist <- function(x,...) {
   
@@ -314,18 +320,7 @@ cumoffset <- function(x) {
   ans
 }
 
-setGeneric("rename",function(x,...) standardGeneric("rename"))
-setMethod("rename", "matlist", function(x,names,...) {
-  names(x@data) <- names
-  return(x)
-})
-
-setGeneric("gettag", function(x,...) standardGeneric("gettag"))
-setMethod("gettag", "matlist", function(x,...) {
-  return(names(x@data))
-})
-
-##' Operations with matlist objects.
+##' Operations with matlist objects
 ##' 
 ##' @param x a matlist object
 ##' @param ... other matlist objects

@@ -1,4 +1,4 @@
-// Copyright (C) 2013 - 2017  Metrum Research Group, LLC
+// Copyright (C) 2013 - 2019  Metrum Research Group, LLC
 //
 // This file is part of mrgsolve.
 //
@@ -16,7 +16,8 @@
 // along with mrgsolve.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "RcppInclude.h"
-#include "modelheader.h"
+#include "mrgsolv.h"
+
 
 #define CALLDEF(name, n)  {#name, (DL_FUNC) &name, n}
 
@@ -25,38 +26,33 @@ RcppExport SEXP _mrgsolve_get_tokens(SEXP);
 RcppExport SEXP _mrgsolve_MVGAUSS(SEXP,SEXP);
 RcppExport SEXP _mrgsolve_DEVTRAN(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,
                                   SEXP,SEXP,SEXP);
+RcppExport SEXP _mrgsolve_MRGSIMQ(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,
+                                  SEXP,SEXP);
 RcppExport SEXP _mrgsolve_SUPERMATRIX(SEXP,SEXP);
 RcppExport SEXP _mrgsolve_TOUCH_FUNS(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP);
-RcppExport SEXP _mrgsolve_QUICKSIM(SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,SEXP,
-                                   SEXP,SEXP,SEXP);
 RcppExport SEXP _mrgsolve_EXPAND_EVENTS(SEXP,SEXP,SEXP);
+RcppExport SEXP _mrgsolve_EXPAND_OBSERVATIONS(SEXP,SEXP,SEXP);
 
 RcppExport void _model_housemodel_main__(MRGSOLVE_INIT_SIGNATURE);
 RcppExport void _model_housemodel_ode__(MRGSOLVE_ODE_SIGNATURE);
 RcppExport void _model_housemodel_table__(MRGSOLVE_TABLE_SIGNATURE);
 RcppExport void _model_housemodel_config__(MRGSOLVE_CONFIG_SIGNATURE);
 
-// RcppExport SEXP _mrgsolve_QMRGSIM(
-//     SEXP, SEXP, SEXP,
-//     SEXP, SEXP, SEXP,
-//     SEXP, SEXP, SEXP,
-//     SEXP, SEXP
-// );
-
 static R_CallMethodDef callEntryPoints[]  = {
   CALLDEF(_mrgsolve_get_tokens,1),
   CALLDEF(_mrgsolve_MVGAUSS,2),
   CALLDEF(_mrgsolve_DEVTRAN,12),
+  CALLDEF(_mrgsolve_MRGSIMQ,11),
   CALLDEF(_mrgsolve_SUPERMATRIX,2),
   CALLDEF(_mrgsolve_TOUCH_FUNS,7),
-  CALLDEF(_mrgsolve_QUICKSIM,11),
   CALLDEF(_mrgsolve_EXPAND_EVENTS,3),
+  CALLDEF(_mrgsolve_EXPAND_OBSERVATIONS,3),
   CALLDEF(_mrgsolve_dcorr,1),
   CALLDEF(_model_housemodel_main__,MRGSOLVE_INIT_SIGNATURE_N),
   CALLDEF(_model_housemodel_ode__,MRGSOLVE_ODE_SIGNATURE_N),
   CALLDEF(_model_housemodel_table__,MRGSOLVE_TABLE_SIGNATURE_N),
   CALLDEF(_model_housemodel_config__,MRGSOLVE_CONFIG_SIGNATURE_N),
-  //CALLDEF(_mrgsolve_QMRGSIM,11),
+  
   {NULL, NULL, 0}
 };
 

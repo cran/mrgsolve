@@ -12,6 +12,7 @@
 \alias{as_dmat,ANY-method}
 \alias{as_dmat,numeric-method}
 \alias{as_dmat,data.frame-method}
+\alias{as_cmat}
 \title{Coerce R objects to block or diagonal matrices}
 \usage{
 as_bmat(x, ...)
@@ -33,11 +34,13 @@ as_dmat(x, ...)
 \S4method{as_dmat}{numeric}(x, pat = "*", ...)
 
 \S4method{as_dmat}{data.frame}(x, pat = "*", cols = NULL, ...)
+
+as_cmat(x, ...)
 }
 \arguments{
-\item{x}{an R object}
+\item{x}{data frame or list}
 
-\item{...}{passed along}
+\item{...}{arguments passed to \code{\link{dmat}} or \code{\link{bmat}}}
 
 \item{pat}{regular expression, character}
 
@@ -48,15 +51,32 @@ A numeric matrix for list and numeric methods.  For data.frames,
 a list of matrices are returned.
 }
 \description{
-Coerce R objects to block or diagonal matrices
+These are simple functions that may be helpful to create the matrix objects
+that mrgsolve expects.  Functions are named based on whether they create a
+diagonal matrix (\code{d}), a block matrix (\code{b}), or a a correlation
+matrix (\code{c}).
+}
+\details{
+Use \code{as_dmat} to create a diagonal matrix, \code{as_bmat}
+to create a block matrix, and \code{as_cmat} to create a block 
+matrix where diagonal elements are understood to be correlations
+rather than covariances. \code{as_cmat} uses \code{as_bmat} to 
+form the matrix and then converts off-diagonal elements to 
+covariances before returning.
+
+The methods for \code{data.frame} will work down the rows
+of the data frame and make the appropriate matrix from 
+the data in each row.  The result is a list of matrices.
 }
 \examples{
 
-df <- data.frame(OMEGA1.1 = c(1,2),
-                 OMEGA2.1 = c(11,22),
-                 OMEGA2.2 = c(3,4),
-                 SIGMA1.1 = 1,
-                 FOO=-1)
+df <- data.frame(
+  OMEGA1.1 = c(1,2),
+  OMEGA2.1 = c(11,22),
+  OMEGA2.2 = c(3,4),
+  SIGMA1.1 = 1,
+  FOO=-1
+)
 
 as_bmat(df, "OMEGA")
 as_dmat(df,"SIGMA")
@@ -64,5 +84,5 @@ as_dmat(df[1,],"OMEGA")
 
 }
 \seealso{
-\code{\link{bmat}}, \code{\link{dmat}}
+\code{\link{bmat}}, \code{\link{dmat}}, \code{\link{cmat}}
 }

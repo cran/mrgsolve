@@ -1,4 +1,4 @@
-# Copyright (C) 2013 - 2018  Metrum Research Group, LLC
+# Copyright (C) 2013 - 2019  Metrum Research Group, LLC
 #
 # This file is part of mrgsolve.
 #
@@ -20,21 +20,33 @@
 
 tran_upper <- c("AMT", "II", "SS", "CMT", "ADDL", "RATE", "EVID","TIME")
 
-nodataset <- matrix(0, nrow=0, ncol=8, 
-                    dimnames=list(
-                      NULL,
-                      c("ID", "time", "evid", "amt", "cmt","addl", "ii", "ss")
-                    )
+nodataset <- matrix(
+  0, nrow=0, ncol=8, 
+  dimnames=list(
+    NULL,
+    c("ID", "time", "evid", "amt", "cmt","addl", "ii", "ss")
+  )
 )
 
-null_idata <- matrix(0, 
-                     nrow=0, ncol=1, 
-                     dimnames=list(NULL, c("ID")))
+null_idata <- matrix(
+  0, 
+  nrow=0, ncol=1, 
+  dimnames=list(NULL, c("ID"))
+)
 
-null_data <-  matrix(0,  
-                     nrow=0, ncol=3, 
-                     dimnames=list(NULL, c("ID", "time", "cmt")))
+no_idata_set <- function() {
+  structure(null_idata,class="valid_idata_set")  
+}
 
+null_data <-  matrix(
+  0,  
+  nrow=0, ncol=3, 
+  dimnames=list(NULL, c("ID", "time", "cmt"))
+)
+
+no_data_set <- function() {
+  structure(matrix(1,dimnames=list(NULL, "ID")), class="valid_data_set")
+}
 
 tgrid_matrix <- function(x) {
   n <- length(x)
@@ -71,78 +83,36 @@ validate_idata <- function(idata) {
 ##' Simulate from a model object
 ##'
 ##' This function sets up the simulation run from data stored in the model
-##' object as well as arguments passed in.  Note that there are several 
-##' non-formal arguments to this function that can be used to customize 
-##' the simulation run and it's output. Use \code{mrgsim_df} to 
-##' return a data frame rather than \code{mrgsims} object.
+##' object as well as arguments passed in.  Use \code{\link{mrgsim_q}} instead 
+##' to benchmark mrgsolve or to do repeated quick simulation for tasks like 
+##' parameter optimization, sensitivity analyses, or optimal design.  See
+##' \code{\link{mrgsim_variants}} for other mrgsim-like functions that have 
+##' more focused inputs. \code{mrgsim_df} coerces output to data.frame 
+##' prior to returning.
 ##'
-##' 
-##' @param x the model objects
+##' @param x the model object
 ##' @param data NMTRAN-like data set (see \code{\link{data_set}})
 ##' @param idata a matrix or data frame of model parameters, 
 ##' one parameter per row (see \code{\link{idata_set}})
 ##' @param events an event object
 ##' @param nid integer number of individuals to simulate; only used if 
 ##' idata and data are missing
-##' @param ... passed to \code{\link[mrgsolve]{update}}
+##' @param ... passed to \code{\link[mrgsolve]{update}} and 
+##' \code{\link{do_mrgsim}}
 ##' 
-##' @return an object of class \code{\link{mrgsims}}
+##' @return An object of class \code{\link{mrgsims}}
 ##' 
-##' 
-##' @section Additional arguments:
-##'
-##' \itemize{
-##' 
-##' 
-##' \item \code{Request} a vector of compartment or table names to take in 
-##' simulated output; if this is specified, \code{request} is ignored
-##' 
-##' \item \code{obsonly} omit records with \code{evid} != 0 from simulated 
-##' output
-##' 
-##' \item \code{obsaug} logical; when \code{TRUE} and a full data set is 
-##' used, the simulated output is augmented with an observation at each 
-##' time in \code{\link{stime}}().  When using \code{obsaug}, a flag indicating 
-##' augmented observations can be requested by including \code{a.u.g} in 
-##' \code{carry.out}
-##' 
-##' \item \code{recsort}  Default value is 1.  Possible values are 1,2,3,4: 
-##' 1 and 2 put doses in a data set after padded observations at the same 
-##' time; 3 and 4 put those doses before padded observations at the same 
-##' time.  2 and 4 will put doses scheduled through \code{addl} after 
-##' observations at the same time; 1 and 3 put doses scheduled through 
-##' \code{addl} before observations at the same time. \code{recsort} will 
-##' not change the order of your input data set if both doses and observations 
-##' are given.
-##' 
-##' \item \code{filbak} For each \code{ID}, carry the first record  \code{data} 
-##' backward to start of the simulation
-##' 
-##' \item \code{tad} logical; when \code{TRUE} a column is added to simulated 
-##' output is added showing the time since the last dose.  Only data records 
-##' with \code{evid == 1} will be considered doses for the purposes of 
-##' \code{tad} calculation. The \code{tad} can be properly calculated with 
-##' a dosing lag time in the model as long as the dosing lag time (specified 
-##' in \code{$MAIN})  is always  appropriate for any subsequent doses scheduled 
-##' through \code{addl}.  This will always be true if the lag time doesn't 
-##' change over time.  But it might (possibly) not hold if the lag time changes
-##' prior to the last dose in the \code{addl} sequence.  This known limitation
-##' shouldn't affect \code{tad} calculation in most common dosing lag time
-##' implementations.  
-##'  
-##' \item \code{nocb} if \code{TRUE} (default), time-varying items in a data 
-##' set will be implemented as next observation carried back; if \code{FALSE} 
-##' time-varying items in a data set will be implemented as last observation 
-##' carried forward.  
-##' 
-##' }
 ##' 
 ##' @details
+##' 
 ##' \itemize{
 ##' 
-##' \item{Both \code{data} and \code{idata} will be coreced to numeric matrix}
+##' \item Use \code{mrgsim_df} to return a data frame rather than 
+##' \code{mrgsims} object.
 ##' 
-##' \item{\code{carry.out} can be used to insert data columns into the output 
+##' \item{Both \code{data} and \code{idata} will be coerced to numeric matrix}
+##' 
+##' \item{\code{carry_out} can be used to insert data columns into the output 
 ##' data set.  This is partially dependent on the nature of the data brought 
 ##' into the problem.}
 ##' 
@@ -153,9 +123,9 @@ validate_idata <- function(idata) {
 ##' generated if ID is duplicated in \code{data}; parameters will be used 
 ##' from the first occurrence found in \code{idata}.
 ##'  
-##'  \item \code{carry.out}: \code{idata} is assumed to be 
+##'  \item \code{carry_out}: \code{idata} is assumed to be 
 ##' individual-level and variables that are carried from \code{idata} 
-##' are repeated throughout the invidivual's simulated data.  Variables 
+##' are repeated throughout the individual's simulated data.  Variables 
 ##' carried from \code{data} are carried via last-observation carry forward.  
 ##' \code{NA} is returned from observations that are inserted into 
 ##' simulated output that occur prior to the first record in \code{data}.
@@ -163,36 +133,45 @@ validate_idata <- function(idata) {
 ##'
 ##' }
 ##' 
-##' @seealso \code{\link{mrgsim_variants}}
+##' @seealso \code{\link{mrgsim_variants}}, \code{\link{mrgsim_q}}
 ##' 
 ##' @examples
 ##' ## example("mrgsim")
 ##' 
 ##' e <- ev(amt = 1000)
+##' 
 ##' mod <- mrgsolve:::house() 
+##' 
 ##' out <- mod %>% ev(e) %>% mrgsim()
+##' 
 ##' plot(out)
 ##'
 ##' out <- mod %>% ev(e) %>% mrgsim(end=22)
+##' 
 ##' out
 ##'
 ##' data(exTheoph)
 ##'
 ##' out <- mod %>% data_set(exTheoph) %>% mrgsim()
+##' 
 ##' out
 ##' 
 ##' out <- mod %>% mrgsim(data=exTheoph)
 ##'
 ##' out <- mrgsim(mod, data=exTheoph, obsonly=TRUE)
+##' 
 ##' out
 ##'
-##' out <- mod %>% mrgsim(data=exTheoph, obsaug=TRUE, carry.out="a.u.g")
+##' out <- mod %>% mrgsim(data=exTheoph, obsaug=TRUE, carry_out="a.u.g")
+##' 
 ##' out
 ##'
 ##' out <- mod %>% ev(e) %>% mrgsim(req="CENT")
+##' 
 ##' out
 ##'
 ##' out <- mrgsim(mod, Req="CP,RESP", events = e)
+##' 
 ##' out
 ##' 
 ##' 
@@ -250,13 +229,17 @@ mrgsim <-  function(x, data=NULL, idata=NULL, events=NULL, nid=1, ...) {
 
 ##' @rdname mrgsim
 ##' @export
-mrgsim_df <- function(...) as.data.frame(mrgsim(...))
-
+mrgsim_df <- function(...,output="df") mrgsim(..., output=output)
 
 ##' mrgsim variant functions
 ##' 
 ##' These functions are called by \code{\link{mrgsim}} and have
-##' explicit input requirements written into the function name.
+##' explicit input requirements written into the function name.  The motivation
+##' behind these variants is to give the user a clear workflow with specific,
+##' required inputs as indicated by the function name. Use 
+##' \code{\link{mrgsim_q}} instead to benchmark mrgsolve or to do repeated quick
+##' simulation for tasks like parameter optimization,  sensitivity analyses, 
+##' or optimal design.
 ##' 
 ##' @inheritParams mrgsim
 ##' 
@@ -276,9 +259,11 @@ mrgsim_df <- function(...) as.data.frame(mrgsim(...))
 ##'     \code{idata_set}
 ##'   \item \code{mrgsim_i} simulate using a \code{idata_set}
 ##'   \item \code{mrgsim_0} simulate using just the model
+##'   \item \code{mrgsim_q} simulate from a data set with quicker 
+##'   turnaround (see \code{\link{mrgsim_q}})
 ##' }
 ##' 
-##' @seealso \code{\link{mrgsim}}
+##' @seealso \code{\link{mrgsim}}, \code{\link{mrgsim_q}}
 ##' @name mrgsim_variants
 ##' @rdname mrgsim_variants
 ##' @export
@@ -292,7 +277,7 @@ mrgsim_e <- function(x, events, idata = NULL, data = NULL, ...) {
   args <- combine_list(x@args,args)
   do.call(
     do_mrgsim, 
-    c(list(x = x, data = events, idata = null_idata), args)
+    c(list(x = x, data = events, idata = no_idata_set()), args)
   )
 } 
 
@@ -304,7 +289,7 @@ mrgsim_d <- function(x, data, idata = NULL, events = NULL, ...) {
   args <- combine_list(x@args,args)
   do.call(
     do_mrgsim, 
-    c(list(x = x, data = data, idata = null_idata), args)
+    c(list(x = x, data = data, idata = no_idata_set()), args)
   )
 } 
 
@@ -379,7 +364,7 @@ mrgsim_0 <- function(x, idata = NULL, data = NULL, events = NULL, ...) {
   args <- combine_list(x@args,args)
   do.call(
     do_mrgsim, 
-    c(list(x = x, data = data, idata = null_idata), args)
+    c(list(x = x, data = data, idata = no_idata_set()), args)
   )
 }
 
@@ -396,43 +381,64 @@ mrgsim_nid <- function(x, nid, events = ev(), ...) {
   return(mrgsim_i(x, idata, ...))
 }
 
-##' Do an mrgsim run
-##' 
-##' @param x a model object
-##' @param data a simulation data set
-##' @param idata individual-level data
-##' @param carry.out data items to copy into the output
+##' @param carry_out data items to copy into the output
+##' @param carry.out soon to be deprecated; use \code{carry_out} instead
 ##' @param seed deprecated
 ##' @param Request compartments or captured variables to retain
-##' in the simulated output
+##' in the simulated output; this is different than the \code{request}
+##' slot in the model object, which refers only to model compartments
+##' @param output  if \code{NULL} (the default) a mrgsims object is returned; 
+##' otherwise, pass \code{df} to return a data.frame or \code{matrix} to 
+##' return a matrix
 ##' @param capture character file name used for debugging (not related
-##' to \code{$CAPTURE}
+##' to \code{$CAPTURE})
 ##' @param obsonly if \code{TRUE}, dosing records are not included
 ##' in the output
-##' @param obsaug augment the data set with time grid observations
+##' @param obsaug augment the data set with time grid observations; when 
+##' \code{TRUE} and a full data set is used, the simulated output is augmented 
+##' with an observation at each time in \code{\link{stime}}().  When using
+##' \code{obsaug}, a flag indicating augmented observations can be requested by
+##' including \code{a.u.g} in  \code{carry_out}
 ##' @param tgrid a tgrid object; or a numeric vector of simulation times
 ##' or another object with an \code{stime} method
-##' @param recsort record sorting flag
+##' @param recsort record sorting flag.  Default value is 1.  Possible values 
+##' are 1,2,3,4: 1 and 2 put doses in a data set after padded observations at 
+##' the same time; 3 and 4 put those doses before padded observations at the 
+##' same time.  2 and 4 will put doses scheduled through \code{addl} after 
+##' observations at the same time; 1 and 3 put doses scheduled through 
+##' \code{addl} before observations at the same time. \code{recsort} will 
+##' not change the order of your input data set if both doses and observations 
+##' are given.
 ##' @param deslist a list of tgrid objects
 ##' @param descol the name of a column for assigning designs
 ##' @param filbak carry data items backward when the first 
 ##' data set row has time greater than zero
-##' @param tad if \code{TRUE}, include time after dose
-##' in the output
+##' @param tad when \code{TRUE} a column is added to simulated 
+##' output is added showing the time since the last dose.  Only data records 
+##' with \code{evid == 1} will be considered doses for the purposes of 
+##' \code{tad} calculation. The \code{tad} can be properly calculated with 
+##' a dosing lag time in the model as long as the dosing lag time (specified 
+##' in \code{$MAIN})  is always  appropriate for any subsequent doses scheduled 
+##' through \code{addl}.  This will always be true if the lag time doesn't 
+##' change over time.  But it might (possibly) not hold if the lag time changes
+##' prior to the last dose in the \code{addl} sequence.  This known limitation
+##' shouldn't affect \code{tad} calculation in most common dosing lag time
+##' implementations.  
 ##' @param nocb if \code{TRUE}, use next observation carry 
-##' backward method; otherwise, use \code{locf}
+##' backward method; otherwise, use \code{locf}.  
 ##' @param skip_init_calc don't use \code{$MAIN} to 
 ##' calculate initial conditions
-##' @param ... not used
 ##' 
-##' 
+##' @rdname mrgsim
 ##' @export
 do_mrgsim <- function(x,
                       data,
-                      idata = null_idata,
+                      idata = no_idata_set(),
+                      carry_out = carry.out,
                       carry.out = character(0),
                       seed = as.integer(NA),
                       Request = character(0),
+                      output = NULL,
                       capture = NULL,
                       obsonly = FALSE,
                       obsaug = FALSE,
@@ -451,11 +457,6 @@ do_mrgsim <- function(x,
   ## This both touches the functions as well as
   ## gets the function pointers
   
-  if(!model_loaded(x)) {
-    stop("The model is not properly loaded.  Aborting simulation.",
-         call.=FALSE) 
-  }
-  
   ## data
   if(!is.valid_data_set(data)) {
     data <- valid_data_set(data,x,verbose)
@@ -463,7 +464,7 @@ do_mrgsim <- function(x,
   
   ## "idata"
   if(!is.valid_idata_set(idata)) {
-    idata <- valid_idata_set(idata,verbose=verbose)
+    idata <- valid_idata_set(idata,x,verbose=verbose)
   }
   
   tcol <- timename(data)
@@ -472,7 +473,7 @@ do_mrgsim <- function(x,
   param <- as.numeric(param(x))
   init <-  as.numeric(Init(x))
   
-  if(!identical(names(param(x)),x@shlib$par)) {
+  if(!identical(Pars(x),x@shlib$par)) {
     stop("The parameter list has changed since the model was compiled.")
   }
   if(!identical(Cmt(x), x@shlib$cmt)) {
@@ -515,22 +516,22 @@ do_mrgsim <- function(x,
   
   ## carry can be tran/data/idata
   # Items to carry out from the data set
-  rename.carry <- .ren.create(carry.out)
-  carry.out <- rename.carry$old
+  rename.carry <- .ren.create(carry_out)
+  carry_out <- rename.carry$old
   
   # Don't take ID,time,TIME
-  carry.out <- setdiff(carry.out, c("ID", "time", "TIME"))
+  carry_out <- setdiff(carry_out, c("ID", "time", "TIME"))
   
   # Only take names in GLOBALS$CARRY_TRAN
-  carry.tran <- intersect(carry.out,GLOBALS[["CARRY_TRAN"]])
+  carry.tran <- intersect(carry_out,GLOBALS[["CARRY_TRAN"]])
   carry.tran <- carry.tran[!duplicated(tolower(carry.tran))]
   
   # Non-tran items to carry out from data and idata
-  carry.out <- setdiff(carry.out,carry.tran)
+  carry_out <- setdiff(carry_out,carry.tran)
   
   # What to carry out from data and idata
-  carry.data  <- intersect(carry.out, colnames(data))
-  carry.idata <- intersect(carry.out, colnames(idata))
+  carry.data  <- intersect(carry_out, colnames(data))
+  carry.idata <- intersect(carry_out, colnames(idata))
   
   # Carry from data_set if name is in idata_set too
   carry.idata <- setdiff(carry.idata, carry.data)
@@ -584,7 +585,7 @@ do_mrgsim <- function(x,
     capture.output(file=capture, print(c(date=list(date()), parin=parin)))
     capture.output(file=capture, append=TRUE, print(idata))
     capture.output(file=capture, append=TRUE, print(data))
-    capture.output(file=capture, append=TRUE, print(carry.out))
+    capture.output(file=capture, append=TRUE, print(carry_out))
     capture.output(file=capture, append=TRUE, print(list(capt_pos,capt)))
   }
   
@@ -594,18 +595,20 @@ do_mrgsim <- function(x,
          call. = FALSE)
   }
   
-  out <- .Call(`_mrgsolve_DEVTRAN`,
-               parin,
-               param,
-               names(param(x)),
-               init,
-               names(Init(x)),
-               capt_pos,
-               pointers(x),
-               data,idata,
-               as.matrix(omat(x)),
-               as.matrix(smat(x)),
-               x@envir)
+  out <- .Call(
+    `_mrgsolve_DEVTRAN`,
+    parin,
+    param,
+    names(param(x)),
+    init,
+    names(Init(x)),
+    capt_pos,
+    pointers(x),
+    data,idata,
+    as.matrix(omat(x)),
+    as.matrix(smat(x)),
+    x@envir
+  )
   
   # out$trannames always comes back lower case in a specific order
   # need to rename to get back to requested case
@@ -614,16 +617,26 @@ do_mrgsim <- function(x,
   
   if(tad) tcol <- c(tcol,"tad")
   
-  cnames <- c("ID",
-              tcol,
-              .ren.rename(rename.carry,carry.tran), ## First tran
-              .ren.rename(rename.carry,carry.data), ## Then carry data 
-              .ren.rename(rename.carry,carry.idata), ## Then carry idata
-              .ren.rename(rename.Request,request),   ## Then compartments
-              .ren.rename(rename.Request,capt) ## Then captures
+  cnames <- c(
+    "ID",
+    tcol,
+    .ren.rename(rename.carry,carry.tran), ## First tran
+    .ren.rename(rename.carry,carry.data), ## Then carry data 
+    .ren.rename(rename.carry,carry.idata), ## Then carry idata
+    .ren.rename(rename.Request,request),   ## Then compartments
+    .ren.rename(rename.Request,capt) ## Then captures
   )
   
   dimnames(out[["data"]]) <- list(NULL, cnames)
+  
+  if(!is.null(output)) {
+    if(output=="df") {
+      return(as.data.frame(out[["data"]]))  
+    }
+    if(output=="matrix") {
+      return(out[["data"]])  
+    }
+  }
   
   new("mrgsims",
       request=.ren.rename(rename.Request,request),
@@ -632,21 +645,18 @@ do_mrgsim <- function(x,
       mod=x)
 }
 
-
 do_mrgsimple <- function(x,
                          data,
-                         idata = NULL,
-                         seed = as.integer(NA),
+                         idata = no_idata_set(),
                          obsonly = FALSE,
                          obsaug = FALSE,
                          tgrid = NULL,
                          recsort = 1,
                          deslist = list(),
                          descol = character(0),
-                         filbak = TRUE,
                          tad = FALSE,
-                         nocb = TRUE,
                          skip_init_calc = FALSE,
+                         output = NULL,
                          ...) {
   
   verbose <- x@verbose
@@ -655,11 +665,6 @@ do_mrgsimple <- function(x,
   ## This both touches the functions as well as
   ## gets the function pointers
   
-  if(!model_loaded(x)) {
-    stop("The model is not properly loaded.  Aborting simulation.",
-         call.=FALSE) 
-  }
-  
   ## data
   if(!is.valid_data_set(data)) {
     data <- valid_data_set(data,x,verbose)
@@ -667,7 +672,7 @@ do_mrgsimple <- function(x,
   
   ## "idata"
   if(!is.valid_idata_set(idata)) {
-    idata <- valid_idata_set(idata,verbose=verbose)
+    idata <- valid_idata_set(idata,x,verbose=verbose)
   }
   
   tcol <- timename(data)
@@ -679,9 +684,6 @@ do_mrgsimple <- function(x,
   # capture items; will work on this
   capt <- x@capture
   
-  # Non-compartment names in capture
-  capt <- unique(setdiff(capt,cmt(x)))
-  
   # First spot is the number of capture.items, followed by integer positions
   # Important to use the total length of x@capture
   capt_pos <- c(length(x@capture),(match(capt,x@capture)-1))
@@ -691,12 +693,11 @@ do_mrgsimple <- function(x,
   parin$recsort <- recsort
   parin$obsonly <- obsonly
   parin$obsaug <- obsaug
-  parin$filbak <- filbak
+  parin$filbak <- TRUE
   parin$tad <- tad
-  parin$nocb <- nocb
+  parin$nocb <- TRUE
   parin$do_init_calc <- !skip_init_calc
   
-  # already took intersect
   parin$request <- as.integer(seq_along(cmt(x))-1)
   parin$carry_data <- character(0)
   parin$carry_idata <- character(0)
@@ -718,18 +719,20 @@ do_mrgsimple <- function(x,
     parin[["whichtg"]] <- integer(0)
   }
   
-  out <- .Call(`_mrgsolve_DEVTRAN`,
-               parin,
-               param,
-               names(param(x)),
-               init,
-               names(Init(x)),
-               capt_pos,
-               pointers(x),
-               data,idata,
-               as.matrix(omat(x)),
-               as.matrix(smat(x)),
-               x@envir)
+  out <- .Call(
+    `_mrgsolve_DEVTRAN`,
+    parin,
+    param,
+    Pars(x),
+    init,
+    names(Init(x)),
+    capt_pos,
+    pointers(x),
+    data,idata,
+    as.matrix(omat(x)),
+    as.matrix(smat(x)),
+    x@envir
+  )
   
   if(tad) tcol <- c(tcol,"tad")
   
@@ -737,16 +740,18 @@ do_mrgsimple <- function(x,
   
   dimnames(out[["data"]]) <- list(NULL, cnames)
   
+  if(!is.null(output)) {
+    if(output=="df") {
+      return(as.data.frame(out[["data"]]))  
+    }
+  }
+  
   new("mrgsims",
       request=cmt(x),
       data=as.data.frame(out[["data"]]),
       outnames=capt,
-      mod=x,
-      seed=as.integer(seed))
+      mod=x)
 }
-
-
-
 
 param_as_parent <- function(x) {
   e <- as.environment(as.list(param(x)))

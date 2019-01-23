@@ -1,4 +1,4 @@
-# Copyright (C) 2013 - 2018  Metrum Research Group, LLC
+# Copyright (C) 2013 - 2019  Metrum Research Group, LLC
 #
 # This file is part of mrgsolve.
 #
@@ -43,6 +43,7 @@ is.mt <- function(x) {return(is.null(x) | length(x)==0)}
 ##' are brought along from \code{y} only when \code{open}.
 ##' 
 ##' @export
+##' @keywords internal
 merge.list <- function(x,y,...,open=FALSE,
                        warn=TRUE,context="object",wild="...") {
   
@@ -94,6 +95,7 @@ update_list <- function(left, right) {
 ##' @param n number of variates to simulate
 ##' @param seed if not null, passed to set.seed
 ##' @export
+##' @keywords internal
 mvgauss <- function(mat, n=10, seed=NULL) {
   if(!is.null(seed)) set.seed(seed)
   .Call(`_mrgsolve_MVGAUSS`, mat, n)
@@ -101,11 +103,15 @@ mvgauss <- function(mat, n=10, seed=NULL) {
 
 
 pfile <- function(package,dir,file,ext=NULL) {
-  ans <- file.path(path.package(package),dir,file)
+  ans <- file.path(system.file(package=package),dir,file)
   if(is.character(ext)) {
     ans <- paste0(ans, ".", ext)
   }
   return(ans)
+}
+
+mrgsolve_file <- function(..., package="mrgsolve") {
+  system.file(..., package = package)
 }
 
 cropstr <- function(string, prefix, suffix, bump= "...") {
@@ -181,21 +187,28 @@ as.cvec <- function(x) {
 
 ##' Create template data sets for simulation
 ##'
-##' @param ... passed to \code{\link{expand.grid}}
+##' @param ... passed to [expand.grid]
 ##' 
 ##' @details
-##' An ID column is added as \code{1:nrow(ans)} if not supplied by the user.  
-##' For \code{expand.ev}, defaults
-##' also added: \code{cmt = 1}, \code{time = 0}, \code{evid = 1}.
+##' An ID column is added as `seq(nrow(ans))` if not supplied by the user.  
+##' For `expand.ev`, defaults also added include `cmt = 1`, 
+##' `time = 0`, `evid = 1`.  If `total` is included, 
+##' then `addl` is derived as `total` - 1. If `tinf` is included, then 
+##' an infusion rate is derived for row where `tinf` is greater than 
+##' zero.
 ##'
 ##' @examples
-##' idata <- expand.idata(CL=c(1,2,3), VC=c(10,20,30))
+##' idata <- expand.idata(CL = c(1,2,3), VC = c(10,20,30))
 ##'
-##' doses <- expand.ev(amt=c(300,100), ii=c(12,24), cmt=1)
+##' doses <- expand.ev(amt = c(300,100), ii = c(12,24), cmt = 1)
+##' 
+##' infusion <- expand.ev(amt = 100, tinf = 2)
+##' 
+##' @md
 ##' @export
 expand.idata <- function(...) {
   ans <- expand.grid(...,stringsAsFactors=FALSE)
-  ans$ID <- 1:nrow(ans)
+  ans$ID <- seq_len(nrow(ans))
   shuffle(ans,"ID")
 }
 
@@ -203,10 +216,22 @@ expand.idata <- function(...) {
 ##' @rdname expand.idata
 expand.ev <- function(...) {
   ans <- expand.grid(...,stringsAsFactors=FALSE)
-  ans$ID <- 1:nrow(ans)
-  if(!has_name("evid", ans)) ans$evid <- 1
-  if(!has_name("cmt", ans)) ans$cmt <- 1
-  if(!has_name("time", ans)) ans$time <- 0
+  ans$ID <- seq_len(nrow(ans))
+  if(!has_name("evid", ans)) ans[["evid"]] <- 1
+  if(!has_name("cmt", ans)) ans[["cmt"]] <- 1
+  if(!has_name("time", ans)) ans[["time"]] <- 0
+  if(has_name("total",ans)) {
+    ans[["addl"]] <- ans[["total"]]-1
+    ans[["total"]] <- NULL
+  }
+  if(has_name("tinf", ans)) {
+    ans[["rate"]] <- ifelse(
+      ans[["tinf"]] > 0, 
+      ans[["amt"]]/ans[["tinf"]],
+      0
+    )
+    ans[["tinf"]] <- NULL
+  }
   shuffle(ans,"ID")
 }
 
@@ -240,31 +265,33 @@ tovec <- function(x,concat=TRUE) {
 ##'
 ##' @param x comma-separated quoted string (for \code{cvec})
 ##' @param ... unquoted strings (for \code{ch})
-##' @export
 ##' @examples
 ##'
 ##' cvec("A,B,C")
 ##' s_(A,B,C)
-##'
+##' @export
+##' @keywords internal
 setGeneric("cvec", function(x,...) standardGeneric("cvec"))
 
 ##' @export
 ##' @rdname cvec
+##' @keywords internal
 setMethod("cvec", "character", as.cvec)
 
 ##' @export
 ##' @rdname cvec
+##' @keywords internal
 s_ <- function(...) as.character(match.call(expand.dots=TRUE))[-1]
 
 ##' Access or clear arguments for calls to mrgsim
 ##'
 ##' @param x model object
-##' @param clear logical indicating whether or not clear args from 
+##' @param clear logical indicating whether or not to clear `args` from 
 ##' the model object
-##' @param which character with lenght 1 naming a single arg to get
+##' @param which character with length 1 naming a single arg to get
 ##' @param ... passed along
 ##' 
-##' @return If \code{clear} is \code{TRUE}, the argument list is 
+##' @return If `clear` is `TRUE`, the argument list is 
 ##' cleared and the model object is returned.  Otherwise, the argument 
 ##' list is returned.
 ##' 
@@ -272,6 +299,7 @@ s_ <- function(...) as.character(match.call(expand.dots=TRUE))[-1]
 ##' mod <- mrgsolve:::house()
 ##' mod %>% Req(CP,RESP) %>% carry_out(evid,WT,FLAG) %>% simargs
 ##' 
+##' @md
 ##' @export
 simargs <- function(x, which = NULL, clear=FALSE,...) {
   
@@ -306,29 +334,11 @@ if.file.remove <- function(x) {
   if(file_exists(x)) file.remove(x)
 }
 
-#' rename columns from vector for new names
-#' @param .df dataframe to rename
-#' @param new_names vector of names using syntax "<newname>" = "<oldname>"
-#' @examples
-#' rename_cols(Theoph, c("dv" = "conc", "ID" = "Subject"))
-#' @export
-rename_cols <- function(.df, new_names) {
-  if (!all(new_names %in% names(.df))) {
-    missing <- new_names[which(!new_names %in% names(.df))]
-    stop(paste("the following columns do not exist in the dataset: ", 
-               paste(missing, collapse = ", ")))
-  }
-  matches <- match(new_names, names(.df))
-  names(.df)[matches] <- names(new_names)
-  return(.df)
-}
-
 as_character_args <- function(x) {
   x <- deparse(x,width.cutoff=500)
   x <- gsub("^.*\\(|\\)$", "", x)
   x
 }
-
 
 get_tokens <- function(x,unlist=FALSE) {
   if(!is.character(x)) return(character(0))
@@ -540,7 +550,7 @@ forbak <- function(x)nocb(locf(x))
 bakfor <- function(x)locf(nocb(x))
 nocb <- function(x)rev(locf(rev(x)))
 
-locf_data_frame <- function(x) {
+locf_tibble <- function(x) {
   mutate_all(x, .funs = funs__("locf"))
 }
 
@@ -568,3 +578,21 @@ funs__ <- function(...) {
 distinct__ <- function(df, .dots, .keep_all = FALSE) {
   dplyr::distinct(df, `!!!`(syms(.dots)), .keep_all = .keep_all)  
 }
+
+divider_msg <- function(msg = "", width = 60) {
+  if(nchar(msg) > 0) {
+    msg <- paste0("---:: ", msg, " ::")    
+  }
+  rem <- width - nchar(msg)
+  msg <- paste0(
+    msg, 
+    paste0(rep("-", rem),collapse="")
+  )
+  return(msg)
+}
+
+reg_exec_match <- function(x, pattern) {
+  m <- regexec(pattern,x)
+  regmatches(x,m)
+}
+

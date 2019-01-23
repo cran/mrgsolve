@@ -1,4 +1,4 @@
-# Copyright (C) 2013 - 2018  Metrum Research Group, LLC
+# Copyright (C) 2013 - 2019  Metrum Research Group, LLC
 #
 # This file is part of mrgsolve.
 #
@@ -28,7 +28,7 @@
 ##' @param .y list to be merged into parameter list
 ##' @param .pat a regular expression (character) to be applied as 
 ##' a filter when printing compartments to the screen
-##' @param ... passsed along
+##' @param ... passed along
 ##' @return an object of class \code{cmt_list} (see 
 ##' \code{\link{numericlist}})
 ##' @details
@@ -37,7 +37,7 @@
 ##' conditions in a model object.  For both uses, the return value 
 ##' is a \code{cmt_list} object. For the former use, \code{init} 
 ##' is usually called to print the compartment initial conditions 
-##' to the screen, but the \code{cmt_list} object can also be coreced 
+##' to the screen, but the \code{cmt_list} object can also be coerced 
 ##' to a list or numeric R object.
 ##'
 ##' @examples
@@ -80,59 +80,51 @@ setMethod("init", "mrgmod", function(.x,.y=list(),..., .pat="*") {
   return(.x@init)
 })
 
-##' @export
 ##' @rdname init
+##' @export
 setMethod("init", "mrgsims", function(.x,...) {
   init(mod(.x),...)
 }) 
 
-##' @export
 ##' @rdname init
+##' @export
 setMethod("init", "missing", function(...) {
   init(list(...))
 })
 
-##' @export
 ##' @rdname init
+##' @export
 setMethod("init", "list", function(.x,...) {
   create_numeric_list(.x,"cmt_list",...)
 })
 
-##' @export
 ##' @rdname init
+##' @export
 setMethod("init", "ANY", function(.x,...) {
   init(as.list(.x),...)
 })
 
-##' @export
-##' @rdname init
 setGeneric("as.init", function(.x,...) {
   standardGeneric("as.init")
 })
 
-##' @export
-##' @rdname init
 setMethod("as.init", "list", function(.x,...) {
   create_numeric_list(.x,"cmt_list",...)
 })
 
-##' @export
-##' @rdname init
 setMethod("as.init", "numeric", function(.x,...) {
   create_numeric_list(as.list(.x),"cmt_list",...)
 })
 
-##' @export
-##' @rdname init
 setMethod("as.init", "cmt_list", function(.x,...) .x)
 
-##' @export
-##' @rdname init
-setMethod("as.init", "missing", function(.x,...) create_numeric_list(list(), "cmt_list",...))
+setMethod("as.init", "missing", function(.x,...) {
+  create_numeric_list(list(), "cmt_list",...)
+})
 
-##' @export
-##' @rdname init
-setMethod("as.init", "NULL", function(.x,...) create_numeric_list(list(), "cmt_list",...))
+setMethod("as.init", "NULL", function(.x,...) {
+  create_numeric_list(list(), "cmt_list",...)
+})
 
 
 
@@ -194,8 +186,9 @@ showinit <-  function(x,digits=3,ncols=NULL,right=FALSE,...) {
   
 }
 
-##' @rdname init
+##' Show the compartment list
+##' @param object the object to show
 ##' @export
-##' @param object to show
+##' @keywords internal
 setMethod("show", "cmt_list", function(object) showinit(object))
 

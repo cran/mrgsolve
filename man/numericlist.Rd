@@ -9,6 +9,7 @@
 \alias{length,numericlist-method}
 \alias{names,numericlist-method}
 \alias{$,numericlist-method}
+\alias{[[,numericlist-method}
 \alias{[,numericlist-method}
 \title{Methods for numericlist}
 \usage{
@@ -16,14 +17,16 @@
 
 \S4method{as.numeric}{numericlist}(x)
 
-\S4method{as.data.frame}{numericlist}(x, row.names = NULL, optional = FALSE,
-  ...)
+\S4method{as.data.frame}{numericlist}(x, row.names = NULL,
+  optional = FALSE, ...)
 
 \S4method{length}{numericlist}(x)
 
 \S4method{names}{numericlist}(x)
 
 \S4method{$}{numericlist}(x, name)
+
+\S4method{[[}{numericlist}(x, i, ..., exact = TRUE)
 
 \S4method{[}{numericlist}(x, i, j, ..., drop = TRUE)
 }
@@ -40,13 +43,16 @@
 
 \item{i}{elements to keep}
 
+\item{exact}{not used}
+
 \item{j}{not used}
 
 \item{drop}{not used}
 }
 \description{
-These methods can be used to corece \code{param} and 
+These methods can be used to coerce \code{param} and 
 \code{init} objects into common \code{R} data structures,
 extract elements from \code{numericlist}s, or get attributes 
 from \code{numericlist}s.
 }
+\keyword{internal}

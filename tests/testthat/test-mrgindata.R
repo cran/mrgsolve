@@ -1,4 +1,4 @@
-# Copyright (C) 2013 - 2018  Metrum Research Group, LLC
+# Copyright (C) 2013 - 2019  Metrum Research Group, LLC
 #
 # This file is part of mrgsolve.
 #
@@ -111,10 +111,9 @@ test_that("Run with data set - tbl", {
   data <- filter(extran3, ID <= 3)
   out <- mod %>% data_set(dplyr::tbl_df(data)) %>% mrgsim
   expect_equal(nrow(out),nrow(data))
-  out <- mod %>% data_set(as_data_frame(data)) %>% mrgsim
+  out <- mod %>% data_set(as_tibble(data)) %>% mrgsim
   expect_equal(nrow(out),nrow(data))
 })
-
 
 data(exidata)
 
@@ -126,7 +125,6 @@ test_that("Run idata set", {
 })
 
 test_that("Run idata set with ev", {
-  
   e <- ev(amt=100)
   N <- length(unique(exidata$ID))
   N <- N*n + N
@@ -136,13 +134,7 @@ test_that("Run idata set with ev", {
   expect_equal(length(unique(out$ID)),nrow(exidata))
 })
 
-
 test_that("Duplicate ID in idata_set gives error", {
-  idata <- data_frame(ID=rep(1:10,each=5),CL=2)    
-  expect_error(mod %>% idata_set(idata) %>% mrgsim)
+  idata <- dplyr::mutate(tibble(ID=rep(seq(10),each=5)),CL=2)
   expect_error(mrgsim(mod,idata=idata_set))
 })
-
-
-
-

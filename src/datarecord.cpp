@@ -1,4 +1,4 @@
-// Copyright (C) 2013 - 2017  Metrum Research Group, LLC
+// Copyright (C) 2013 - 2019  Metrum Research Group, LLC
 //
 // This file is part of mrgsolve.
 //
@@ -117,15 +117,20 @@ datarecord::datarecord(short int cmt_, int evid_, double amt_,
 datarecord::~datarecord() {}
 
 bool CompByTimePosRec(const rec_ptr& a, const rec_ptr& b) {
-  // time-a != time-b
-  if (a->time() < b->time()) return true;
-  if (b->time() < a->time()) return false;
-  // time-a == time-b
-  if (a->pos() < b->pos()) return true;
-  if (b->pos() < b->pos()) return false;
-  return false;
+  bool res = a->time() < b->time(); 
+  if(!res) res = a->pos() < b->pos(); 
+  return res;
 }
 
+bool CompEqual(const reclist& a, double time, unsigned int evid, int cmt) {
+  for(size_t i = 0; i < a.size(); ++i) {
+    if(a[i]->time() != time) continue;
+    if((a[i]->evid()==evid) && (a[i]->cmt()==cmt)) {
+      return true;    
+    }
+  }
+  return false;
+}
 
 double datarecord::dur(double b) {
   return(b*Amt/Rate);
@@ -427,9 +432,7 @@ void datarecord::steady_infusion(odeproblem *prob) {
  * 
  */
 void datarecord::schedule(std::vector<rec_ptr>& thisi, double maxtime, 
-                          bool put_ev_first, double Fn) {
-  
-  int nextpos = put_ev_first ? -600 : (thisi.size() + 10);
+                          bool addl_ev_first, double Fn) {
   
   if(Fn==0) return;
   
@@ -471,6 +474,8 @@ void datarecord::schedule(std::vector<rec_ptr>& thisi, double maxtime,
     }
     
     double ontime = 0;
+    
+    int nextpos = addl_ev_first ?  (this->pos() - 600) : (thisi.size() + 10);
     
     for(unsigned int k=1; k<=Addl; ++k) {
       

@@ -1,4 +1,4 @@
-# Copyright (C) 2013 - 2018  Metrum Research Group, LLC
+# Copyright (C) 2013 - 2019  Metrum Research Group, LLC
 #
 # This file is part of mrgsolve.
 #
@@ -56,7 +56,7 @@ env_ls <- function(x,...) {
 ##' Return model environment
 ##' 
 ##' @param x model object
-##' @param tolist should the environment be coreced to \code{list}?
+##' @param tolist should the environment be coerced to \code{list}?
 ##' 
 ##' @export
 env_get <- function(x,tolist=TRUE) {
@@ -95,6 +95,7 @@ env_update <- function(.x,...,.dots=list()) {
 ##' 
 ##' @details \code{sah-mah}
 ##' 
+##' @keywords internal
 ##' @export
 cama <- function(mod,fn="cama",...) {
   object_exists(fn, mod@envir, "function", inherits=FALSE)

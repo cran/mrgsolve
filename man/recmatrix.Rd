@@ -2,7 +2,7 @@
 % Please edit documentation in R/qsim.R
 \name{recmatrix}
 \alias{recmatrix}
-\title{Create a matrix of events for simulation}
+\title{DEPRECATED: Create a matrix of events for simulation}
 \usage{
 recmatrix(x, times, c_indexing = TRUE)
 }
@@ -16,3 +16,4 @@ recmatrix(x, times, c_indexing = TRUE)
 \description{
 This function is for use with \code{\link{qsim}} only.
 }
+\keyword{internal}

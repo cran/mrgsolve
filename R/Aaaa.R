@@ -1,4 +1,4 @@
-# Copyright (C) 2013 - 2018  Metrum Research Group, LLC
+# Copyright (C) 2013 - 2019  Metrum Research Group, LLC
 #
 # This file is part of mrgsolve.
 #
@@ -30,11 +30,12 @@
 ##' @importFrom dplyr select_vars everything 
 ##' @importFrom dplyr if_else mutate_at summarise_each is.tbl select
 ##' @importFrom dplyr mutate_all group_by ungroup n
+##' @importFrom dplyr data_frame as_data_frame
 ##' @importFrom magrittr %>% %T>%
 ##' @importFrom Rcpp evalCpp
 ##' @importFrom RcppArmadillo armadillo_version
-##' @importFrom tibble as_data_frame data_frame
-##' @importFrom rlang quos enquo syms !!!
+##' @importFrom tibble tibble as_tibble
+##' @importFrom rlang quos enquo syms !!! quo_name
 ##' 
 ##' @include class_mrgsims.R
 ##' @include class_mrgmod.R
@@ -43,7 +44,6 @@
 ##' @include class_matlist.R
 ##' @include class_numericlist.R
 ##' @include class_tgrid.R  
-##' @include class_modlist.R
 ##' @include generics.R
 ##' @include package.R
 ##' @include utils.R 
@@ -66,13 +66,12 @@ GLOBALS$PKMODEL_NOT_FOUND <- "Required PK parameters not found: "
 GLOBALS$TRAN_UPPER <- c("AMT", "II", "SS", "CMT", "ADDL", "RATE", "EVID","TIME")
 GLOBALS$TRAN_LOWER <- tolower(GLOBALS$TRAN_UPPER)
 
-
 block_list <- c("ENV", "PROB", "PARAM", "INIT",
                 "CMT", "ODE", "DES", "MAIN", "TABLE",
                 "FIXED", "CMTN", "THETA", "NMXML", "VCMT",
                 "PKMODEL", "PLUGIN", "INCLUDE", "NAMESPACE",
                 "OMEGA", "SIGMA", "SET","GLOBAL", "CAPTURE", 
-                "PREAMBLE")
+                "PREAMBLE", "PRED")
 
 Reserved_cvar <- c("SOLVERTIME","table","ETA","EPS",
                    "ID", "TIME", "EVID","simeps", "self", "simeta",
@@ -94,19 +93,14 @@ globalVariables(c("test_package","time", "ID","block", "descr",
 
 VERSION <- packageDescription("mrgsolve")$Version
 
-#' Forward pipe.
+#' Forward pipe
+#' 
+#' 
 #'
 #' @name %>%
-#' @export
 #' @rdname zchain
-NULL
-
-
-#' Tee.
-#'
-#' @name %T>%
 #' @export
-#' @rdname zchain
+#' @keywords internal
 NULL
 
 
