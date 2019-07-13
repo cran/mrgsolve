@@ -1,4 +1,4 @@
-32c641f298aaa5c00035cc065bdb537a *DESCRIPTION
+5200a91d8ae3499e76d33def57b7615d *DESCRIPTION
 6250446edfec07b3cd079ac835601794 *NAMESPACE
 860c5871dbb888ffdcda7637e7356faf *R/Aaaa.R
 a0aa3db39badb63694df4fc90f215cdd *R/RcppExports.R
@@ -57,7 +57,7 @@ c54a9f807d76489f883657b556ea660d *data/exidata.RData
 cb342551e02a56094500bb3a4aff4b5c *inst/Rmd/mrgsolve_render_template.Rmd
 23370f6fae77738d405c16ce78259b5a *inst/WORDLIST
 ad6087fa5339a9cb1c04d085f13a9078 *inst/base/databox_cpp.h
-89a40f0c9a893616f8c2b80fbaa197a4 *inst/base/modelheader.h
+12ed1bf42f20cf589d22cedd0f4e9ca1 *inst/base/modelheader.h
 1268679b3f53157d4bbe3ceded9f029c *inst/base/mrgsolv.h
 e70dd33f60a9841923b0302d86d23b56 *inst/include/RcppInclude.h
 79b5b378bec56d4ddf2843d90a6c0571 *inst/include/dataobject.h
@@ -236,7 +236,7 @@ a1fb265bd4c2916d3c405a0fb8657b85 *man/wf_sweep.Rd
 2db491a8224a76c5da5bfd8ef06be443 *src/RcppExports.cpp
 338ea15dc70604c045cd97d4e8fba10f *src/dataobject.cpp
 bd161b32b8eca2dd8fd489bc9005d2c7 *src/datarecord.cpp
-758f14b20a32fa0c37c7d560aef899fd *src/devtran.cpp
+e566ee62349ab7c85da7266c384e5b64 *src/devtran.cpp
 ddb70e28d79cca89bddd9e04ecc211b3 *src/housemodel-mread-header.h
 38700c320b1e73cbb469df4ff79e056b *src/housemodel-mread-source.cpp
 4604a9df74bcec61e2456f28fa216852 *src/mrgsimq.cpp
@@ -244,8 +244,7 @@ ddb70e28d79cca89bddd9e04ecc211b3 *src/housemodel-mread-header.h
 f8ec2c20da129697be2fed895efdb2c4 *src/mrgsolve_init.cpp
 6b0b1bbab9a6127b3c0ec08317761640 *src/odepack_dlsoda.cpp
 ede0ea227a9aa1c43aae1f182125f98d *src/odeproblem.cpp
-39a346a47fc631f5937ee928e704de15 *src/opk_dlsoda_mrg.f
-e2962b0f7aeeb0ea97e41af74211533b *src/opkda1_mrg.f
+eb1c0c89cb779a6bda37e528c6ee314d *src/opk_dlsoda_mrg.f
 684ea52e6fc42e938ff38e200f04eeed *src/opkda2_mrg.f
 97096c3796bb40a3cd49001bf144f81b *tests/testthat.R
 8021e594cf867be7baa612b789ac2a48 *tests/testthat/test-annot.R
