@@ -1,7 +1,7 @@
 Type: Package
 Package: mrgsolve
 Title: Simulate from ODE-Based Models
-Version: 0.10.1
+Version: 0.10.4
 Authors@R: 
     c(person(given = "Kyle T",
              family = "Baron",
@@ -37,7 +37,8 @@ Depends: R (>= 3.1.2), methods
 Imports: Rcpp (>= 0.12.12), dplyr (>= 0.8.1), magrittr (>= 1.5),
         RcppArmadillo (>= 0.7.900.2.0), tibble (>= 2.1.1), rlang (>=
         0.3.4), tidyselect (>= 0.2.5), lifecycle, glue
-Suggests: lattice, testthat, xml2 (>= 1.2.0), rmarkdown, yaml, knitr
+Suggests: lattice, testthat, xml2 (>= 1.2.0), rmarkdown, yaml, knitr,
+        data.table
 LinkingTo: Rcpp (>= 0.12.12), RcppArmadillo (>= 0.7.900.2.0), BH (>=
         1.62.0-1)
 RdMacros: lifecycle
@@ -45,7 +46,7 @@ Encoding: UTF-8
 Language: en-US
 LazyLoad: yes
 NeedsCompilation: yes
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.0
 SystemRequirements: C++11
 Collate: 'RcppExports.R' 'utils.R' 'package.R' 'generics.R'
         'class_tgrid.R' 'class_numericlist.R' 'class_matlist.R'
@@ -58,7 +59,7 @@ Collate: 'RcppExports.R' 'utils.R' 'package.R' 'generics.R'
         'mrgindata.R' 'mrgsim_q.R' 'mrgsims.R' 'mrgsolve.R' 'nmxml.R'
         'param.R' 'print.R' 'r_to_cpp.R' 'realize_addl.R' 'relabel.R'
         'render.R' 'update.R' 'workflows.R'
-Packaged: 2020-02-17 17:48:53 UTC; kyleb
+Packaged: 2020-06-18 22:19:07 UTC; kyleb
 Author: Kyle T Baron [aut, cre] (<https://orcid.org/0000-0001-7252-5656>),
   Bill Gillespie [ctb],
   Charles Margossian [ctb],
@@ -67,4 +68,4 @@ Author: Kyle T Baron [aut, cre] (<https://orcid.org/0000-0001-7252-5656>),
   Dilawar Singh [ctb],
   Metrum Research Group [cph]
 Repository: CRAN
-Date/Publication: 2020-02-21 06:00:02 UTC
+Date/Publication: 2020-06-19 05:20:02 UTC
