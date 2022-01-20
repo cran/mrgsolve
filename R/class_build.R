@@ -1,4 +1,4 @@
-# Copyright (C) 2013 - 2019  Metrum Research Group, LLC
+# Copyright (C) 2013 - 2022  Metrum Research Group
 #
 # This file is part of mrgsolve.
 #
@@ -209,20 +209,26 @@ build_output_cleanup <- function(x,build) {
   patt <- "^ *In function .*void _model.*:$"
   errr <- msub(pattern = patt, replacement = "", x = errr)
   x[["stderr"]] <- errr
-  x <- structure(x, class = "mrgsolve-build-error")
+  x <- structure(x, class = c("mrgsolve-build-error", "list"))
   x
 }
 
-
-build_failed <- function(out,build,mod,ignore.stdout) {
-  outt <- list(out)
-  names(outt) <- paste0("mrgsolve.build.", build[["model"]])
-  options(outt)
+build_failed <- function(out,build,mod,spec,ignore.stdout) {
   out <- build_output_cleanup(out,build)
-  if(build[["recover"]]) {
+  if(isTRUE(build[["recover"]])) {
     warning("returning object for debugging purposes only.")
-    ans <- list(build = build, mod = as.list(mod), shlib=list(compiled=FALSE), out=out)
-    return(structure(ans,class = "mrgsolve-build-recover"))
+    build <- as.list(build)
+    mod <- as.list(mod)
+    mod[["envir"]] <- as.list(mod[["envir"]])
+    mod[["shlib"]][["version"]] <- unlist(mod[["shlib"]][["version"]])
+    mod[["shlib"]][["compiled"]] <- FALSE
+    ans <- list(
+      out = out,
+      build = build, 
+      mod = mod, 
+      spec = spec
+    )
+    return(structure(ans, class = c("mrgsolve-build-recover", "list")))
   }
   if(!ignore.stdout) {
     msg <- divider_msg("stdout")
@@ -241,22 +247,16 @@ build_failed <- function(out,build,mod,ignore.stdout) {
   stop("the model build step failed.",call.=FALSE)
 }
 
-
-build_save_output <- function(out) {
-  out[["date"]] <- date()
-  path <- file.path(tempdir(), "mrgsolve-build-result.RDS")
-  saveRDS(out, file=path)
-  return(invisible(path))
-}
-
-build_get_output <- function() {
-  file <- file.path(tempdir(),"mrgsolve-build-result.RDS")
-  file <- normalizePath(file,mustWork=FALSE)
-  if(!file.exists(file)) {
-    message("No build output was found.")
-    return(invisible(list()))
+build_format_recover <- function(data, path = NULL) {
+  if(!requireNamespace("yaml")) {
+    stop("please install the yaml package to format recovery data", call.=FALSE)  
   }
-  return(readRDS(file))
+  ans <- yaml::as.yaml(data)
+  if(is.character(path)) {
+    writeLines(text = ans, con = path)
+    return(invisible(ans))
+  }
+  ans
 }
 
 build_handle_127 <- function(out) {
@@ -267,5 +267,29 @@ build_handle_127 <- function(out) {
     cat(divider_msg(),"\n")
   }
   return(invisible(NULL))  
+}
+
+build_source_code <- function(x, cache = TRUE) {
+  stopifnot(is.mrgmod(x))
+  if(inherits(x, "packmod")) {
+    stop("x is a packmod object")  
+  }
+  if(!dir.exists(soloc(x))) {
+    stop("could not find build directory.")  
+  }
+  cwd <- getwd()
+  on.exit(setwd(cwd))
+  setwd(soloc(x))
+  h <- list.files(pattern = "\\.h$")
+  h <- lapply(h, readLines)
+  names(h) <- paste0("h", seq_along(h))
+  cpp <- list.files(pattern = "\\.cpp$")
+  cpp <- lapply(cpp, readLines)
+  names(cpp) <- paste0("cpp", seq_along(cpp))
+  sources <- list(h = h, cpp = cpp)
+  if(file.exists(rds <- "mrgmod_cache.RDS") && isTRUE(cache)) {
+    sources$cache <- as.list(readRDS(rds))  
+  }
+  sources
 }
 # nocov end

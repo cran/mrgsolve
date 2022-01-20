@@ -1,5 +1,4 @@
-# Copyright (C) 2013 - 2019  Metrum Research Group, LLC
-#
+# Copyright (C) 2013 - 2021  Metrum Research Group
 # This file is part of mrgsolve.
 #
 # mrgsolve is free software: you can redistribute it and/or modify it
@@ -15,10 +14,12 @@
 # You should have received a copy of the GNU General Public License
 # along with mrgsolve.  If not, see <http://www.gnu.org/licenses/>.
 
-
-SUPERMATRIX <- function(x,keep_names=FALSE) {
-  x <- .Call(`_mrgsolve_SUPERMATRIX`,x,keep_names,PACKAGE="mrgsolve")
-  if(nrow(x) > 0 & !keep_names) {
+SUPERMATRIX <- function(x, keep_names = FALSE, no_names = TRUE) {
+  if(!is.list(x)) stop("x must be a list")
+  keep_names <- keep_names & no_names
+  x <- .Call(`_mrgsolve_SUPERMATRIX`, x, keep_names, PACKAGE = "mrgsolve")
+  if(no_names) return(x)
+  if((nrow(x) > 0) && (!keep_names)) {
     dimnames(x) <- list(paste0(seq_len(nrow(x)), ": "), NULL)
   }
   x
@@ -132,7 +133,7 @@ Diag <- function(x) {
 ##' Create matrices from vector input
 ##'
 ##' @param ... matrix data
-##' @param correlation logical; if TRUE, off diagonal elements are assumed 
+##' @param correlation logical; if TRUE, off-diagonal elements are assumed 
 ##' to be correlations and converted to covariances
 ##' @param digits if greater than zero, matrix is passed to signif (along 
 ##' with digits) prior to returning
@@ -192,7 +193,7 @@ dmat <- function(...) {
 ##' @details
 ##' Use \code{as_dmat} to create a diagonal matrix, \code{as_bmat}
 ##' to create a block matrix, and \code{as_cmat} to create a block 
-##' matrix where diagonal elements are understood to be correlations
+##' matrix where off-diagonal elements are understood to be correlations
 ##' rather than covariances. \code{as_cmat} uses \code{as_bmat} to 
 ##' form the matrix and then converts off-diagonal elements to 
 ##' covariances before returning.

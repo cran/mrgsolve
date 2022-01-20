@@ -39,8 +39,8 @@ void sort_unique(T& a) {
   a.erase(last, a.end());
 }
 
-int find_position(const Rcpp::CharacterVector& what,  
-                  const Rcpp::CharacterVector& table);
+int find_position(const std::string what,  
+                  Rcpp::CharacterVector& table);
 
 double digits(const double& a, const double& b);
 
@@ -61,6 +61,8 @@ Rcpp::NumericMatrix EXPAND_EVENTS(const Rcpp::IntegerVector& idcol_,
                                   const Rcpp::NumericMatrix& events,
                                   const Rcpp::NumericVector& id); 
 
+Rcpp::List mat2df(Rcpp::NumericMatrix const& x);
+  
 // Rcpp::NumericMatrix recdata(Rcpp::NumericMatrix& dose,
 //                             Rcpp::NumericMatrix& obs,
 //                             Rcpp::IntegerVector& cols,
