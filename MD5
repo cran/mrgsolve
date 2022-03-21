@@ -1,4 +1,4 @@
-d4362385d646f81e9403421a0933a57b *DESCRIPTION
+35164fefa466ba0fba89dc9db5151c73 *DESCRIPTION
 3bf0d9426877e07ec1fc3334c27d0792 *NAMESPACE
 589a0293d1acda30233da0d8d796c79e *R/Aaaa.R
 3791505fad869b9ad8d69597cfeab511 *R/RcppExports.R
@@ -254,7 +254,7 @@ c898bdc3b482436d4aa361378d8f7675 *src/Makevars
 85879b3461b9459d668ab803d1c31c94 *src/devtran.cpp
 bc03edccb1f9d0247eaf7b3d6b179c82 *src/housemodel-mread-header.h
 35c3dddc776865499df857dd48066fd2 *src/housemodel-mread-source.cpp
-a9a29e86b2ae2b77b8d2e89c867f63ca *src/lsoda_functions.h
+04a86956ee36ff463f29202b1a8251d9 *src/lsoda_functions.h
 48754aeae3bdbcc21ff6a87029f84158 *src/mrgsolve.cpp
 dc4893b8bbeaac1ef71c990766df18f0 *src/mrgsolve_init.cpp
 7d4ab290508425b5027b541c320460a5 *src/odeproblem.cpp
