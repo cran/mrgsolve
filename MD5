@@ -1,5 +1,5 @@
-35164fefa466ba0fba89dc9db5151c73 *DESCRIPTION
-3bf0d9426877e07ec1fc3334c27d0792 *NAMESPACE
+5641ec5d18582aa1e3c338b9a4a005fd *DESCRIPTION
+a14c8ffe8e066b7f0587f01a7379adc5 *NAMESPACE
 589a0293d1acda30233da0d8d796c79e *R/Aaaa.R
 3791505fad869b9ad8d69597cfeab511 *R/RcppExports.R
 ddf408f621b6a03620b9257c48aa9556 *R/annot.R
@@ -7,7 +7,7 @@ ddf408f621b6a03620b9257c48aa9556 *R/annot.R
 e827350d7141f92aecf3ccc22a8c8321 *R/class_build.R
 1f614de636e803a942031cbc2daaff2a *R/class_derived.R
 3aef00a82282b217e7b8174fbd46c04d *R/class_ev.R
-a6ddee5ae96f9830a022aaa321366f37 *R/class_evd.R
+d6a534a917ffdab6cfc8275141356c97 *R/class_evd.R
 3568fc51d09b6262533479ff5a02d19c *R/class_matlist.R
 d2178b4c3b36c7ea0f5520a1fe1fd00c *R/class_mrgmod.R
 2c6b4274ccbbc23817d8f989a8982b42 *R/class_mrgsims.R
@@ -15,10 +15,10 @@ ebe4a24a3175d351745bb660570b794b *R/class_numericlist.R
 e8260b56dcc104cec74d986424083322 *R/class_rx.R
 d21882f131878b619ab30e3a241a4432 *R/class_tgrid.R
 6b3c6dcb957b78a656c4e35b6f7828fb *R/compile.R
-adb98000f175b4c2201ae6b457663472 *R/data_set.R
+1d2008c0ec86ad4b5f233ace089ef087 *R/data_set.R
 a785bc9db7966f3a8e6679131244101c *R/datasets.R
 e7daba416b5a87281ade90ceacb61285 *R/env.R
-c0bcc4b1daed41ace50727264c08230b *R/events.R
+ce4fc015a040d20cd45173ec7c7cc705 *R/events.R
 f19ac88e1f89f7290b5b46f2ddb84399 *R/funset.R
 ab58feb98d1ccc64572eb6c3b8e5f644 *R/generics.R
 1295d6d59200d2adeb9b69eb9ff7b7a3 *R/handle_spec_block.R
@@ -47,7 +47,7 @@ ecbe1ede7979b88623bb3e143105063d *R/r_to_cpp.R
 0dcc547829dcb8846bf2f0295a196ad0 *R/relabel.R
 62c1712d6a147fd716f787f764dbdc5e *R/render.R
 c722cf72255afa8042353493f6da1bb9 *R/update.R
-c90a97c497c87c64cbda7ee8199339ea *R/utils.R
+fa69b45ca624c154c1223a6e64b2d339 *R/utils.R
 2c06394b1249d38bc2b721ece3ae2a2a *R/workflows.R
 40c864c2cf9707820d29d476190e8689 *data/exBoot.RData
 d63342641adcb6c6d5b1421d269d8be9 *data/exTheoph.RData
@@ -56,7 +56,7 @@ c54a9f807d76489f883657b556ea660d *data/exidata.RData
 8c351bdc8a3c99299d26fc46f8d9b10f *data/extran2.RData
 84153150d6af37c6ac3ff4e9f5a2fce5 *data/extran3.RData
 cb342551e02a56094500bb3a4aff4b5c *inst/Rmd/mrgsolve_render_template.Rmd
-8bdbd0d855dca571bb9b47f9c2fcc8c1 *inst/WORDLIST
+b4fee03c606ef00573c8e68bd8392a8c *inst/WORDLIST
 9c625a2679deb0ad28a45423d2ecee37 *inst/base/databox_cpp.h
 8f943c0e50b85770a47e21bb5a9b6850 *inst/base/modelheader.h
 96448be39f303394b4b2e5482d4f417c *inst/base/mrgsolv.h
@@ -91,7 +91,7 @@ ba408048e69e9a71f5465454f20513f0 *inst/models/pkExample.cpp
 65e7d47383496a95b1e76652ff906d5c *inst/models/tmdd.cpp
 598815c67cc6d7fccafb7113cdb798ea *inst/models/viral1.cpp
 4e823735ff09b1f4b5dc08707ad211c6 *inst/models/viral2.cpp
-ed811c8013633707c1d676e5869a1206 *inst/mrgx/mrgx.h
+a02af809e8c342b44529dad885f66402 *inst/mrgx/mrgx.h
 10ef1d9ae78c8cff211a773a2c68b3d4 *inst/mrgx/simeta.h
 5926c9d8c1b728de503b52094c8ca61c *inst/msg/error127.txt
 5541863180ab108dfe5be7328f94568f *inst/nonmem/1005/1005.cat
@@ -116,6 +116,7 @@ db159a3d9dbc221bbda7c8434ed37225 *inst/nonmem/1005/1005par.tab
 9257f495ca064740f7021c1204085eda *inst/rmarkdown/templates/blank/template.yaml
 f16abb8b5ac467122d31167e3bc58631 *inst/rmarkdown/templates/pkmodel/skeleton/skeleton.Rmd
 d55455aaaaa0ca18539c8abd8d7fbe3d *inst/rmarkdown/templates/pkmodel/template.yaml
+23f68fc0bdfba67b9ead6db413ab5cc0 *inst/stories.yaml
 ab5d5614b741c45ac435c8251e702424 *man/BLOCK_PARSE.Rd
 b443fc9b4aa15064508a030f7e88ea66 *man/PKMODEL.Rd
 28f874d0693ffd336854dfd2a2a801f2 *man/Req.Rd
@@ -153,9 +154,9 @@ f7369b4db63cdbf97edfadf8e43d76b5 *man/ev_methods.Rd
 63b2aed0b1d9e817d57b9f1e72ba88f8 *man/ev_repeat.Rd
 29936739f7df7e0ad5a5236c65648c8a *man/ev_rx.Rd
 d05b1bf4f8656361c748eeb6337d46b3 *man/ev_seq.Rd
-e06d7983ac4df478c30c9de1158251c8 *man/evd.Rd
+e2d06c62b70ce6d10af19c40fbd13ee9 *man/evd.Rd
 2daed6983481d4c5aeb7de984d8a6ad0 *man/exdatasets.Rd
-4e335c1830fceb5e54b23e0093eea7cc *man/expand.idata.Rd
+fcfd9b13e8512fcfaf4b0c82b3ed60e6 *man/expand.idata.Rd
 34e234a4f495e160f67e7df887a077b4 *man/expand_observations.Rd
 7d01892d57d1f91771cf6bb397bbbc5d *man/figures/mrgsolve_sticker_812418_1.png
 4f2038997936d7b951d31ec182a82eae *man/file_show.Rd
@@ -166,7 +167,7 @@ ec39750e7b02952da719ddf9a0a1bc6c *man/idata_set.Rd
 de03367cde44611747bce5b1e6aa9145 *man/is.mrgmod.Rd
 7d5d3339e2cb35697bb18e201f46b4e4 *man/is.mrgsims.Rd
 31b6996fbe604b978b772c21849f65f1 *man/knobs.Rd
-0f64ee18b09cd50db879b33916b35fc1 *man/lctran.Rd
+2cc25657b0f64952d06bfd48fc3cd699 *man/lctran.Rd
 9db25f8e5285a87dcdf3a84814a063e8 *man/loadso.Rd
 b2f8d7970cd9e13a6bdaec1ea511dc38 *man/lower2matrix.Rd
 f61ac6b11b7af9e152ab0fd4c9ef3a39 *man/matlist-class.Rd
@@ -251,11 +252,11 @@ c898bdc3b482436d4aa361378d8f7675 *src/Makevars
 4bfaf3bbdc42ff2425506672a6c268c1 *src/RcppExports.cpp
 939e036b09be6909be26364b7e680731 *src/dataobject.cpp
 2bdd3d8a45cd1365bd1c0e711378207e *src/datarecord.cpp
-85879b3461b9459d668ab803d1c31c94 *src/devtran.cpp
+9cfb53921ed53f16e9d4881779f676cc *src/devtran.cpp
 bc03edccb1f9d0247eaf7b3d6b179c82 *src/housemodel-mread-header.h
 35c3dddc776865499df857dd48066fd2 *src/housemodel-mread-source.cpp
 04a86956ee36ff463f29202b1a8251d9 *src/lsoda_functions.h
-48754aeae3bdbcc21ff6a87029f84158 *src/mrgsolve.cpp
+45d0ccaf47000f873ec3cd2a68a040c9 *src/mrgsolve.cpp
 dc4893b8bbeaac1ef71c990766df18f0 *src/mrgsolve_init.cpp
 7d4ab290508425b5027b541c320460a5 *src/odeproblem.cpp
 97096c3796bb40a3cd49001bf144f81b *tests/testthat.R
@@ -270,7 +271,7 @@ a01d1fb35897a7e8f5d1628e9281c226 *tests/testthat/test-annot.R
 1c938ca0dda672f8043b79e703f246f8 *tests/testthat/test-cache.R
 99ea0a7e1b0d99861e5b82de417984c6 *tests/testthat/test-carry-out.R
 6dcfc6c762e49b1382c1275035d4df19 *tests/testthat/test-carry_out.R
-ac63f8a92923911060e3c5cf763dea25 *tests/testthat/test-data_set.R
+e548a03eab2280e25315b4d535576e7a *tests/testthat/test-data_set.R
 9e94b4f832b827bba32dbfa8adc48a7f *tests/testthat/test-deslist.R
 70e4129be80dbbda515cae9e8b75557c *tests/testthat/test-dplyr-generics.R
 a6fa79f928fbefa158b07c84d7681a54 *tests/testthat/test-env.R
@@ -278,7 +279,7 @@ a6fa79f928fbefa158b07c84d7681a54 *tests/testthat/test-env.R
 db797f729d88d5b4e87f9ef58c1a19ea *tests/testthat/test-ev_assign.R
 21156fdd48b2434f3fdcf0b9b578be2b *tests/testthat/test-ev_days.R
 a848616e200388f2420db784d10834ec *tests/testthat/test-ev_rx.R
-97d494f6eab6a577306c96de9f51b4da *tests/testthat/test-evd.R
+d7381e4e189f42d78f3f28e69a2df960 *tests/testthat/test-evd.R
 8bc8eedff11dff15e1367df4d62c550c *tests/testthat/test-evid4.R
 5958d2992246caaaa6adda5bb6ba4345 *tests/testthat/test-fixed-cmtn.R
 0ddac765ea0f62ff98eadd9face101da *tests/testthat/test-funset.R
@@ -310,7 +311,7 @@ d60a8b2fe78a6aa119f91c22db66b032 *tests/testthat/test-records.R
 12f4c9b7f6df788ae42669d10a841f62 *tests/testthat/test-recsort.R
 ea349307c9b380fad258320efd7653bd *tests/testthat/test-relabel.R
 652e4c56b18d050899aa0978e922aed0 *tests/testthat/test-rename.R
-606e02653a76522dca28ccb209ae8b75 *tests/testthat/test-rng.R
+9114b4044e58d30a6ccaf0373591ea20 *tests/testthat/test-rng.R
 2a0a0818cef5acb7b709f73a35abf0a7 *tests/testthat/test-ss.R
 3e9aa45aa88c111c9614007e5b3797e8 *tests/testthat/test-tad.R
 a028d16e87959fa13ca7b8471066f62e *tests/testthat/test-tgrid.R
