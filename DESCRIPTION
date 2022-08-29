@@ -1,7 +1,7 @@
 Type: Package
 Package: mrgsolve
 Title: Simulate from ODE-Based Models
-Version: 1.0.4
+Version: 1.0.6
 Authors@R: 
     c(person(given = "Kyle T", family = "Baron",
              role = c("aut", "cre"),
@@ -33,12 +33,12 @@ Description: Fast simulation from ordinary differential equation
 License: GPL (>= 2)
 URL: https://github.com/metrumresearchgroup/mrgsolve
 BugReports: https://github.com/metrumresearchgroup/mrgsolve/issues
-Depends: R (>= 3.1.2), methods
+Depends: R (>= 3.5), methods
 Imports: Rcpp (>= 1.0.7), dplyr (>= 1.0.8), magrittr (>= 2.0.1), tibble
         (>= 3.1.6), rlang (>= 1.0.1), tidyselect (>= 1.1.1), lifecycle,
         glue
-Suggests: lattice, testthat, xml2 (>= 1.2.0), rmarkdown, yaml, knitr,
-        data.table, pmxTools
+Suggests: lattice, testthat, xml2 (>= 1.3.2), rmarkdown, yaml, knitr,
+        data.table (>= 1.14.2), pmxTools
 LinkingTo: Rcpp (>= 1.0.7), RcppArmadillo (>= 0.10.7.3.0), BH (>=
         1.75.0-0)
 RdMacros: lifecycle
@@ -46,7 +46,7 @@ Encoding: UTF-8
 Language: en-US
 LazyLoad: yes
 NeedsCompilation: yes
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.0
 SystemRequirements: C++11
 Collate: 'RcppExports.R' 'utils.R' 'package.R' 'generics.R'
         'class_tgrid.R' 'class_numericlist.R' 'class_matlist.R'
@@ -60,7 +60,7 @@ Collate: 'RcppExports.R' 'utils.R' 'package.R' 'generics.R'
         'nm-mode.R' 'nmxml.R' 'param.R' 'print.R' 'r_to_cpp.R'
         'realize_addl.R' 'relabel.R' 'render.R' 'update.R'
         'workflows.R'
-Packaged: 2022-05-16 18:01:52 UTC; kyleb
+Packaged: 2022-08-29 16:50:54 UTC; kyleb
 Author: Kyle T Baron [aut, cre] (<https://orcid.org/0000-0001-7252-5656>),
   Bill Gillespie [ctb],
   Charles Margossian [ctb],
@@ -71,4 +71,4 @@ Author: Kyle T Baron [aut, cre] (<https://orcid.org/0000-0001-7252-5656>),
   Timothy Waterhouse [ctb] (<https://orcid.org/0000-0002-0954-9660>),
   Metrum Research Group [cph]
 Repository: CRAN
-Date/Publication: 2022-05-16 20:20:02 UTC
+Date/Publication: 2022-08-29 17:30:02 UTC
