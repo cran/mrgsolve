@@ -28,7 +28,7 @@ if(!requireNamespace("xml2",quietly=TRUE)) skip("xml2 is not installed.")
 
 code <- '
 $NMXML
-project=file.path(path.package("mrgsolve"), "nonmem")
+project = file.path(path.package("mrgsolve"), "nonmem")
 run  = 1005
 oname="OMEGA", sname="SIGMA"
 sigma=TRUE
@@ -352,4 +352,34 @@ test_that("nm source file is available via as.list", {
   expect_equal(basename(list1[["nm_import"]]), ans[1])
   expect_equal(basename(list2[["nm_import"]]), ans[2])
   expect_equal(basename(list3[["nm_import"]]), ans)
+})
+
+test_that("use cpp file stem as nm run number nmext [SLV-TEST-0021]", {
+  skip_if_not(file.exists("nm/cppstem-nmext/1005.cpp"))
+  mod <- mread("1005", project = "nm/cppstem-nmext", compile = FALSE)
+  expect_is(mod, "mrgmod")
+  nmext_file <- basename(as.list(mod)[["nm_import"]])
+  expect_equal(nmext_file, "1005.ext")
+})
+
+test_that("use cpp file stem as nm run number nmxml [SLV-TEST-0022]", {
+  skip_if_not(file.exists("nm/cppstem-nmxml/1005.cpp"))
+  mod <- mread("1005", project = "nm/cppstem-nmxml", compile = FALSE)
+  expect_is(mod, "mrgmod")
+  nmxml_file <- basename(as.list(mod)[["nm_import"]])
+  expect_equal(nmxml_file, "1005.xml")
+})
+
+test_that("provide path rather than run and project [SLV-TEST-023]", {
+  skip_if_not(file.exists("nm/1005-path-ext.mod"))
+  mod <- mread("1005-path-ext.mod", project = "nm", compile = FALSE)
+  expect_is(mod, "mrgmod")
+  nmext_file <- basename(as.list(mod)[["nm_import"]])
+  expect_equal(nmext_file, "1005.ext")
+  
+  skip_if_not(file.exists("nm/1005-path-xml.mod"))
+  mod <- mread("1005-path-xml.mod", project = "nm", compile = FALSE)
+  expect_is(mod, "mrgmod")
+  nmxml_file <- basename(as.list(mod)[["nm_import"]])
+  expect_equal(nmxml_file, "1005.xml")
 })
