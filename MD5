@@ -1,4 +1,4 @@
-16c6aa0105e589d7bc969cdac17d9e29 *DESCRIPTION
+9b44f6226966f0afc2d9333428e7b2d1 *DESCRIPTION
 52effee9a250f0ef0c9704a0600d7745 *NAMESPACE
 909c5deb3ef61ddf6f70e680fc70a071 *R/Aaaa.R
 1371e6a197c01d2a85a2968e05f246cb *R/RcppExports.R
@@ -14,7 +14,7 @@ d6a534a917ffdab6cfc8275141356c97 *R/class_evd.R
 ebe4a24a3175d351745bb660570b794b *R/class_numericlist.R
 e8260b56dcc104cec74d986424083322 *R/class_rx.R
 d21882f131878b619ab30e3a241a4432 *R/class_tgrid.R
-0e9ad8ec98e014e68999bfaf70235107 *R/compile.R
+3ef1522e60ad4f64bd446dbfa7b5090a *R/compile.R
 1d2008c0ec86ad4b5f233ace089ef087 *R/data_set.R
 a785bc9db7966f3a8e6679131244101c *R/datasets.R
 e7daba416b5a87281ade90ceacb61285 *R/env.R
@@ -35,7 +35,7 @@ f9cb4652ccda453db2acdcb95f33e881 *R/modspec.R
 28ca31386f1f81ee8f98d0d535ea77d7 *R/mread.R
 a7179c8ff32cba0a0e0ea58dd00f1e1c *R/mrgindata.R
 1cf2d5a8c3762884c4c163d0f7f26b44 *R/mrgsim_q.R
-07177f322ad7f3fe297f4b6caa0134e5 *R/mrgsims.R
+6c12864bb17fc291ec24dbfa3e05def6 *R/mrgsims.R
 f34ecaff315a3eab9eb8f080b626791c *R/mrgsolve.R
 c1699540c69056f66670de655e6eff41 *R/nm-mode.R
 3d8da2b358615ff758fc84ae7b2038f9 *R/nmxml.R
@@ -196,7 +196,7 @@ c766d89086f8b77d50d31b450bce0ed3 *man/mrgsim.Rd
 3f414903182ed6ef306ec3a3f38467a8 *man/mrgsim_variants.Rd
 303d483d37583c964da8b8e7c281d9a8 *man/mrgsims-class.Rd
 216c9299f7d865fc80390888218cc21d *man/mrgsims.Rd
-c9c7bffbc50bf1fd3569f41a8e90d011 *man/mrgsims_dplyr.Rd
+11bc38da48d70daf3199d0b13aeb494d *man/mrgsims_dplyr.Rd
 cbe641d4d397b23fe725164ea4af6a28 *man/mrgsims_modify.Rd
 e538c3ef5fb98d743e6f2870dc3fccf7 *man/mrgsolve_package.Rd
 0346b52ecae34af438363e2806c3559a *man/mvgauss.Rd
