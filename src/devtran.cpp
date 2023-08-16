@@ -305,12 +305,18 @@ Rcpp::List DEVTRAN(const Rcpp::List parin,
       eta = dat.get_etas(neta, false, etasrc);
     } else if(etasrc=="data.all") {
       eta = dat.get_etas(neta, true, etasrc);
+    } else if(etasrc=="idata") {
+      eta = idat.get_etas(neta, false, etasrc); 
+    } else if(etasrc=="idata.all") {
+      eta = idat.get_etas(neta, true, etasrc);
     } else {
       std::string msg = 
         R"(`etasrc` must be either:
-           "omega"    = ETAs simulated from OMEGA
-           "data"     = ETAs imported from the data set
-           "data.all" = strict ETA import from data set)";
+           "omega"     = ETAs simulated from OMEGA
+           "data"      = ETAs imported from the data set
+           "idata"     = ETAs imported from the idata set
+           "data.all"  = strict ETA import from data set
+           "idata.all" = strict ETA import from idata set)";
       CRUMP(msg.c_str());  
     }
   }
@@ -373,7 +379,7 @@ Rcpp::List DEVTRAN(const Rcpp::List parin,
   }
   
   crow = 0; // current output row
-  int crec = 0; // current record number
+  int ic = prob.interrupt; // interrupt counter
   
   prob.nid(dat.nid());
   prob.nrow(NN);
@@ -435,9 +441,9 @@ Rcpp::List DEVTRAN(const Rcpp::List parin,
     
     for(size_t j=0; j < a[i].size(); ++j) {
       
-      ++crec;
-      if(do_interrupt && ((crec % prob.interrupt)==0)) {
+      if(do_interrupt && (!(--ic))) {
         Rcpp::checkUserInterrupt();
+        ic = prob.interrupt;
       }
       
       if(crow == NN) continue;
