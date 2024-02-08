@@ -1,4 +1,4 @@
-// Copyright (C) 2013 - 2023  Metrum Research Group
+// Copyright (C) 2013 - 2024  Metrum Research Group
 //
 // This file is part of mrgsolve.
 //
@@ -299,8 +299,10 @@ Rcpp::List DEVTRAN(const Rcpp::List parin,
   if(neta > 0) {
     const std::string etasrc = Rcpp::as<std::string> (parin["etasrc"]);
     prob.set_eta();
+    eta = prob.mv_omega(NID); 
     if(etasrc=="omega") {
-      eta = prob.mv_omega(NID); 
+      // Nothing else to do; we always simulate
+      // from omega if neta > 0
     } else if(etasrc=="data") {
       eta = dat.get_etas(neta, false, etasrc);
     } else if(etasrc=="data.all") {
@@ -624,7 +626,7 @@ Rcpp::List DEVTRAN(const Rcpp::List parin,
         for(size_t mti = 0; mti < mt.size(); ++mti) {
           // Unpack and check
           double this_time = (mt[mti]).time;
-          if(this_time < tto) continue;
+          if(this_time < tto && !mt[mti].now) continue;
           unsigned int this_evid = (mt[mti]).evid;
           if(this_evid==0) continue;
           double this_amt = mt[mti].amt;
