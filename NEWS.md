@@ -1,3 +1,8 @@
+# mrgsolve 1.4.1
+
+- Fix bug in `evt::regimen.ii(double)` where timing of next dose 
+  was not as expected (#1170).
+
 # mrgsolve 1.4.0
 
 - `evtools` is a new plugin providing API for dynamic dosing from within the 

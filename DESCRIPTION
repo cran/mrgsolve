@@ -1,7 +1,7 @@
 Type: Package
 Package: mrgsolve
 Title: Simulate from ODE-Based Models
-Version: 1.4.0
+Version: 1.4.1
 Authors@R: 
     c(person(given = "Kyle T", family = "Baron",
              role = c("aut", "cre"),
@@ -61,7 +61,7 @@ Collate: 'RcppExports.R' 'utils.R' 'package.R' 'generics.R'
         'nm-mode.R' 'nmxml.R' 'param.R' 'print.R' 'r_to_cpp.R'
         'realize_addl.R' 'relabel.R' 'render.R' 'update.R'
         'workflows.R'
-Packaged: 2024-02-07 21:32:59 UTC; kyleb
+Packaged: 2024-02-13 14:44:56 UTC; kyleb
 Author: Kyle T Baron [aut, cre] (<https://orcid.org/0000-0001-7252-5656>),
   Bill Gillespie [ctb],
   Charles Margossian [ctb],
@@ -73,4 +73,4 @@ Author: Kyle T Baron [aut, cre] (<https://orcid.org/0000-0001-7252-5656>),
   Kyle Meyer [ctb],
   Metrum Research Group [cph]
 Repository: CRAN
-Date/Publication: 2024-02-08 08:10:10 UTC
+Date/Publication: 2024-02-14 00:50:58 UTC
