@@ -1,7 +1,7 @@
 Type: Package
 Package: mrgsolve
 Title: Simulate from ODE-Based Models
-Version: 1.4.1
+Version: 1.5.1
 Authors@R: 
     c(person(given = "Kyle T", family = "Baron",
              role = c("aut", "cre"),
@@ -48,7 +48,7 @@ Encoding: UTF-8
 Language: en-US
 LazyLoad: yes
 NeedsCompilation: yes
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 Collate: 'RcppExports.R' 'utils.R' 'package.R' 'generics.R'
         'class_tgrid.R' 'class_numericlist.R' 'class_matlist.R'
         'class_ev.R' 'class_derived.R' 'class_mrgmod.R'
@@ -58,10 +58,10 @@ Collate: 'RcppExports.R' 'utils.R' 'package.R' 'generics.R'
         'idata_set.R' 'init.R' 'inven.R' 'knobs.R' 'matlist.R'
         'matrix.R' 'mcode.R' 'model_include.R' 'modlib.R' 'modspec.R'
         'mread.R' 'mrgindata.R' 'mrgsim_q.R' 'mrgsims.R' 'mrgsolve.R'
-        'nm-mode.R' 'nmxml.R' 'param.R' 'print.R' 'r_to_cpp.R'
-        'realize_addl.R' 'relabel.R' 'render.R' 'update.R'
+        'mwrite.R' 'nm-mode.R' 'nmxml.R' 'param.R' 'print.R'
+        'r_to_cpp.R' 'realize_addl.R' 'relabel.R' 'render.R' 'update.R'
         'workflows.R'
-Packaged: 2024-02-13 14:44:56 UTC; kyleb
+Packaged: 2024-07-25 23:44:14 UTC; kyleb
 Author: Kyle T Baron [aut, cre] (<https://orcid.org/0000-0001-7252-5656>),
   Bill Gillespie [ctb],
   Charles Margossian [ctb],
@@ -73,4 +73,4 @@ Author: Kyle T Baron [aut, cre] (<https://orcid.org/0000-0001-7252-5656>),
   Kyle Meyer [ctb],
   Metrum Research Group [cph]
 Repository: CRAN
-Date/Publication: 2024-02-14 00:50:58 UTC
+Date/Publication: 2024-07-26 04:20:02 UTC

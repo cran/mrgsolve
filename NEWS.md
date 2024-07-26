@@ -1,3 +1,46 @@
+# mrgsolve 1.5.1
+
+- Fixed `yaml_to_cpp()` example code to prevent saving the file to the 
+  working directory (#1220). 
+
+# mrgsolve 1.5.0
+
+- New functions `mwrite_yaml()` and `mwrite_cpp()` can write a model object back
+  to a file, accounting for all updates since the model was read from native
+  mrgsolve format using `mread()` (#1190, #1213).
+  
+- New function `mread_yaml()` for reading back models written out with 
+  `mwrite_yaml()` (#1190, #1213).
+  
+- New functions in `evtools` plugin: `evt::replace()` works like `evt::bolus()`,
+  but will replace the amount in a given compartment rather than add to it
+  (#1203).
+  
+- The `nm-vars` plugin now exposes `DEXP()`, `LOG10()`, `COS()` and `SIN()` 
+  for use in the mrgsolve C++ code blocks (#1199).
+
+- An error is now generated when `KA` is equal to `CL/VC` while simulating from
+  the one-compartment model with analytical solution invoked through 
+  `$PKMODEL` (#1179, #1197). 
+
+
+## Bugs Fixed
+
+- A bug was fixed when certain data frame inputs were passed to `as_data_set()`
+  (#1115, #1196). 
+
+# mrgsolve 1.4.2
+
+- An error will now be issued at simulation time when simulation data sets 
+  (data and idata) contain non-numeric data in columns sharing names with
+  parameters; non-numeric data in columns with certain reserved names 
+  (like `AMT`, `RATE`, `II`, `ADDL`, etc.) will also result in an error
+  (#1193).
+  
+- Internal refactoring to improve performance when simulating infusions or 
+  doses with lag times when those doses are coded explicitly in the data
+  set (#1186, #1187).
+
 # mrgsolve 1.4.1
 
 - Fix bug in `evt::regimen.ii(double)` where timing of next dose 
