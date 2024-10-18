@@ -53,6 +53,9 @@ struct evdata {
     cmt = 1;
     amt = 0.0;
     rate = 0.0;
+    ii = 0.0;
+    ss = 0; 
+    addl = 0;
     now = false;
     check_unique = false;
   } 
@@ -61,6 +64,9 @@ struct evdata {
   int cmt;
   double amt; 
   double rate;
+  double ii; 
+  int ss; 
+  int addl;
   bool now;
   bool check_unique;
 }; 
@@ -125,6 +131,10 @@ typedef std::vector<double> dvec;
 //! signature for <code>$TABLE</code>
 #define MRGSOLVE_TABLE_SIGNATURE const dvec& _A_, const dvec& _A_0_,  dvec& _THETA_,  const dvec& _F_, const dvec& _R_,  databox& self, const dvec& _pred_, dvec& _capture_, mrgsolve::resim& simeps
 #define MRGSOLVE_TABLE_SIGNATURE_N 9
+
+//! signature for <code>$EVENT</code> same as what we use for <code>$TABLE</code>
+#define MRGSOLVE_EVENT_SIGNATURE MRGSOLVE_TABLE_SIGNATURE
+#define MRGSOLVE_EVENT_SIGNATURE_N MRGSOLVE_TABLE_SIGNATURE_N
 
 //! signature for <code>$ODE</code>
 #define MRGSOLVE_ODE_SIGNATURE const double* _ODETIME_, const double* _A_, double* _DADT_,  const dvec& _A_0_, const dvec& _THETA_, const bool _ss_flag_
