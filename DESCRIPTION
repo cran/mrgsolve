@@ -1,7 +1,7 @@
 Type: Package
 Package: mrgsolve
 Title: Simulate from ODE-Based Models
-Version: 1.5.2
+Version: 1.6.1
 Authors@R: 
     c(person(given = "Kyle T", family = "Baron",
              role = c("aut", "cre"),
@@ -54,24 +54,27 @@ Collate: 'RcppExports.R' 'utils.R' 'package.R' 'generics.R'
         'class_tgrid.R' 'class_numericlist.R' 'class_matlist.R'
         'class_ev.R' 'class_derived.R' 'class_mrgmod.R'
         'class_mrgsims.R' 'Aaaa.R' 'annot.R' 'chain.R' 'class_build.R'
-        'class_evd.R' 'events.R' 'class_rx.R' 'compile.R' 'data_set.R'
-        'datasets.R' 'env.R' 'funset.R' 'handle_spec_block.R'
-        'idata_set.R' 'init.R' 'inven.R' 'knobs.R' 'matlist.R'
-        'matrix.R' 'mcode.R' 'model_include.R' 'modlib.R' 'modspec.R'
-        'mread.R' 'mrgindata.R' 'mrgsim_q.R' 'mrgsims.R' 'mrgsolve.R'
-        'mwrite.R' 'nm-mode.R' 'nmxml.R' 'param.R' 'print.R'
-        'r_to_cpp.R' 'realize_addl.R' 'relabel.R' 'render.R' 'update.R'
-        'workflows.R'
-Packaged: 2024-10-18 12:42:49 UTC; kyleb
-Author: Kyle T Baron [aut, cre] (<https://orcid.org/0000-0001-7252-5656>),
+        'class_evd.R' 'events.R' 'class_rx.R' 'compile.R'
+        'custom-tol.R' 'data_set.R' 'datasets.R' 'env.R' 'funset.R'
+        'handle_spec_block.R' 'idata_set.R' 'init.R' 'inven.R'
+        'knobs.R' 'matlist.R' 'matrix.R' 'mcode.R' 'model_include.R'
+        'modlib.R' 'modspec.R' 'mread.R' 'mrgindata.R' 'mrgsim_q.R'
+        'mrgsims.R' 'mrgsolve.R' 'mwrite.R' 'nm-mode.R' 'nmxml.R'
+        'param.R' 'print.R' 'r_to_cpp.R' 'realize_addl.R' 'relabel.R'
+        'render.R' 'update.R' 'workflows.R'
+Packaged: 2025-07-31 15:59:53 UTC; kyleb
+Author: Kyle T Baron [aut, cre] (ORCID:
+    <https://orcid.org/0000-0001-7252-5656>),
   Bill Gillespie [ctb],
   Charles Margossian [ctb],
   Devin Pastoor [ctb],
-  Bill Denney [ctb] (<https://orcid.org/0000-0002-5759-428X>),
+  Bill Denney [ctb] (ORCID: <https://orcid.org/0000-0002-5759-428X>),
   Dilawar Singh [ctb],
-  Felicien Le Louedec [ctb] (<https://orcid.org/0000-0003-3699-2729>),
-  Timothy Waterhouse [ctb] (<https://orcid.org/0000-0002-0954-9660>),
+  Felicien Le Louedec [ctb] (ORCID:
+    <https://orcid.org/0000-0003-3699-2729>),
+  Timothy Waterhouse [ctb] (ORCID:
+    <https://orcid.org/0000-0002-0954-9660>),
   Kyle Meyer [ctb],
   Metrum Research Group [cph]
 Repository: CRAN
-Date/Publication: 2024-10-18 13:20:05 UTC
+Date/Publication: 2025-08-22 06:00:02 UTC

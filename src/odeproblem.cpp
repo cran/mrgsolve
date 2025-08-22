@@ -1,4 +1,4 @@
-// Copyright (C) 2013 - 2024  Metrum Research Group
+// Copyright (C) 2013 - 2025  Metrum Research Group
 //
 // This file is part of mrgsolve.
 //
@@ -242,12 +242,12 @@ void odeproblem::init_call_record(const double& time) {
 
 //! Call <code>$TABLE</code> function.
 void odeproblem::table_call() {
-  Table(Y,Init_value,Param,F,R,d,pred,Capture,simeps);  
+  Table(Init_value,Y,Param,F,Alag,R,D,d,pred,Capture,simeta,simeps);  
 }
 
 //! Call <code>$EVENT</code> function.
 void odeproblem::event_call() {
-  Event(Y,Init_value,Param,F,R,d,pred,Capture,simeps);  
+  Event(Init_value,Y,Param,F,Alag,R,D,d,pred,Capture,simeta,simeps);  
 }
 
 //! Call <code>$PREAMBLE</code> function.
@@ -363,7 +363,7 @@ void odeproblem::advance(double tfrom, double tto, LSODA& solver) {
   solver.lsoda_update(main_derivs,Neq,Y,Yout,&tfrom,tto,&Istate,this);
   
   if(Istate < 0) {
-    negative_istate(Istate, solver.Maxsteps, solver.Rtol, solver.Atol);  
+    negative_istate(Istate, solver.Maxsteps, solver.Rtol, solver.Atol, solver.itol);  
   }
   
   this->init_derivs(tto);
