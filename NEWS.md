@@ -1,3 +1,41 @@
+# mrgsolve 1.7.2
+
+- An individual record counter has been added. Use `self.inrow` to get the number of
+  output rows for the current individual; use `self.irown` to get the zero-indexed row
+  number for the current individual; these are similar to `self.nrow` and `self.rown`, 
+  which count records for the entire output data set (#1313). 
+
+## Bugs Fixed
+
+- The `code` argument to `mcode()` now accepts a character vector with length 
+  greater than 1; passing multiple lines previously caused a compile error (#1310). 
+
+
+# mrgsolve 1.7.1
+
+- The 1.7.0 release added safety checks to help users avoid an unintentional
+  mismatch between model code and data set.  These checks now signal a warning
+  instead of an error to give downstream tools that use mrgsolve more
+  flexibility in how they adjust to the checks (#1307).
+
+# mrgsolve 1.7.0
+
+- Safety checks added to avoid unintentional mismatch between model code and 
+  data set when infusion duration (`Dn`) or rate (`Rn`) are modeled in 
+  `$PK` (#1304).
+  - If there is a positive infusion duration in the model (e.g., `D1` 
+    in `$PK`) and data set rate is not -2 on a dosing record, an error will be 
+    issued. If there is a positive infusion rate in the model (e.g., `R1` 
+    in `$PK`) and data set rate is not -1 on a dosing record, a similar error 
+    will be issued (check direction: model to data set).
+  - These checks are in addition to existing behavior that issued an error
+    when rate was -1 or -2 in the data and `R1` or `D1` were not set to a 
+    positive value in the model (the opposite check direction: data set to 
+    model).
+  - Original behavior can be restored by turning off these checks either by a 
+    block option (`@!check_modeled_infusions`) on `$PK` or through the 
+    `CHECK_MODELED_INFUSIONS` macro available in `$PREAMBLE` only.
+
 # mrgsolve 1.6.1
 
 - Internal refactor of `self.mevent()` and `self.mtime()` to _not_ send event

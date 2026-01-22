@@ -1,4 +1,4 @@
-// Copyright (C) 2013 - 2024  Metrum Research Group
+// Copyright (C) 2013 - 2026  Metrum Research Group
 //
 // This file is part of mrgsolve.
 //
@@ -136,21 +136,25 @@ public:
   
   const std::vector<double>& param() {return Param;}
   void param(int pos, double value) {Param[pos] = value;}
-  
+
+  void check_data_rate(rec_ptr rec, int cmtn);
+  void check_modeled_dur(rec_ptr rec); 
+  void check_modeled_rate(rec_ptr rec);
+
   void rate(unsigned int pos, double value) {R[pos] = value;}
-  double rate(unsigned int pos) {return R[pos];}
+  double rate(unsigned int pos);
   void rate0(unsigned int pos, double value) {R0[pos] = value;}
-  double rate0(unsigned int pos){return R0[pos];}
-  
+  double rate0(unsigned int pos);
+
   int rate_count(unsigned int pos){return infusion_count[pos];}
   void rate_add(unsigned int pos, const double& value);
   void rate_rm(unsigned int pos,  const double& value);
   void rate_bump(const unsigned int pos, const double& value);
-  void rate_main(rec_ptr rec);
+  void rate_main(rec_ptr rec, int cmtn);
   void rate_reset();
   
   void dur(unsigned int pos, double value) {D[pos] = value;}
-  double dur(unsigned int pos){return D[pos];}
+  double dur(unsigned int pos);
   
   void reset_newid(const double id_);
   
@@ -181,10 +185,14 @@ public:
   int neta(){return Omega.n_rows;}
   int neps(){return Sigma.n_rows;}
   
-  void nid(int n) {d.nid = n;}///< sets the number of IDs
-  void nrow(int n) {d.nrow = n;}///< sets the number of data set rows
-  void idn(int n) {d.idn = n;}///< sets the current ID number
-  void rown(int n) {d.rown=n;}///< sets the currenw data set row number
+  void nid(int n) {d.nid=n;}///< sets the number of IDs
+  void idn(int n) {d.idn=n;}///< sets the current ID number
+  
+  void nrow(int n) {d.nrow=n;}///< sets the number of data set rows
+  void rown(int n) {d.rown=n;}///< sets the current data set row number
+  
+  void inrow(int n) {d.inrow=n;}///< sets number of output rows for current ID
+  void irown(int n) {d.irown=n;}///< sets the output row number for current ID
   
   dvec& get_capture() {return Capture;}
   double capture(int i) {return Capture[i];}
@@ -226,6 +234,7 @@ public:
   bool ss_flag; ///< flag indicating when the system is advancing to SS
   std::vector<int> Ss_cmt; ///< vector of compartments to consider for SS
 
+  bool check_modeled_infusions;
   std::vector<double> R0; ///< acutal current infusion rate
   std::vector<unsigned int> infusion_count; ///< number of active infusions
   std::vector<double> R; ///< receive user input for infusion rate
