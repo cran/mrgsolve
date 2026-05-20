@@ -1,4 +1,4 @@
-# Copyright (C) 2013 - 2025 Metrum Research Group
+# Copyright (C) 2013 - 2026  Metrum Research Group
 #
 # This file is part of mrgsolve.
 #
@@ -100,49 +100,6 @@ check_globals <- function(x,cmt) {
   return(invisible(NULL))
 }
 
-check_cpp_dot <- function(env, x) {
-  # Vast majority of models will just return
-  if(is.null(env[["cpp_dot"]])) return(NULL)
-  cpp_dot <- env[["cpp_dot"]]
-  dont_check <- x@envir[["MRGSOLVE_CPP_DOT_SKIP"]]
-  if(is.character(dont_check)) {
-    dont_check <- cvec_cs(dont_check)
-    cpp_dot <- setdiff(cpp_dot, dont_check)
-  } 
-  if(!length(cpp_dot)) return(NULL)
-  mod_names <- names(x)
-  mod_names <- mod_names[c("param", "init", "omega_labels", "sigma_labels")]
-  mod_labels <- unlist(mod_names, use.names = FALSE)
-  bad <- cpp_dot[cpp_dot %in% mod_labels]
-  bad <- setdiff(bad, Reserved)  
-  if(!length(bad)) return(NULL)
-  mod_names$sigma_labels <- unlist(mod_names$sigma_labels, use.names = FALSE)
-  mod_names$omega_labels <- unlist(mod_names$omega_labels, use.names = FALSE)
-  for(i in seq_along(bad)) {
-    if(bad[i] %in% mod_names$param) {
-      bad[i] <- paste(bad[i], "(parameter)")
-    }
-    if(bad[i] %in% mod_names$init) {
-      bad[i] <- paste(bad[i], "(compartment)")
-    }
-    if(bad[i] %in% mod_names$omega_labels) {
-      bad[i] <- paste(bad[i], "(eta label)")
-    }
-    if(bad[i] %in% mod_names$sigma_labels) {
-      bad[i] <- paste(bad[i], "(eps label)")
-    }
-  }
-  if(length(bad) > 1) {
-    msg <- "Reserved symbols cannot be used as model names:"
-    foot <- "These symbols became reserved because they were detected in C++ model code."
-  } else {
-    msg <- "Reserved symbol cannot be used as model name:"
-    foot <- "This symbol became reserved because it was detected in C++ model code."
-  }
-  names(bad) <- rep("x", length(bad))
-  abort(c(msg, bad), footer = foot)
-}
-
 protomod <- list(model=character(0),
                  modfile = character(0),
                  package=character(0),
@@ -210,13 +167,13 @@ valid.mrgmod <- function(object) {
   tags <- unlist(tags, use.names=FALSE)
   x <- check_names(tags,Pars(object),Cmt(object))
   x1 <- length(x)==0
-  x2 <- object@advan %in% c(0,1,2,3,4,13)
+  x2 <- object@advan %in% c(0,1,2,3,4,11,12,13)
   x3 <- !any(object@capture %in% Cmt(object))
   fun <- valid_funs(object@funs)
   cool <- x1 & x2 & fun[[1]] & x3
   if(cool) return(TRUE)
   x <- c(x,fun[[2]])
-  if(!x2) x <- c(x,"advan must be 1, 2, 3, 4, or 13")
+  if(!x2) x <- c(x,"advan must be 1, 2, 3, 4, 11, 12, or 13")
   if(!x3) {
     invalid <- intersect(object@capture,Cmt(object))
     invalid <- paste0(invalid,collapse=",")
@@ -840,7 +797,7 @@ file_show <- function(x,spec=TRUE,source=TRUE,...) {
   do.call(base::file.show,what)
 }
 
-
+#' @method all.equal mrgmod
 #' @export
 all.equal.mrgmod <- function(target, current,...) {
   target.env <- as.list(target@envir)

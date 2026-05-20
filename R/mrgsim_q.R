@@ -163,7 +163,7 @@ mrgsim_q <- function(x,
     PACKAGE = "mrgsolve"
   )[["data"]]
   
-  names(out) <- c("ID", tcol, x@cmtL, x@capL)
+  out <- mat2df(out, c("ID", tcol, x@cmtL, x@capL))
   
   if(output=="df") {
     return(out)  

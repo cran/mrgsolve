@@ -21,13 +21,13 @@
 
 \method{filter}{mrgsims}(.data, ...)
 
-\method{group_by}{mrgsims}(.data, ..., add = FALSE, .add = FALSE)
+\method{group_by}{mrgsims}(.data, ..., .add = FALSE)
 
 \method{distinct}{mrgsims}(.data, ..., .keep_all = FALSE)
 
 \method{mutate}{mrgsims}(.data, ...)
 
-\method{summarise}{each}(.data, funs, ...)
+\method{summarise}{each}(...)
 
 \method{summarise}{mrgsims}(.data, ...)
 
@@ -44,19 +44,15 @@ as_data_frame.mrgsims(x, ...)
 as.tbl.mrgsims(x, ...)
 }
 \arguments{
-\item{.data}{an mrgsims object; passed to various \code{dplyr} functions}
+\item{.data}{an mrgsims object; passed to various \code{dplyr} functions.}
 
-\item{...}{passed to other methods}
+\item{...}{passed to other methods.}
 
-\item{add}{passed to \link[dplyr:group_by]{dplyr::group_by} (for dplyr < \verb{1.0.0})}
+\item{.add}{passed to \code{\link[dplyr:group_by]{dplyr::group_by()}}.}
 
-\item{.add}{passed to \link[dplyr:group_by]{dplyr::group_by} (for dplyr >= \verb{1.0.0})}
+\item{.keep_all}{passed to \code{\link[dplyr:distinct]{dplyr::distinct()}}.}
 
-\item{.keep_all}{passed to \link[dplyr:distinct]{dplyr::distinct}}
-
-\item{funs}{passed to \link[dplyr:summarise_each]{dplyr::summarise_each}}
-
-\item{.dots}{passed to various \code{dplyr} functions}
+\item{.dots}{passed to various \code{dplyr} functions.}
 
 \item{x}{mrgsims object.}
 }

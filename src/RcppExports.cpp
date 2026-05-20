@@ -27,6 +27,52 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// convert_pow_impl
+Rcpp::CharacterVector convert_pow_impl(Rcpp::CharacterVector code, std::string block);
+RcppExport SEXP _mrgsolve_convert_pow_impl(SEXP codeSEXP, SEXP blockSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type code(codeSEXP);
+    Rcpp::traits::input_parameter< std::string >::type block(blockSEXP);
+    rcpp_result_gen = Rcpp::wrap(convert_pow_impl(code, block));
+    return rcpp_result_gen;
+END_RCPP
+}
+// warn_int_div_impl
+Rcpp::CharacterVector warn_int_div_impl(Rcpp::CharacterVector code, std::string block);
+RcppExport SEXP _mrgsolve_warn_int_div_impl(SEXP codeSEXP, SEXP blockSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type code(codeSEXP);
+    Rcpp::traits::input_parameter< std::string >::type block(blockSEXP);
+    rcpp_result_gen = Rcpp::wrap(warn_int_div_impl(code, block));
+    return rcpp_result_gen;
+END_RCPP
+}
+// convert_fort_if_impl
+Rcpp::CharacterVector convert_fort_if_impl(Rcpp::CharacterVector code);
+RcppExport SEXP _mrgsolve_convert_fort_if_impl(SEXP codeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type code(codeSEXP);
+    rcpp_result_gen = Rcpp::wrap(convert_fort_if_impl(code));
+    return rcpp_result_gen;
+END_RCPP
+}
+// convert_semicolons_impl
+Rcpp::CharacterVector convert_semicolons_impl(Rcpp::CharacterVector code);
+RcppExport SEXP _mrgsolve_convert_semicolons_impl(SEXP codeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type code(codeSEXP);
+    rcpp_result_gen = Rcpp::wrap(convert_semicolons_impl(code));
+    return rcpp_result_gen;
+END_RCPP
+}
 // MVGAUSS
 arma::mat MVGAUSS(Rcpp::NumericMatrix& OMEGA_, int n);
 RcppExport SEXP _mrgsolve_MVGAUSS(SEXP OMEGA_SEXP, SEXP nSEXP) {
@@ -107,6 +153,18 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const Rcpp::IntegerVector& >::type to_copy(to_copySEXP);
     Rcpp::traits::input_parameter< const Rcpp::IntegerVector& >::type next_pos(next_posSEXP);
     rcpp_result_gen = Rcpp::wrap(EXPAND_OBSERVATIONS(data, times, to_copy, next_pos));
+    return rcpp_result_gen;
+END_RCPP
+}
+// mat2df
+Rcpp::List mat2df(Rcpp::NumericMatrix const& x, Rcpp::CharacterVector nm);
+RcppExport SEXP _mrgsolve_mat2df(SEXP xSEXP, SEXP nmSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix const& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type nm(nmSEXP);
+    rcpp_result_gen = Rcpp::wrap(mat2df(x, nm));
     return rcpp_result_gen;
 END_RCPP
 }

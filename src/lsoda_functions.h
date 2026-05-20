@@ -35,7 +35,7 @@ void LSODA::setup_tol_vectors(const Rcpp::S4& mod) {
   Rcpp::NumericVector xatol_ = Rcpp::as<Rcpp::NumericVector>(mod.slot("vec_atol"));
   Rcpp::NumericVector xrtol_ = Rcpp::as<Rcpp::NumericVector>(mod.slot("vec_rtol"));
   bool size_error = false;
-  if(xatol_.size() != Neq) {
+  if(static_cast<int>(xatol_.size()) != Neq) {
     std::string size = std::to_string(xatol_.size());
     std::string expect = std::to_string(Neq);
     Rcpp::CharacterVector text = 
@@ -43,7 +43,7 @@ void LSODA::setup_tol_vectors(const Rcpp::S4& mod) {
     Rcpp::message(text);
     size_error = true;
   }
-  if(xrtol_.size() != Neq) {
+  if(static_cast<int>(xrtol_.size()) != Neq) {
     std::string size = std::to_string(xrtol_.size());
     std::string expect = std::to_string(Neq);
     Rcpp::CharacterVector text = 
@@ -57,7 +57,7 @@ void LSODA::setup_tol_vectors(const Rcpp::S4& mod) {
   // initialize to the default
   atol_.assign(Neq+1,1e-8);
   rtol_.assign(Neq+1,1e-8);
-  for(size_t i = 0; i < Neq; ++i) {
+  for(int i = 0; i < Neq; ++i) {
     // tolerances in the solver object start at index 1
     atol_[i+1] = xatol_[i]; 
     rtol_[i+1] = xrtol_[i];
@@ -73,11 +73,11 @@ bool LSODA::abs_compare(double a, double b)
 size_t LSODA::idamax1(const vector<double> &dx, const size_t n, const size_t offset = 0)
 {
 
-    size_t v = 0, vmax = 0;
+    double v = 0, vmax = 0;
     size_t idmax = 1;
     for (size_t i = 1; i <= n; ++i)
     {
-        v = abs(dx[i + offset]);
+        v = std::fabs(dx[i + offset]);
         if (v > vmax)
         {
             vmax = v;

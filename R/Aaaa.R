@@ -1,4 +1,4 @@
-# Copyright (C) 2013 - 2024  Metrum Research Group
+# Copyright (C) 2013 - 2026  Metrum Research Group
 #
 # This file is part of mrgsolve.
 #
@@ -25,7 +25,7 @@
 #' @importFrom dplyr intersect select rename do slice pull
 #' @importFrom dplyr if_else summarise_each is.tbl select
 #' @importFrom dplyr group_by ungroup n left_join
-#' @importFrom tidyselect vars_select everything
+#' @importFrom tidyselect all_of vars_select everything
 #' @importFrom magrittr %>%
 #' @importFrom tibble tibble as_tibble
 #' @importFrom rlang quos enquo enquos quo_name syms !!! !! eval_tidy as_label
@@ -60,7 +60,9 @@ GLOBALS$ADVAN_PARMS <- list(
   "1" = c("CL","V"),
   "2" = c("CL","V","KA"),
   "3" = c("CL","V1","Q","V2"),
-  "4" = c("CL","V2","Q","V3","KA")
+  "4" = c("CL","V2","Q","V3","KA"),
+  "11" = c("CL","V1","Q2","V2","Q3","V3"),
+  "12" = c("CL","V2","Q3","V3","KA","Q4","V4")
 )
 GLOBALS$CARRY_TRAN_UC <- c("AMT", "CMT", "EVID", "II", "ADDL", "RATE", "SS")
 GLOBALS$CARRY_TRAN_LC <- tolower(GLOBALS[["CARRY_TRAN_UC"]])
@@ -89,6 +91,10 @@ GLOBALS$SET_ARGS <- c("Req", "obsonly", "recsort", "carry.out", "Trequest",
 )
 GLOBALS[["version"]] <- utils::packageVersion("mrgsolve")
 
+GLOBALS[["PRE_PROC_BLOCKS"]] <- c(
+  "PREAMBLE", "MAIN", "PK", "ODE", "DES", "EVENT", "TABLE", "ERROR", "PRED"  
+)
+
 block_list <- c("ENV", "PROB", "PARAM", "INIT",
                 "CMT", "ODE", "DES", "MAIN", "TABLE",
                 "FIXED", "CMTN", "THETA", "NMXML", "VCMT",
@@ -106,7 +112,8 @@ Reserved_cvar <- c("SOLVERTIME","table","ETA","EPS", "AMT", "CMT",
                    "NEWIND", "DONE", "CFONSTOP", "DXDTZERO",
                    "CFONSTOP","INITSOLV","_F", "_R","_ALAG",
                    "SETINIT", "report", "_VARS_", "VARS", 
-                   "SS_ADVANCE", "END_OF_INFUSION", "CHECK_MODELED_INFUSIONS")
+                   "SS_ADVANCE", "END_OF_INFUSION", "CHECK_MODELED_INFUSIONS", 
+                   "FINAL_ROW", "FINAL_IROW")
 
 Reserved <- c("ID", "amt", "cmt", "ii", "ss", "evid",
               "addl", "rate","time", Reserved_cvar,
@@ -115,7 +122,7 @@ Reserved <- c("ID", "amt", "cmt", "ii", "ss", "evid",
               "double", "int", "bool", "capture", 
               "until", "now")
 
-Reserved_nm <- c("A", "DADT", "A_0", "T")
+Reserved_nm <- c("A", "DADT", "A_0", "T", "ERR")
 
 globalVariables(c("test_package","time", "ID","block", "descr",
                   "everything", "TIME", "address","x", 
@@ -125,7 +132,8 @@ globalVariables(c("test_package","time", "ID","block", "descr",
 
 VERSION <- utils::packageVersion("mrgsolve")
 
-DPLYR_1_0_0 <- packageVersion("dplyr") >= '0.8.99.9000'
+# Keep to support mt_fun function in inst/mrgx/mrgx.h
+mrgx_mt_fun <- function() {}
 
 #' Forward pipe
 #' 

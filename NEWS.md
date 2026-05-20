@@ -1,3 +1,152 @@
+# mrgsolve 2.0.1
+
+## Bugs Fixed
+
+- Fixed a bug causing an error when calling `pow_convert()` on empty model 
+  code blocks. (#1381)
+
+- Fixed a compilation error under C++20, the default standard in R 4.6.0. 
+  A `boost::static_visitor` initialization in `dsl-preprocess.cpp` used 
+  list initialization (`Emitter{}`) that is disallowed in C++20; changed
+  to value initialization (`Emitter()`). (#1385, fixes #1384)
+
+## Internal
+
+- Column names are now assigned to the simulation output matrix in place,
+  avoiding an extra copy of the simulated data. (#1383, #1387)
+
+- Updated the simulation loop to clear an individual's records before moving 
+  to the next individual; this should improve memory utilization, especially 
+  for very large simulation output. (#1388)
+
+
+# mrgsolve 2.0.0
+
+## Breaking Changes
+
+- `data_set()` and `idata_set()` no longer accept `.subset`, `.select`,
+  `object`, or `need` arguments. These arguments allowed filtering and
+  column selection inside the call; that processing should now be done on the
+  data frame before passing it to `data_set()` or `idata_set()`. (#1374)
+
+- The `n` argument to `simeta()` and `simeps()` has been discouraged for a
+  while and is now removed. Calling `simeta(n)` or `simeps(n)` to resimulate 
+  a single ETA or EPS value is no longer supported. Use `simeta()` or `simeps()` 
+  (no argument) to resimulate all values. (#1373)
+
+- `knobs()`, `wf_sweep()`, and `render()` have been removed. These
+  functions were previously deprecated. (#1369)
+
+- The default value of `root` in `$NMXML` and `$NMEXT` has changed from
+  `"working"` to `"cppfile"`. The root directory for locating NONMEM
+  output files now defaults to the directory containing the model `.cpp` file
+  rather than the R working directory. Pass `root = "working"` to restore the
+  previous behavior; but users are _highly_ encouraged to use the new default.
+  (#1368)
+
+- `summarise.each()` is removed; it has not been practically reachable by the 
+  user for several years (#1352).
+
+- Several `modlib` model library models have had parameter and compartment
+  names standardized (#1361):
+  - The first extravascular compartment is now named `EV` (was `EV1`) in
+    `pk1cmt`, `pk2cmt`, `irm1`-`irm4`, and `emax`.
+  - The first absorption rate constant is now named `KA` (was `KA1`) in
+    models that previously used numbered names.
+  - Code that references these compartments or parameters by name (e.g.,
+    `init(mod, EV1 = 0)` or `param(mod, KA1 = 1)`) will need to be updated.
+  - We continue to discourage users from using these models in production 
+    code. 
+
+## New Features
+
+- Models can now use `a ** b` syntax to represent `pow(a, b)`; this syntax is
+  always available, without need to invoke a plugin (#1360).
+
+- With the `nm-vars` plugin, mrgsolve now recognizes NONMEM / Fortran 
+  `IF / ELSE / THEN` statements; this code can be left in your model and 
+  mrgsolve will convert to appropriate C++ under the hood (#1360).
+
+- `ERR(n)` is now recognized as an alias for `EPS(n)` when using the `nm-vars`
+  plugin (#1367).
+
+- New DSL preprocessing functions convert NONMEM/Fortran model code to 
+  mrgsolve / C++ syntax (#1360, #1362, #1366):
+  - `convert_pow()` converts Fortran `**` exponentiation to `pow()`.
+  - `convert_fort_if()` converts Fortran `IF/THEN/ELSE/END IF` blocks to C++
+    `if/else` syntax.
+  - `convert_semicolons()` inserts missing trailing semicolons on assignment
+    statements.
+  - RStudio addins are provided to allow conversion of certain NONMEM source 
+    code blocks to mrgsolve format in the RStudio editor window.
+
+- Closed-form three-compartment linear models with or without depot compartments
+  can now be implemented via `$PKMODEL` (#1345).
+
+- `$PKMODEL` gains an `advan` input for selecting 1, 2, or 3 compartment
+  models with analytical solutions; for example, setting `advan` to 2, 4,
+  or 12 will give you 1, 2, or 3 compartment model in closed form with a
+  depot compartment. When `advan` is specified, compartments with standard 
+  names are automatically registered if neither `$INIT` nor `$CMT` are 
+  found in the model file and no compartments are registered at the time 
+  that `$PKMODEL` is processed (#1345).
+
+- Two new `modlib` models, `pk3` and `pk3iv`, provide the corresponding
+  pre-coded model files (#1345).
+
+- `mrgx::assign()` is now available in the `mrgx` plugin; this is a convenience 
+  function to help you get R objects from your model code back to R when the 
+  simulation finishes (#1353).
+
+- The `plot()` method for `mrgsims` objects gains a `fixy` argument to fix the
+  y-axis limits across panels in the plot (#1349).
+
+- Users can now find `plot()` method documentation through `?plot` (#1349). 
+
+- `env_get()` refactored to allow access of R objects inside the model 
+  environment similar to `base::get()`; `env_get_obj()` is an alias to `env_get()`, 
+  analogous to `env_get_env()` (#1355).
+
+## Bugs Fixed
+
+- Fixed a bug where the model row counter was not correct when a simulation
+  was performed with only an idata set (#1351).
+
+# mrgsolve 1.8.0
+
+- mrgsolve now requires R >= 4.1 (#1333).
+
+- `FINAL_ROW` and `FINAL_IROW` macros are now available to indicate when the
+  simulation is processing the final output record for the whole problem or for
+  the current individual, respectively; both macros are reserved words
+  (#1328, #1327).
+
+## Bugs Fixed
+
+- Fixed S3 registration of the `all.equal` method (#1337).
+
+- `custom_rtol()` and `custom_atol()` now return without error when called with
+  no tolerance inputs (#1321, #1336).
+
+- Row counters (`self.rown`, `self.nrow`, `self.irown`, `self.inrow`) now only
+  update when the system advances to an output record; previously, non-output
+  records between output records could cause the counters to misrepresent the
+  current position in the output (#1323).
+
+## Internal
+
+- Model parameter and compartment aliases in generated C++ code now use scoped
+  reference variables rather than preprocessor `#define` directives (#1332).
+  - During this refactor, it was noted that model parameters were mutable
+    in `$TABLE` (and `$EVENT`), against the intention for the parameter 
+    vector. This vector continues to be mutable in these blocks, but plans will 
+    be made to fix this behavior in the future.
+
+- Initialize `Self` to null pointer in `evt::regimen` objects (#1329).
+
+- Refactor `mat2df()` (C++) for efficiency, avoiding Rcpp sugar (#1316).
+
+
 # mrgsolve 1.7.2
 
 - An individual record counter has been added. Use `self.inrow` to get the number of

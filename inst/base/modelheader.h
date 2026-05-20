@@ -1,4 +1,4 @@
-// Copyright (C) 2013 - 2019  Metrum Research Group
+// Copyright (C) 2013 - 2026  Metrum Research Group
 //
 // This file is part of mrgsolve.
 //
@@ -27,29 +27,63 @@ typedef int    local_int;
 typedef bool   local_bool;
 typedef double capture;
 
+// Two macros needed to suppress unused variable warnings 
+// Macro to temporarily suppress warnings 
+#if defined(_MSC_VER)
+  #define MRGSOLVE_WARN_UNUSED_VAR_NO \
+    __pragma(warning(push))            \
+    __pragma(warning(disable: 4101))
+#elif defined(__INTEL_COMPILER)
+  #define MRGSOLVE_WARN_UNUSED_VAR_NO \
+    __pragma(warning(push))            \
+    __pragma(warning(disable: 177))
+#elif defined(__GNUC__) || defined(__clang__)
+  #define MRGSOLVE_WARN_UNUSED_VAR_NO \
+    _Pragma("GCC diagnostic push")     \
+    _Pragma("GCC diagnostic ignored \"-Wunused-variable\"")
+#else
+  #define MRGSOLVE_WARN_UNUSED_VAR_NO
+#endif
+
+// Macro to restore unused variable warnings 
+#if defined(_MSC_VER) || defined(__INTEL_COMPILER)
+  #define MRGSOLVE_WARN_UNUSED_VAR_YES __pragma(warning(pop))
+#elif defined(__GNUC__) || defined(__clang__)
+  #define MRGSOLVE_WARN_UNUSED_VAR_YES _Pragma("GCC diagnostic pop")
+#else
+  #define MRGSOLVE_WARN_UNUSED_VAR_YES
+#endif
+
 // pred_P definitions for $PKMODEL
 // Note that V/VC/V2 are synonymous when using the pred_P construct
-// Also, V3/V3 are synonyms as well
-#define pred_CL _pred_[0]
-#define pred_V  _pred_[1]
-#define pred_VC _pred_[1]
-#define pred_V2 _pred_[1]
-#define pred_KA _pred_[2]
-#define pred_Q  _pred_[3]
-#define pred_V3 _pred_[4]
-#define pred_VP _pred_[4]
+// Also, VP/V3 and V4/VP2 are synonyms as well
+#define pred_CL  _pred_[0]
+#define pred_V   _pred_[1]
+#define pred_VC  _pred_[1]
+#define pred_V2  _pred_[1]
+#define pred_KA  _pred_[2]
+#define pred_Q   _pred_[3]
+#define pred_V3  _pred_[4]
+#define pred_VP  _pred_[4]
+#define pred_Q2  _pred_[5]
+#define pred_V4  _pred_[6]
+#define pred_VP2 _pred_[6]
 
 // advan/trans combinations
 // These definitions are added by mrgsolve at the end of $MAIN
 // when $PKMODEL is called; trans 2/4 are default; when 11 is picked ... tack on a `i` at the end
-#define __ADVAN1_TRANS2__  pred_CL = CL;  pred_V  = V;
-#define __ADVAN2_TRANS2__  pred_CL = CL;  pred_V  = V;   pred_KA = KA;
-#define __ADVAN3_TRANS4__  pred_CL = CL;  pred_V2 = V1;  pred_Q =  Q;  pred_V3 = V2;
-#define __ADVAN4_TRANS4__  pred_CL = CL;  pred_V2 = V2;  pred_Q =  Q;  pred_V3 = V3; pred_KA = KA;
-#define __ADVAN1_TRANS11__ pred_CL = CLi; pred_V  = Vi;
-#define __ADVAN2_TRANS11__ pred_CL = CLi; pred_V  = Vi;  pred_KA = KAi;
-#define __ADVAN3_TRANS11__ pred_CL = CLi; pred_V2 = V1i; pred_Q =  Qi;  pred_V3 = V2i;
-#define __ADVAN4_TRANS11__ pred_CL = CLi; pred_V2 = V2i; pred_Q =  Qi;  pred_V3 = V3i; pred_KA = KAi;
+#define __ADVAN1_TRANS2__   pred_CL = CL;  pred_V  = V;
+#define __ADVAN2_TRANS2__   pred_CL = CL;  pred_V  = V;   pred_KA = KA;
+#define __ADVAN3_TRANS4__   pred_CL = CL;  pred_V2 = V1;  pred_Q =  Q;   pred_V3 = V2;
+#define __ADVAN4_TRANS4__   pred_CL = CL;  pred_V2 = V2;  pred_Q =  Q;   pred_V3 = V3;  pred_KA = KA;
+#define __ADVAN11_TRANS4__  pred_CL = CL;  pred_V2 = V1;  pred_Q =  Q2;  pred_V3 = V2;  pred_Q2 = Q3;  pred_V4 = V3;
+#define __ADVAN12_TRANS4__  pred_CL = CL;  pred_V2 = V2;  pred_Q =  Q3;  pred_V3 = V3;  pred_KA = KA;  pred_Q2 = Q4;  pred_V4 = V4;
+#define __ADVAN1_TRANS11__  pred_CL = CLi; pred_V  = Vi;
+#define __ADVAN2_TRANS11__  pred_CL = CLi; pred_V  = Vi;  pred_KA = KAi;
+#define __ADVAN3_TRANS11__  pred_CL = CLi; pred_V2 = V1i; pred_Q =  Qi;  pred_V3 = V2i;
+#define __ADVAN4_TRANS11__  pred_CL = CLi; pred_V2 = V2i; pred_Q =  Qi;  pred_V3 = V3i; pred_KA = KAi;
+#define __ADVAN11_TRANS11__ pred_CL = CLi; pred_V2 = V1i; pred_Q =  Q2i; pred_V3 = V2i; pred_Q2 = Q3i; pred_V4 = V3i;
+#define __ADVAN12_TRANS11__ pred_CL = CLi; pred_V2 = V2i; pred_Q =  Q3i; pred_V3 = V3i; pred_KA = KAi; pred_Q2 = Q4i; pred_V4 = V4i;
 
 // Don't need this?
 #define __BEGIN_pred__ extern "C" {void __ODEFUN___(MRGSOLVE_PRED_SIGNATURE) {
@@ -92,6 +126,10 @@ typedef double capture;
 #define THETA(a) THETA##a
 // Should modeled infusion parameters get checked
 #define CHECK_MODELED_INFUSIONS _check_modeled_infusions
+// Check for final record of the simulation
+#define FINAL_ROW (self.rown == (self.nrow-1))
+// Check for final record of current individual
+#define FINAL_IROW (self.irown == (self.inrow-1))
 
 // NMVARS
 #ifdef _MRGSOLVE_USING_NM_VARS_
@@ -99,6 +137,7 @@ typedef double capture;
 #define A_0(a) _A_0_[a-1]
 #define DADT(a) _DADT_[a-1]
 #define T _ODETIME_[0]
+#define ERR(a) EPS(a) 
 #define EXP(a) exp(a)
 #define DEXP(a) exp(a)
 #define LOG(a) log(a)

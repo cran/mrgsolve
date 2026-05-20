@@ -64,19 +64,23 @@ find_nm_vars_impl <- function(code) {
   m
 }
 
-generate_nmdefs <- function(x) {
-  if(isFALSE(x[["found_frda"]])) return(NULL)
-  ans <- paste0(
-    "#define ", 
+generate_nmdefs <- function(x, rd) {
+  if(isFALSE(x[["found_frda"]])) {
+    return(rd)
+  }
+  frda <- paste0(
     x[["frda"]][["match"]],
-    " ", 
+    " = ", 
     "_", 
     x[["frda"]][["prefix"]], 
     "_[", 
     x[["frda"]][["cmt"]] - 1, 
-    "]"
+    "];"
   )
-  ans
+  rd$nmdfs <- frda
+  rd$tokens <- c(rd$tokens, x[["frda"]][["match"]])
+  rd$frda <- c(rd$frda, frda)
+  rd
 }
 
 any_nm_vars <- function(x) {
@@ -133,6 +137,23 @@ autodec_nm_vars <- function(x, env) {
     stop(err, call. = FALSE)  
   }
   return(invisible(TRUE))
+}
+
+preprocess_nm_vars <- function(spec, env) {
+  to_process <- intersect(names(spec), GLOBALS$PRE_PROC_BLOCKS)
+  # Convert FORTRAN if else then; needs to happen first
+  if(env$convert_fort_if) {
+    for(b in to_process) {
+      spec[[b]] <- convert_fort_if(spec[[b]])
+    }
+  }
+  # Add semicolons if needed
+  if(env$convert_semicolons) {
+    for(b in to_process) {
+      spec[[b]] <- convert_semicolons(spec[[b]])
+    }
+  }
+  spec
 }
 
 audit_nm_vars_range <- function(x, cmt) {
